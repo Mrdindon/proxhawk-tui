@@ -41,7 +41,7 @@ declare -gA CFG=(
 #   color.<token> = <value>   colour overrides (#rrggbb, SGR parameters or "default")
 declare -gA CFGX=()
 
-PVETTY_VERSION="1.2.1"
+PVETTY_VERSION="1.3.0"
 RUN_DIR=""
 LOCAL_NODE="${HOSTNAME%%.*}"
 
