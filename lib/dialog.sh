@@ -96,7 +96,24 @@ dlg_menu() {
     # Room for the text: one line per 70 characters (and per newline).
     tl=$(( (${#text} + 69) / 70 )); (( tl < 1 )) && tl=1
     tl=$(( tl + $(printf '%s' "$text" | grep -c '') - 1 ))
-    _dlg_size $(( n + 7 + tl )) 76
+    # Width: the longest "tag  item" line (at least 76 columns), within the
+    # terminal; longer items are cut, otherwise whiptail breaks the frame.
+    local -a args=("$@")
+    local i tw=0 iw=0 w
+    for (( i = 0; i + 1 < ${#args[@]}; i += 2 )); do
+        (( ${#args[i]} > tw )) && tw=${#args[i]}
+        (( ${#args[i+1]} > iw )) && iw=${#args[i+1]}
+    done
+    (( DLG_NOTAGS )) && tw=0
+    w=$(( tw + iw + 12 )); (( w < 76 )) && w=76
+    _dlg_size $(( n + 7 + tl )) "$w"
+    local room=$(( DW - tw - 12 ))
+    if (( iw > room && room > 8 )); then
+        for (( i = 1; i < ${#args[@]}; i += 2 )); do
+            (( ${#args[i]} > room )) && args[i]="${args[i]:0:room-1}…"
+        done
+    fi
+    set -- "${args[@]}"
     local mh=$(( DH - 7 - tl )); (( mh > n )) && mh=$n; (( mh < 1 )) && mh=1
     local -a extra=()
     if (( DLG_NOTAGS )); then [[ $DLG == dialog ]] && extra=(--no-tags) || extra=(--notags); fi
