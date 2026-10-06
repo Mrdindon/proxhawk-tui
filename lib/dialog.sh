@@ -47,6 +47,20 @@ _dlg_size() {
     (( DW > ${2:-70} )) && DW=${2:-70}
 }
 
+# Size of a box for a text: DW from the longest line (between MIN_W and the
+# terminal), DH from the wrapped lines plus EXTRA rows (buttons, input...).
+# DLG_SCROLL=1 when the text does not fit.
+_dlg_fit() {
+    local text=$1 extra=$2 minw=${3:-50} line lines=0 w=0
+    while IFS= read -r line; do (( ${#line} > w )) && w=${#line}; done <<< "$text"
+    w=$(( w + 6 )); (( w < minw )) && w=$minw
+    _dlg_size 999 "$w"
+    local cw=$(( DW - 4 ))
+    while IFS= read -r line; do lines=$(( lines + (${#line} + cw - 1) / cw )); [[ -z $line ]] && (( lines++ )); done <<< "$text"
+    DLG_SCROLL=0
+    if (( lines + extra > ROWS - 4 )); then DLG_SCROLL=1; DH=$(( ROWS - 4 )); else DH=$(( lines + extra )); fi
+}
+
 dlg_yesno() {
     T "$1"; local title=$REPLY; T "$2"; local text=$REPLY
     if [[ $DLG == builtin ]]; then
@@ -57,7 +71,7 @@ dlg_yesno() {
         [[ $a == [yYoO]* ]]
         return
     fi
-    _dlg_size 12 70
+    _dlg_fit "$text" 7 50
     local -a dflt=(--defaultno)
     (( ${DLG_DEFAULT_YES:-0} )) && dflt=()
     _dlg_run --title " $title " "${dflt[@]}" --yesno "$text" "$DH" "$DW"
@@ -73,8 +87,9 @@ dlg_input() {
         term_enter; NEED_REDRAW=1
         return $rc
     fi
-    _dlg_size 10 70
-    _dlg_run --title " $title " --inputbox "$text" "$DH" "$DW" "${3:-}"
+    local d=${3:-}
+    _dlg_fit "$text" 8 $(( ${#d} + 10 > 60 ? ${#d} + 10 : 60 ))
+    _dlg_run --title " $title " --inputbox "$text" "$DH" "$DW" "$d"
 }
 
 dlg_menu() {
@@ -117,6 +132,16 @@ dlg_menu() {
     local mh=$(( DH - 7 - tl )); (( mh > n )) && mh=$n; (( mh < 1 )) && mh=1
     local -a extra=()
     if (( DLG_NOTAGS )); then [[ $DLG == dialog ]] && extra=(--no-tags) || extra=(--notags); fi
+    # Button labels of action menus (DLG_OK_LABEL / DLG_CANCEL_LABEL), e.g.
+    # "Change" / "Close" where Enter acts on the selected line.
+    if [[ -n ${DLG_OK_LABEL-} ]]; then
+        T "$DLG_OK_LABEL"
+        [[ $DLG == dialog ]] && extra+=(--ok-label "$REPLY") || extra+=(--ok-button "$REPLY")
+    fi
+    if [[ -n ${DLG_CANCEL_LABEL-} ]]; then
+        T "$DLG_CANCEL_LABEL"
+        [[ $DLG == dialog ]] && extra+=(--cancel-label "$REPLY") || extra+=(--cancel-button "$REPLY")
+    fi
     _dlg_run --title " $title " "${extra[@]}" --menu "$text" "$DH" "$DW" "$mh" "$@"
 }
 
@@ -171,8 +196,10 @@ dlg_msg() {
         term_enter; NEED_REDRAW=1
         return 0
     fi
-    _dlg_size 14 72
-    _dlg_run --title " $title " --msgbox "$text" "$DH" "$DW"
+    _dlg_fit "$text" 7 50
+    local -a extra=()
+    (( DLG_SCROLL )) && [[ $DLG == whiptail ]] && extra=(--scrolltext)
+    _dlg_run --title " $title " "${extra[@]}" --msgbox "$text" "$DH" "$DW"
 }
 
 dlg_textbox() {
@@ -197,6 +224,6 @@ dlg_password() {
         term_enter; NEED_REDRAW=1
         return $rc
     fi
-    _dlg_size 10 70
+    _dlg_fit "$text" 9 60
     _dlg_run --title " $title " --passwordbox "$text" "$DH" "$DW"
 }
