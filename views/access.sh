@@ -82,8 +82,50 @@ v_dc_users() {
 crud v_dc_users label="User" add=/access/users edit="/access/users/{1}" del="/access/users/{1}" \
     first="userid password groups expire enable firstname lastname email comment keys" \
     choices="groups:choice_groups" extra="p:Password u:Unlock_TFA"
+# Add a user like the web UI: realm, then the name, then the other fields
+# (the API wants the full "name@realm" user ID). The password is only set
+# for the "pve" realm: PAM users are Linux accounts, LDAP / AD / OpenID
+# users authenticate on their server.
+_users_add() {
+    local realm name type="" row
+    local -a f items=()
+    api_get rows /access/domains "" "realm,type,comment" || { dlg_msg "Add: User" "$API_ERR"; return; }
+    for row in "${API_ROWS[@]}"; do
+        tsv_split f "$row"
+        [[ ${f[0]} == pve ]] && items=("${f[0]}" "${f[1]}${f[2]:+ - ${f[2]}}" "${items[@]}") \
+                             || items+=("${f[0]}" "${f[1]}${f[2]:+ - ${f[2]}}")
+    done
+    if [[ -n ${CRUD_ANSWER[realm]-} ]]; then realm=${CRUD_ANSWER[realm]}
+    else dlg_menu "Add: User" "Realm:" "${items[@]}" || return; realm=$REPLY
+    fi
+    for row in "${API_ROWS[@]}"; do tsv_split f "$row"; [[ ${f[0]} == "$realm" ]] && type=${f[1]}; done
+    while :; do
+        if [[ -n ${CRUD_ANSWER[name]-} ]]; then name=${CRUD_ANSWER[name]}
+        else
+            Tf "User name (without @%s):" "$realm"
+            dlg_input "Add: User" "$REPLY" "" || return
+            name=$REPLY
+        fi
+        name=${name%@"$realm"}
+        [[ $name =~ ^[^[:space:]@:/]+$ ]] && break
+        [[ -n ${CRUD_ANSWER[name]-} ]] && return
+        dlg_msg "Add: User" "Invalid user name: no spaces, '@', ':' or '/'."
+    done
+    [[ $type == pam ]] && ! id "$name" >/dev/null 2>&1 && \
+        { Tf "No Linux account '%s' on this node: create it first (useradd %s), PAM users log in with the Linux password." "$name" "$name"
+          dlg_msg "Add: User" "$REPLY"; }
+    form_reset
+    FORM_FIX[userid]="$name@$realm"
+    FORM_FIRST=${CRUD[v_dc_users|first]-}
+    [[ $type == pve ]] || FORM_HIDE="password"
+    _crud_choices v_dc_users
+    Tf "Add: User %s" "$name@$realm"
+    form_run "$REPLY" POST /access/users && content_load 1
+}
+
 v_dc_users__key() {
     local u=$2
+    case $1 in a|INS) _users_add; return 0 ;; esac
     [[ -n $u ]] || return 1
     case $1 in
         p)

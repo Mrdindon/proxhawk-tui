@@ -109,6 +109,7 @@ act_shutdown_menu() {
 # Console: serial terminal for VMs, `pct enter` for containers. Linux VMs
 # without a serial port are offered an SSH connection instead.
 act_console() {
+    perm_need "/vms/$CTX_VMID" VM.Console || return
     if [[ $CTX_TYPE == lxc ]]; then
         node_cmd "$CTX_NODE" pct enter "$CTX_VMID"
         return
@@ -178,6 +179,7 @@ guest_ip_candidates() {
 
 # Open an SSH session to the guest.
 act_ssh() {
+    perm_need "/vms/$CTX_VMID" VM.Console || return
     local host user ip
     local -a items=()
     guest_ip_candidates
@@ -267,6 +269,8 @@ act_run_command() {
             mapfile -t -O "${#lines[@]}" lines < <(printf '%s' "${API_KV[err-data]}" | tr '\037' '\n')
         fi
     else
+        # pct exec runs as root on the node: same privilege as the console.
+        perm_need "/vms/$CTX_VMID" VM.Console || { spinner_stop; return; }
         if [[ $CTX_NODE == "$LOCAL_NODE" ]]; then
             out=$(timeout 300 pct exec "$CTX_VMID" -- /bin/sh -c "$cmd" 2>&1); rc=$?
         else
@@ -473,6 +477,7 @@ act_snapshot_delete() {
 # Node actions
 # ---------------------------------------------------------------------------
 act_node_shell() {
+    perm_need "/nodes/$CTX_NODE" Sys.Console || return
     local sh=${SHELL:-/bin/bash}
     T "Starting shell - type 'exit' to return to pvetty."; status_msg info "$REPLY"
     if [[ $CTX_NODE == "$LOCAL_NODE" ]]; then
@@ -564,6 +569,7 @@ act_user_menu() {
         _onoff "${CFG[mouse]}"; v=$REPLY; T "Mouse"; items+=(mouse "$REPLY: $v")
         _onoff "${CFG[confirm]}"; v=$REPLY; T "Confirm actions"; items+=(confirm "$REPLY: $v")
         _onoff "${CFG[confirm_quit]}"; v=$REPLY; T "Confirm quit"; items+=(confirm_quit "$REPLY: $v")
+        _onoff "${CFG[ask_user]}"; v=$REPLY; T "Ask the user to run as at start-up"; items+=(ask_user "$REPLY: $v")
         T "Automatic refresh (s, 0 = off)"; items+=(refresh "$REPLY: ${CFG[refresh]}")
         T "Startup selection"; items+=(startup "$REPLY: ${CFG[startup]}")
         T "Task panel rows"; items+=(task_rows "$REPLY: ${CFG[task_rows]}")
@@ -600,7 +606,7 @@ act_user_menu() {
                 dlg_menu "Icons" "Icon set. The Nerd Font icons are drawn by the font of YOUR terminal: if they appear as squares below, install a Nerd Font on the computer running the terminal and select it in the terminal settings (see docs/CONFIGURATION.md)." \
                     nerd "Nerd Font   $pn" unicode "Unicode     $pu" ascii "ASCII       D N V C S P o \$" || continue
                 core_save_config glyphs "$REPLY"; glyphs_load; chart_init ;;
-            icons|confirm|confirm_quit|show_tags|ip_column)
+            icons|confirm|confirm_quit|show_tags|ip_column|ask_user)
                 [[ ${CFG[$k]} == 1 ]] && v=0 || v=1
                 core_save_config "$k" "$v"
                 [[ $k == icons ]] && glyphs_load ;;

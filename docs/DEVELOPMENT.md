@@ -1,5 +1,8 @@
 # pvetty — Development notes (internal)
 
+> pvetty is developed with Claude Code (Anthropic's AI coding agent),
+> directed and reviewed by the author; AGENTS.md is the agents' entry point.
+
 > Called *pvetui* until 1.1.0: the release archives 1.0.0 / 1.1.0, the git
 > history use the old name.
 
@@ -12,6 +15,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 1.3.0 | 2026-10-06 | run as another Proxmox VE user (permissions like the web UI), one-line install, add user with realm (fix) |
 | 1.2.1 | 2026-10-06 | exit when the terminal is closed (runaway CPU fix), plugins checklist and restart, dialog sizing and button labels, demo video |
 | 1.2.0 | 2026-10-06 | renamed pvetui → pvetty (name clash, Proxmox trademark guidelines), AGPL-3.0-or-later licence, migration of the old user files |
 | 1.1.0 | 2026-10-06 | help window, key bindings, colours/themes, settings screen, onboarding, action queue, batch actions, filter, IP column, run command, browser console URL, CLI subcommands, plugins, git + lint, replay backend, screen tests, .deb |

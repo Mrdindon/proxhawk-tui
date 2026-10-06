@@ -36,6 +36,7 @@ language = en
 onboarding = 0
 refresh = 0
 ip_column = 0
+ask_user = 0
 EOF
 
 # Screen content once it stopped changing (pvetty loads asynchronously).

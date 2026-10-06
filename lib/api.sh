@@ -153,7 +153,7 @@ _api_broker_get() {
 _api_pvesh_get() {
     local mode=$1 path=$2 query=$3 fields=$4 pair k v
     case $mode in
-        schema|propparse|propprint|pluginopts)
+        schema|propparse|propprint|pluginopts|perm)
             # Schema requests need the API stack: one-shot broker call.
             mapfile -t API_ROWS < <(perl "$PVETTY_HOME/lib/broker.pl" --once "$mode" "$path" "$query" "$fields" 2>"$RUN_DIR/pvesh.err")
             if [[ -s $RUN_DIR/pvesh.err ]]; then API_ERR=$(tail -n 1 "$RUN_DIR/pvesh.err"); return 1; fi

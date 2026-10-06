@@ -45,6 +45,8 @@ See [`conf/pvetty.conf.example`](../conf/pvetty.conf.example).
 | `onboarding` | `1` | `0`, `1` | first run wizard (icons, theme, mouse) when no user configuration exists |
 | `queue_parallel` | `2` | number | queued / batch actions running at the same time |
 | `cli_output` | `json` | `json`, `table` | default output of the subcommands (see [CLI.md](CLI.md)) |
+| `user` | | `name@realm` | Proxmox VE user to run as (see [Running as another user](#running-as-another-user)); empty = launching user |
+| `ask_user` | `1` | `0`, `1` | ask at start-up which user to run as (only when several users exist) |
 
 ### Key bindings
 
@@ -97,6 +99,7 @@ pvetty [options]
   -r, --refresh SEC     auto refresh interval (0 = off)
   -c, --config FILE     additional configuration file
       --no-mouse        disable mouse support
+  -u, --user USER       run as this Proxmox VE user (its permissions apply)
       --select ID       initial selection: root, node/<name>, qemu/<vmid>,
                         lxc/<vmid>, storage/<node>/<storage>, pool/<name>
   -h, --help            help
@@ -115,10 +118,31 @@ pvetty <nodes|guests|tasks|storage|api> ...   non-interactive commands (CLI.md)
 | `VISUAL`, `EDITOR`, `PAGER` | editor and pager |
 | `TMPDIR` | location of the run directory (`pvetty.XXXXXX`, removed on exit) |
 | `PVETTY_PLUGINS` | enabled plugins, overrides `plugins` |
+| `PVETTY_USER` | Proxmox VE user to run as, overrides `user` |
 | `PVETTY_RECORD=DIR` | records every API answer in DIR (for `backend = replay`) |
 | `PVETTY_REPLAY=DIR` | answers used by `backend = replay` |
 | `PVETTY_NOW=EPOCH` | frozen clock (screen tests) |
 | `XDG_STATE_HOME` | location of the state file |
+
+## Running as another user
+
+pvetty runs as root on the node and acts by default as `root@pam` (or as
+`<sudo user>@pam` when it was started with `sudo` and that user exists). At
+start-up it asks which Proxmox VE user to run as (`ask_user`), or takes
+`--user name@realm` / `user = name@realm`. The header shows that user.
+
+The user's permissions then apply exactly as in the web UI: every API call
+is checked with the same function as the API server
+(`check_api2_permissions`), lists are filtered for the user (tree, users,
+storage...), refused calls show the Proxmox VE message (`Permission check
+failed (/nodes/pve1, Sys.Audit)`), and tasks are logged under the user's
+name. Consoles need `VM.Console` (guests) or `Sys.Console` (node shell),
+running a command in a container needs `VM.Console`, and installing
+community scripts needs `root@pam`.
+
+No password is asked: whoever runs pvetty is already root on the node.
+The feature limits what pvetty does (delegated administration, checking
+the rights of a user); it is not a security boundary against root.
 
 ## Plugins
 

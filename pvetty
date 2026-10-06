@@ -13,7 +13,7 @@ shopt -s extglob
 
 PVETTY_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 
-for _m in core term theme glyphs i18n widgets api content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins onboarding cli actions layout; do
+for _m in core term theme glyphs i18n widgets api user content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins onboarding cli actions layout; do
     # shellcheck source=/dev/null
     source "$PVETTY_HOME/lib/$_m.sh"
 done
@@ -34,6 +34,7 @@ Options:
   -c, --config FILE     additional configuration file
       --no-mouse        disable mouse support
       --select ID       initial selection (e.g. qemu/100, node/pve1)
+  -u, --user USER       run as this Proxmox VE user (its permissions apply)
   -h, --help            show this help
   -V, --version         show the version
 
@@ -71,6 +72,7 @@ while (( $# )); do
         -c|--config) EXTRA_CONF+=("$2"); shift ;;
         --no-mouse) CLI[mouse]=0 ;;
         --select) INITIAL_SEL=$2; CLI_SELECT=1; shift ;;
+        -u|--user) CLI[user]=$2; shift ;;
         -h|--help) usage; exit 0 ;;
         -V|--version) echo "pvetty $PVETTY_VERSION"; exit 0 ;;
         *) echo "pvetty: unknown option '$1'" >&2; usage >&2; exit 2 ;;
@@ -115,12 +117,13 @@ plugins_load
 onboarding_run
 layout_compute
 
+# Proxmox VE user to run as (may ask), before the API helper starts.
+user_select
 T "Connecting to the Proxmox VE API..."
 printf '\e[%d;%dH%s' $(( ROWS / 2 )) $(( (COLS - ${#REPLY}) / 2 )) "$REPLY"
 spinner_start "$REPLY"
 api_start
 api_get rows /version "" "version" && PVE_VERSION=${API_ROWS[0]-}
-PVE_USER=root@pam
 res_load || { spinner_stop; die "cannot read /cluster/resources: $API_ERR"; }
 tasks_load
 spinner_stop

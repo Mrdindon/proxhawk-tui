@@ -10,6 +10,8 @@
 #   MODE   rows | kv | json                       data (GET)
 #          schema | propparse | propprint          API parameter definitions
 #          pluginopts                               options of a plugin type
+#          perm                                     PATH = ACL path, QUERY priv=X:
+#                                                   "1" if the user has it, else "0"
 #   PATH   API path, e.g. /nodes/pve1/status
 #   QUERY  url-encoded parameters, e.g. timeframe=hour&cf=AVERAGE
 #   FIELDS comma separated field specs (rows mode only):
@@ -23,6 +25,10 @@
 # Response: zero or more data lines followed by a terminator line:
 #   "\x04OK"  or  "\x04ERR\t<message>"
 # Inside values, TAB becomes a space and NEWLINE becomes "\x1f".
+#
+# PVETTY_USER (default root@pam): the Proxmox VE user the requests run as.
+# Like the API server, each request is checked with check_api2_permissions
+# for that user, and the handlers filter their results for that user.
 use strict;
 use warnings;
 
@@ -31,6 +37,23 @@ use JSON;
 $| = 1;
 my $json = JSON->new->canonical->allow_nonref;
 my $local = "";
+my $as_user = $ENV{PVETTY_USER} || 'root@pam';
+
+# Refresh the per-request state like pvedaemon (cluster file system, cached
+# user configuration: pools, ACL...) and set the user of the request.
+sub request_env {
+    my $rpcenv = PVE::RPCEnvironment->get();
+    $rpcenv->init_request();
+    $rpcenv->set_user($as_user);
+    return $rpcenv;
+}
+
+# Permission check of an API call for the user (what the API server does).
+sub check_perm {
+    my ($info, $param) = @_;
+    return if $as_user eq 'root@pam';
+    PVE::RPCEnvironment->get()->check_api2_permissions($info->{permissions}, $as_user, $param);
+}
 
 sub uri_unescape { my $s = shift // ''; $s =~ tr/+/ /; $s =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/ge; return $s }
 
@@ -88,6 +111,7 @@ sub call_get {
     my ($handler, $info) = PVE::API2->find_handler('GET', $path, $uri_param);
     die "no handler for '$path'\n" if !$handler || !$info;
     my $all = { %$param, %$uri_param };
+    check_perm($info, $all);
     if ($info->{proxyto} || $info->{proxyto_callback}) {
         my $rpcenv = PVE::RPCEnvironment->get();
         my $node = PVE::API2Tools::resolve_proxyto($rpcenv, $info->{proxyto_callback}, $info->{proxyto}, $all);
@@ -307,6 +331,7 @@ sub api_write {
         $param->{$k} += 0 if ($t eq 'integer' || $t eq 'number') && $param->{$k} =~ /^-?[\d.]+$/;
         $param->{$k} = $param->{$k} ? 1 : 0 if $t eq 'boolean';
     }
+    check_perm($i, { %$param, %$uri });
     my $res = $h->handle($i, { %$param, %$uri });
     return [ defined($res) ? (ref($res) ? $json->encode($res) : $res) : () ];
 }
@@ -318,10 +343,12 @@ sub handle_request {
     return @{ api_propparse($path, $param) } if $mode eq 'propparse';
     return @{ api_propprint($path, $param) } if $mode eq 'propprint';
     return @{ api_pluginopts($path, $param) } if $mode eq 'pluginopts';
-    if ($mode eq 'write') { PVE::RPCEnvironment->get()->init_request(); return @{ api_write($path, $param) } }
-    # Like pvedaemon: refresh the cluster file system state and the cached
-    # user configuration (pools, ACL...) before each request.
-    PVE::RPCEnvironment->get()->init_request();
+    if ($mode eq 'write') { request_env(); return @{ api_write($path, $param) } }
+    if ($mode eq 'perm') {
+        my $rpcenv = request_env();
+        return ($rpcenv->check($as_user, $path, [ $param->{priv} ], 1) ? "1" : "0");
+    }
+    request_env();
     return format_data($mode, call_get($path, $param), $fields);
 }
 

@@ -11,7 +11,10 @@ pvetty [options]
 ```
 
 `pvetty` must run as `root` on a Proxmox VE node. There is no login: the
-session is the local `root@pam` user, as with `pvesh`. See
+session is the local `root@pam` user, as with `pvesh`. When other Proxmox
+VE users exist, pvetty first asks which one to run as: that user's
+permissions then apply, as in the web UI (see
+[CONFIGURATION.md](CONFIGURATION.md#running-as-another-user)). See
 [CONFIGURATION.md](CONFIGURATION.md) for all options.
 
 At start-up the API helper is loaded (1–2 seconds, a spinner is shown in the
@@ -161,6 +164,14 @@ content, like the toolbars of the web UI panels (e.g. Updates:
 `Refresh R  Upgrade u  Changelog ⏎`). Each button shows its key; it can be
 clicked with the mouse, or its key pressed while the content panel has the
 focus (`Tab` or `→` to reach it). The same keys are listed in the footer.
+
+#### Adding a user
+
+`a` in Datacenter › Users asks the realm, then the user name (without
+`@realm`), then the other fields, like the web UI. The password is only
+set for the `pve` realm: `pam` users are Linux accounts of the node
+(create them with `useradd`), LDAP / AD / OpenID users authenticate on
+their server.
 
 #### Forms
 

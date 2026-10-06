@@ -32,6 +32,8 @@ declare -gA CFG=(
     [onboarding]=1         # 1 = show the first run wizard when no user config exists
     [queue_parallel]=2     # actions of the queue / batch actions running at once
     [cli_output]=json      # default output of the subcommands: json | table
+    [user]=""              # Proxmox VE user to run as (empty = launching user, see ask_user)
+    [ask_user]=1           # 1 = ask at start-up which user to run as (when several exist)
 )
 
 # Free form settings of the configuration file:
@@ -39,7 +41,7 @@ declare -gA CFG=(
 #   color.<token> = <value>   colour overrides (#rrggbb, SGR parameters or "default")
 declare -gA CFGX=()
 
-PVETTY_VERSION="1.2.1"
+PVETTY_VERSION="1.3.0"
 RUN_DIR=""
 LOCAL_NODE="${HOSTNAME%%.*}"
 

@@ -34,6 +34,7 @@ A guest is given by its VMID or its name.
 | Option | Effect |
 |--------|--------|
 | `-o`, `--output json\|table` | output format; default `cli_output` (`json`) |
+| `-u`, `--user USER` | run as this Proxmox VE user: its permissions apply (default `root@pam`, or the `user` setting) |
 | `--no-wait` | for actions that start a task: print `{"upid": "..."}` at once instead of waiting for the end |
 
 ## Results

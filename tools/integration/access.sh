@@ -16,7 +16,7 @@ test_access() {
 
     # Users.
     check "Users: view" view users
-    reset_step; preset userid=$u password=Pvetty-Test-123 comment="pvetty test user" email=test@example.invalid groups=$g firstname=Test
+    reset_step; crud_answers realm=${u#*@} name=${u%@*}; preset password=Pvetty-Test-123 comment="pvetty test user" email=test@example.invalid groups=$g firstname=Test
     check "Users: add" key a ""
     check "Users: created" kv_is "/access/users/$u" firstname Test
     view users; reset_step; preset comment="edited user" enable=0
