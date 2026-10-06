@@ -10,10 +10,10 @@ UI you already know where everything is.
 pvetty [options]
 ```
 
-`pvetty` must run as `root` on a Proxmox VE node. There is no login: the
-session is the local `root@pam` user, as with `pvesh`. pvetty first asks
-which Proxmox VE user to run as (the launching user or another one): that
-user's permissions then apply, as in the web UI (see
+`pvetty` runs on a Proxmox VE node as `root`, directly or with `sudo`: it
+uses the local API stack, like `pvesh`. There is no login. pvetty first asks
+which Proxmox VE user to act as (the launching user, `root@pam` or
+`<sudo user>@pam`, or another one): that user's permissions then apply, as in the web UI (see
 [CONFIGURATION.md](CONFIGURATION.md#running-as-another-user)). See
 [CONFIGURATION.md](CONFIGURATION.md) for all options.
 

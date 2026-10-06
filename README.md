@@ -63,7 +63,7 @@ node.
 
 | Component | Notes |
 |-----------|-------|
-| Proxmox VE 7, 8 or 9 node | run as `root` (already authenticated as `root@pam`) |
+| Proxmox VE 7, 8 or 9 node | run as `root` on the node, directly or with `sudo` (see [Who can run it](#who-can-run-it)) |
 | bash ≥ 4.3 | standard |
 | perl + PVE Perl modules | shipped with Proxmox VE |
 | `whiptail` or `dialog` | `whiptail` is installed by default; built-in prompts otherwise |
@@ -72,25 +72,54 @@ node.
 
 ## Install
 
-On a Proxmox VE node, as root, one line installs the latest release (the
-`.deb` is checked against its SHA-256 before `apt` installs it):
+### One line (package of the latest release)
+
+On a Proxmox VE node, as root (or with `sudo`), one line installs the latest
+release (the `.deb` is checked against its SHA-256 before `apt` installs it):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Mrdindon/pvetty/main/install.sh)"
 pvetty
 ```
 
+With sudo: `sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/Mrdindon/pvetty/main/install.sh)"`,
+then `sudo pvetty`.
+
 Update: run the same line again. Remove: `apt remove pvetty`. You can read
 [install.sh](install.sh) before running it; the packages are also on the
 [releases page](https://github.com/Mrdindon/pvetty/releases).
 
-From the sources:
+### With git clone
+
+The branch `main` holds the released versions (tags `vX.Y.Z`); `develop` is
+work in progress.
 
 ```bash
-git clone https://github.com/Mrdindon/pvetty.git && cd pvetty
-./pvetty                      # run in place
-./install.sh                  # or: symlink /usr/local/bin/pvetty
+apt install git                          # if git is not installed yet
+git clone https://github.com/Mrdindon/pvetty.git /opt/pvetty
+cd /opt/pvetty
+./pvetty                                 # run in place, or:
+./install.sh                             # command "pvetty" (symlink in /usr/local/bin)
 ```
+
+- **Update**: `cd /opt/pvetty && git pull` (the symlink follows).
+- **A given version**: `git checkout v1.3.1` (back to the latest: `git checkout main`).
+- **Remove**: `./install.sh --uninstall`, then delete the directory.
+- Any directory works; `./install.sh --prefix DIR` puts the command
+  elsewhere than `/usr/local/bin`.
+- Do not mix both methods: remove the package (`apt remove pvetty`) before
+  using a clone, or the reverse.
+
+### Who can run it
+
+pvetty uses the local Proxmox VE API stack directly, like `pvesh`
+(no HTTP, no ticket): on the node it must run as **root**, directly or with
+`sudo`. The **Proxmox VE permissions** are a separate level: at start-up
+pvetty asks which Proxmox VE user to act as (`root@pam`, `alice@pve`...),
+and that user's permissions apply, as in the web UI (see
+[Running as another user](docs/CONFIGURATION.md#running-as-another-user)).
+Running pvetty from a non-root Linux account would need the API over HTTPS
+with a token: not supported yet.
 
 Useful options:
 
@@ -168,8 +197,10 @@ docs/               documentation
   serial console, SSH or `pct enter` are used instead (`w` gives the browser
   URL of the noVNC console).
 - Runs on a node of the cluster only (no remote API connection yet).
-- The interface is meant to run as `root` on a cluster node: it uses the local
-  API stack directly (no HTTP, no ticket), exactly like `pvesh`.
+- pvetty runs as `root` on a cluster node (directly or with `sudo`): it uses
+  the local API stack directly (no HTTP, no ticket), exactly like `pvesh`;
+  the Proxmox VE permissions applied are those of the user chosen at
+  start-up.
 - Uploads (ISO, templates, snippets) take a file of the node itself.
 
 ## How it was made
