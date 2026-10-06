@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1 — 2026-10-06
+
+- The start-up question "run as which user" is now always asked (unless
+  `ask_user = 0`, `--user` or `user = ...`): it was skipped when root@pam
+  was the only Proxmox VE user. "Other user" accepts any user ID; an
+  unknown or disabled user shows a message and asks again.
+
 ## 1.3.0 — 2026-10-06
 
 - **Run as another Proxmox VE user**: at start-up pvetty asks which user to

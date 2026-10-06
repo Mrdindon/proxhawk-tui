@@ -46,7 +46,7 @@ See [`conf/pvetty.conf.example`](../conf/pvetty.conf.example).
 | `queue_parallel` | `2` | number | queued / batch actions running at the same time |
 | `cli_output` | `json` | `json`, `table` | default output of the subcommands (see [CLI.md](CLI.md)) |
 | `user` | | `name@realm` | Proxmox VE user to run as (see [Running as another user](#running-as-another-user)); empty = launching user |
-| `ask_user` | `1` | `0`, `1` | ask at start-up which user to run as (only when several users exist) |
+| `ask_user` | `1` | `0`, `1` | ask at start-up which user to run as (`0`: always the launching user) |
 
 ### Key bindings
 
