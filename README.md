@@ -70,18 +70,26 @@ node.
 | `less` | optional, used to display logs |
 | A UTF-8 terminal, ≥ 80×18 | 256 colours recommended; a Nerd Font for the original icons |
 
-## Quick start
+## Install
+
+On a Proxmox VE node, as root, one line installs the latest release (the
+`.deb` is checked against its SHA-256 before `apt` installs it):
 
 ```bash
-# run from the source directory
-./pvetty
-
-# or install a symlink in /usr/local/bin
-./install.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Mrdindon/pvetty/main/install.sh)"
 pvetty
+```
 
-# or build and install a Debian package
-tools/make-deb.sh && apt install ../releases/pvetty_*_all.deb
+Update: run the same line again. Remove: `apt remove pvetty`. You can read
+[install.sh](install.sh) before running it; the packages are also on the
+[releases page](https://github.com/Mrdindon/pvetty/releases).
+
+From the sources:
+
+```bash
+git clone https://github.com/Mrdindon/pvetty.git && cd pvetty
+./pvetty                      # run in place
+./install.sh                  # or: symlink /usr/local/bin/pvetty
 ```
 
 Useful options:
@@ -163,6 +171,15 @@ docs/               documentation
 - The interface is meant to run as `root` on a cluster node: it uses the local
   API stack directly (no HTTP, no ticket), exactly like `pvesh`.
 - Uploads (ISO, templates, snippets) take a file of the node itself.
+
+## How it was made
+
+pvetty was written with [Claude Code](https://claude.com/claude-code),
+Anthropic's AI coding agent, directed and reviewed by the author and
+tested on a real Proxmox VE node (see [docs/TESTING.md](docs/TESTING.md)).
+The design notes and lessons learned are in
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md); [AGENTS.md](AGENTS.md) is the
+guide given to coding agents working on it.
 
 ## Licence and name
 

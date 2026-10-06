@@ -1,5 +1,8 @@
 # pvetty — Development notes (internal)
 
+> pvetty is developed with Claude Code (Anthropic's AI coding agent),
+> directed and reviewed by the author; AGENTS.md is the agents' entry point.
+
 > Called *pvetui* until 1.1.0: the release archives 1.0.0 / 1.1.0, the git
 > history use the old name.
 
