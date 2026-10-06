@@ -11,9 +11,9 @@ pvetty [options]
 ```
 
 `pvetty` must run as `root` on a Proxmox VE node. There is no login: the
-session is the local `root@pam` user, as with `pvesh`. When other Proxmox
-VE users exist, pvetty first asks which one to run as: that user's
-permissions then apply, as in the web UI (see
+session is the local `root@pam` user, as with `pvesh`. pvetty first asks
+which Proxmox VE user to run as (the launching user or another one): that
+user's permissions then apply, as in the web UI (see
 [CONFIGURATION.md](CONFIGURATION.md#running-as-another-user)). See
 [CONFIGURATION.md](CONFIGURATION.md) for all options.
 
@@ -168,10 +168,20 @@ focus (`Tab` or `→` to reach it). The same keys are listed in the footer.
 #### Adding a user
 
 `a` in Datacenter › Users asks the realm, then the user name (without
-`@realm`), then the other fields, like the web UI. The password is only
-set for the `pve` realm: `pam` users are Linux accounts of the node
-(create them with `useradd`), LDAP / AD / OpenID users authenticate on
-their server.
+`@realm`), then the other fields, like the web UI. The password is set for
+the `pve` and `pam` realms (for `pam` it is the Linux password); LDAP / AD /
+OpenID users authenticate on their server.
+
+A `pam` user needs a Linux account on the node. When it does not exist,
+pvetty offers to create it (`useradd -m -s /bin/bash`) only if the user
+pvetty runs as may create Linux accounts itself: a `pam` user whose Linux
+account is root or may run `useradd` with sudo (checked with `sudo -l`).
+The account is then created through that account (`runuser` + `sudo`:
+its sudo rules apply, sudo may ask its password and logs the action), and
+the Proxmox VE right to add `pam` users (`Realm.AllocateUser` on
+`/access/realm/pam`) is checked first. Otherwise pvetty explains how to
+create the account. On a cluster, create the account on the other nodes
+too.
 
 #### Forms
 

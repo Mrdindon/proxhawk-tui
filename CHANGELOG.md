@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.3.1 — 2026-10-06
+
+- The start-up question "run as which user" is now always asked (unless
+  `ask_user = 0`, `--user` or `user = ...`): it was skipped when root@pam
+  was the only Proxmox VE user. "Other user" accepts any user ID; an
+  unknown or disabled user shows a message and asks again.
+- **PAM users**: when the Linux account does not exist, pvetty offers to
+  create it if the user it runs as may create Linux accounts (a pam user
+  that is root or may run `useradd` with sudo); the account is created
+  through that user's sudo, after checking `Realm.AllocateUser`.
+- **Demo**: the README GIF shows Datacenter Summary and HA, Node Summary,
+  Network, System Log, Community Scripts and Disks, VM Summary and Options,
+  on fictional data; the MP4 version is removed. The demo tooling is no
+  longer part of the repository. The Community Scripts plugin works on
+  recorded API answers (replay backend).
+- **Ansible inventory plugin**: `s` wrote nothing ("Cannot write": the file
+  name was lost before writing); it now creates the folders, asks before
+  replacing a file and reports the hosts written. The inventory lines are
+  selectable (a cursor shows the position when scrolling), `v` opens it in
+  the pager, and guests with the same name no longer produce a duplicate
+  YAML key.
+- **Fix** (running as another user): writes were refused for every user
+  other than root@pam, even with the right permissions (the pvesh wrapper
+  checked pvesh's own command instead of the API method). Methods open to
+  everyone (realm list) are no longer refused.
+
 ## 1.3.0 — 2026-10-06
 
 - **Run as another Proxmox VE user**: at start-up pvetty asks which user to

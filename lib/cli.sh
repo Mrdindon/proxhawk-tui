@@ -149,7 +149,7 @@ cli_main() {
     cli_parse "$@"
     (( EUID == 0 )) || cli_error "must be run as root on a Proxmox VE node"
     core_init_rundir
-    user_apply "${CLI_USER:-${CFG[user]:-root@pam}}"
+    user_apply "${CLI_USER:-${CFG[user]:-root@pam}}" || cli_error "unknown or disabled Proxmox VE user: ${CLI_USER:-${CFG[user]}}"
     trap 'core_cleanup' EXIT
     spinner_start() { :; }; spinner_stop() { :; }
     TCAP[colors]=8; glyphs_load; i18n_load; theme_load; views_load

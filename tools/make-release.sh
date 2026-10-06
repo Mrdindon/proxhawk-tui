@@ -11,7 +11,8 @@ name="pvetty-$ver"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/$name"
-tar -C "$src" --exclude=.git -cf - . | tar -C "$tmp/$name" -xf -
+# Files tracked by git only (local tools and data stay out of the archive).
+( cd "$src" && git ls-files -z | tar --null -T - -cf - ) | tar -C "$tmp/$name" -xf -
 find "$tmp/$name" -name '*~' -delete
 ( cd "$tmp/$name" && find . -type f ! -name MANIFEST.sha256 | sort | xargs sha256sum ) > "$tmp/MANIFEST.sha256"
 mv "$tmp/MANIFEST.sha256" "$tmp/$name/MANIFEST.sha256"

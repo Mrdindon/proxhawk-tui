@@ -10,7 +10,7 @@
 # pvetty does.
 #
 #   user_select      prompt (setting ask_user), then user_apply
-#   user_apply USER  run the API requests as USER
+#   user_apply USER  run the API requests as USER (rc 1: unknown user)
 #   perm_ok PATH PRIV   does the user have PRIV on PATH (rc 0 / 1)
 #   perm_need PATH PRIV  same, with an error message when not
 
@@ -39,42 +39,52 @@ user_default() {
 user_select() {
     local u def
     user_list
-    if [[ -n ${CFG[user]} ]]; then user_apply "${CFG[user]}"; return; fi
+    if [[ -n ${CFG[user]} ]]; then user_apply "${CFG[user]}" || die "unknown or disabled Proxmox VE user: ${CFG[user]}"; return; fi
     user_default; def=$REPLY
-    # Nothing to choose from, or not wanted.
-    if [[ ${CFG[ask_user]} != 1 ]] || (( ${#USERS[@]} < 2 )); then user_apply "$def"; return; fi
+    [[ ${CFG[ask_user]} == 1 ]] || { user_apply "$def"; return; }
     local -a items=()
     Tf "%s (launching user)" "$def"; items+=("$def" "$REPLY")
     for u in "${USERS[@]}"; do
         [[ $u == "$def" ]] || { printf -v REPLY '%-24s %s' "$u" "${USER_DESC[$u]-}"; items+=("$u" "$REPLY"); }
     done
-    T "Other user ID..."; items+=(_other "$REPLY")
-    DLG_NOTAGS=1 DLG_OK_LABEL="Run" DLG_CANCEL_LABEL="Quit" \
-        dlg_menu "pvetty" "Run pvetty as which Proxmox VE user? Its permissions apply (set ask_user = 0 to always use the launching user)." "${items[@]}" \
-        || exit 0
-    u=$REPLY
-    if [[ $u == _other ]]; then
-        dlg_input "pvetty" "User ID (name@realm):" "" || exit 0
+    T "Other user (name@realm)..."; items+=(_other "$REPLY")
+    while :; do
+        DLG_NOTAGS=1 DLG_OK_LABEL="Run" DLG_CANCEL_LABEL="Quit" \
+            dlg_menu "pvetty" "Run pvetty as which Proxmox VE user? Its permissions apply. (ask_user = 0 in the settings: always the launching user)" "${items[@]}" \
+            || exit 0
         u=$REPLY
-    fi
-    user_apply "$u"
+        if [[ $u == _other ]]; then
+            dlg_input "pvetty" "Proxmox VE user ID (name@realm):" "" || continue
+            u=$REPLY
+        fi
+        user_apply "$u" && return
+        Tf "Unknown or disabled Proxmox VE user: %s" "$u"
+        dlg_msg "pvetty" "$REPLY"
+    done
 }
 
 user_apply() {
-    local u=$1
+    local u=$1 d p=""
     [[ $u == *@* ]] || u="$u@pam"
+    # Drop the "pvesh" wrapper of an earlier choice (or of the pvetty that
+    # restarted this one) from PATH.
+    local IFS=:
+    for d in $PATH; do [[ $d == */pvetty.*/bin ]] || p+="${p:+:}$d"; done
+    unset IFS
+    PATH=$p
     if [[ $u != root@pam ]]; then
         user_list
-        [[ " ${USERS[*]} " == *" $u "* ]] || die "unknown or disabled Proxmox VE user: $u"
+        [[ " ${USERS[*]} " == *" $u "* ]] || return 1
         # Writes: a "pvesh" that runs as the user, first in PATH (also for
         # the background jobs and the API helper started later).
         mkdir -p "$RUN_DIR/bin"
         printf '#!/bin/sh\nexec perl %q "$@"\n' "$PVETTY_HOME/lib/pvesh-as.pl" > "$RUN_DIR/bin/pvesh"
         chmod +x "$RUN_DIR/bin/pvesh"
-        export PATH="$RUN_DIR/bin:$PATH"
+        PATH="$RUN_DIR/bin:$PATH"
     fi
-    export PVETTY_USER=$u
+    export PATH PVETTY_USER=$u
     PVE_USER=$u
+    return 0
 }
 
 perm_ok() {

@@ -46,7 +46,7 @@ See [`conf/pvetty.conf.example`](../conf/pvetty.conf.example).
 | `queue_parallel` | `2` | number | queued / batch actions running at the same time |
 | `cli_output` | `json` | `json`, `table` | default output of the subcommands (see [CLI.md](CLI.md)) |
 | `user` | | `name@realm` | Proxmox VE user to run as (see [Running as another user](#running-as-another-user)); empty = launching user |
-| `ask_user` | `1` | `0`, `1` | ask at start-up which user to run as (only when several users exist) |
+| `ask_user` | `1` | `0`, `1` | ask at start-up which user to run as (`0`: always the launching user) |
 
 ### Key bindings
 
@@ -154,7 +154,7 @@ selection, since plugins are loaded at start-up) or with `plugins = name name`. 
 | Plugin | Adds |
 |--------|------|
 | `community-scripts` | Node › *Community Scripts*: browse the [community-scripts](https://github.com/community-scripts/ProxmoxVE) catalogue (CT, VM, tools) and run an install script on the node after confirmation (needs Internet access) |
-| `ansible-inventory` | Datacenter › *Ansible Inventory*: YAML inventory of the guests grouped by node, type, status and tag; `s` saves it to a file |
+| `ansible-inventory` | Datacenter › *Ansible Inventory*: YAML inventory of the guests grouped by node, type, status and tag; `s` saves it to a file (folders created, confirmation before replacing), `v` opens it in the pager |
 
 Writing a plugin: [EXTENDING.md](EXTENDING.md#plugins).
 

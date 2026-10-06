@@ -17,9 +17,12 @@ menu_extend node "communityscripts|Community Scripts|m_import|0"
 # Script names of a category, cached for the session.
 _cs_list() {
     local cat=$1 f="$RUN_DIR/cs-$1.list"
-    if [[ ! -s $f ]]; then
+    # Recorded API answers (tests, demo): the list is part of the recording.
+    if [[ $API_BACKEND == replay ]]; then f="$PVETTY_REPLAY/cs-$cat.list"; [[ -r $f ]] || f=/dev/null; fi
+    if [[ ! -s $f && $f != /dev/null ]]; then
         curl -fsSL --max-time 20 "$CS_REPO_API/$cat" 2>/dev/null \
             | perl -MJSON -e 'my $d = eval { decode_json(join("", <STDIN>)) } || []; print map { "$_->{name}\n" } grep { $_->{name} =~ /\.sh$/ } @$d' > "$f"
+        [[ -n ${PVETTY_RECORD-} ]] && cp "$f" "$PVETTY_RECORD/cs-$cat.list"
     fi
     mapfile -t CS_LIST < "$f"
 }

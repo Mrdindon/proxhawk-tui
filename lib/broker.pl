@@ -52,6 +52,9 @@ sub request_env {
 sub check_perm {
     my ($info, $param) = @_;
     return if $as_user eq 'root@pam';
+    # Methods open to everyone (realm list of the login box): the API server
+    # does not check them.
+    return if ($info->{permissions}{user} // '') eq 'world';
     PVE::RPCEnvironment->get()->check_api2_permissions($info->{permissions}, $as_user, $param);
 }
 

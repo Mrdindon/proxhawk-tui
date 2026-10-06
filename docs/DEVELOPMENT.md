@@ -15,6 +15,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 1.3.1 | 2026-10-06 | user question always asked, PAM account creation by users allowed to (sudo), fix of writes as another user, Ansible plugin fixes, new demo GIF |
 | 1.3.0 | 2026-10-06 | run as another Proxmox VE user (permissions like the web UI), one-line install, add user with realm (fix) |
 | 1.2.1 | 2026-10-06 | exit when the terminal is closed (runaway CPU fix), plugins checklist and restart, dialog sizing and button labels, demo video |
 | 1.2.0 | 2026-10-06 | renamed pvetui → pvetty (name clash, Proxmox trademark guidelines), AGPL-3.0-or-later licence, migration of the old user files |
@@ -105,6 +106,9 @@ kernel 7.0.14-20-pve, two spare test disks (`/dev/sdb`, `/dev/sdc`).
   exits on end of file; HUP / TERM exit directly.
 - A whiptail `--menu` used as a toggle list toggles again on Enter on Ok:
   use `dlg_checklist`, or name the buttons (`DLG_OK_LABEL`).
+- Wrapping pvesh: pvesh runs its own CLI command through
+  `RESTHandler::handle` too; check only `PVE::API2::*` methods (1.3.0 refused
+  every write of non-root users). "world" methods are not checked.
 - `printf %-Ns` counts bytes with some locales: pad with `fit` (multibyte
   glyphs in the help window).
 

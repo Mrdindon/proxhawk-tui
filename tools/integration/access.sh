@@ -25,6 +25,11 @@ test_access() {
     reset_step; preset password=Pvetty-Test-456 confirmation-password=""
     check "Users: change password" key p "$u"
 
+    # PAM users: the Linux account is created only when the user pvetty runs
+    # as may create Linux accounts (root, or useradd allowed by sudo) and may
+    # add users to the pam realm.
+    test_pam_users
+
     # API tokens.
     check "API Tokens: view" view tokens
     reset_step; crud_answers userid=$u tokenid=t1; preset comment="test token" privsep=1
@@ -137,4 +142,59 @@ print("%06d"%((struct.unpack(">I",h[o:o+4])[0]&0x7fffffff)%1000000))' "$secret")
     view groups; reset_step
     check "Groups: remove" key d "$g"
     check "Groups: removed" api_lacks /access/groups groupid "$g"
+}
+
+# Run the API helper as another user (like the start-up choice).
+as_user() {
+    api_stop
+    user_apply "$1"
+    api_start
+}
+pam_add() {     # pam_add <name>: Add user in the pam realm, account creation accepted
+    reset_step; crud_answers realm=pam name="$1" create_account=1; preset password=Pvetty-Pam-123 comment="pvetty test"
+    view users; key a ""
+}
+pam_cleanup() {
+    local n
+    for n in pvetty-t-new pvetty-t-adm pvetty-t-nos; do
+        pveum user delete "$n@pam" >/dev/null 2>&1; id "$n" >/dev/null 2>&1 && userdel -r "$n" >/dev/null 2>&1
+    done
+    pveum user delete pvetty-t-pve@pve >/dev/null 2>&1
+    rm -f /etc/sudoers.d/pvetty-test
+}
+test_pam_users() {
+    local new=pvetty-t-new
+    pam_cleanup
+    # As root@pam.
+    pam_add "$new"
+    check "PAM user (root@pam): Linux account created" id "$new"
+    check "PAM user (root@pam): Proxmox VE user created" api_has /access/users userid "$new@pam"
+    check "PAM user (root@pam): Linux password set" bash -c "grep -q '^$new:\\\$' /etc/shadow"
+    pveum user delete "$new@pam" >/dev/null 2>&1; userdel -r "$new" >/dev/null 2>&1
+    # Test users: Administrator in Proxmox VE, different Linux rights.
+    useradd -m pvetty-t-adm && useradd -m pvetty-t-nos
+    printf 'pvetty-t-adm ALL=(root) NOPASSWD: %s\n' "$(command -v useradd)" > "$RUN_DIR/sudoers"
+    check "PAM user: sudo rule for useradd (visudo -c)" visudo -cf "$RUN_DIR/sudoers"
+    install -m 440 "$RUN_DIR/sudoers" /etc/sudoers.d/pvetty-test
+    pveum user add pvetty-t-adm@pam && pveum user add pvetty-t-nos@pam && pveum user add pvetty-t-pve@pve
+    pveum acl modify / --users pvetty-t-adm@pam,pvetty-t-nos@pam,pvetty-t-pve@pve --roles Administrator
+    # pve realm user: no Linux account, refused.
+    as_user pvetty-t-pve@pve; pam_add "$new"
+    check "PAM user (pve realm user): refused" eval '[[ $LAST_MSG == *"may not create Linux accounts"* ]] && ! id $new'
+    # PAM user without sudo rights: refused.
+    as_user pvetty-t-nos@pam; pam_add "$new"
+    check "PAM user (no sudo): refused" eval '[[ $LAST_MSG == *"may not create Linux accounts"* ]] && ! id $new'
+    # PAM user allowed to run useradd with sudo: created through sudo.
+    as_user pvetty-t-adm@pam; pam_add "$new"
+    check "PAM user (sudo useradd): Linux account created" id "$new"
+    check "PAM user (sudo useradd): Proxmox VE user created" api_has /access/users userid "$new@pam"
+    pveum user delete "$new@pam" >/dev/null 2>&1; userdel -r "$new" >/dev/null 2>&1
+    # Same, without the Proxmox VE right to add pam users: refused.
+    pveum acl delete / --users pvetty-t-adm@pam --roles Administrator
+    pveum acl modify / --users pvetty-t-adm@pam --roles PVEAuditor
+    as_user pvetty-t-adm@pam; pam_add "$new"
+    check "PAM user (sudo, no Realm.AllocateUser): refused" eval '[[ $STATUS_MSG == *Realm.AllocateUser* ]] && ! id $new'
+    as_user root@pam
+    pam_cleanup
+    check "PAM user: test accounts removed" eval '! id pvetty-t-adm && ! id pvetty-t-nos && [[ ! -e /etc/sudoers.d/pvetty-test ]]'
 }
