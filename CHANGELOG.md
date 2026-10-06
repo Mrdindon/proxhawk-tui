@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.0 — 2026-10-06
+
+- **Run as another Proxmox VE user**: at start-up pvetty asks which user to
+  run as (`ask_user`), or takes `--user` / `user = ...` (also for the CLI
+  subcommands). The user's permissions apply like in the web UI: API calls
+  checked with `check_api2_permissions`, filtered lists, tasks logged under
+  the user, consoles need `VM.Console` / `Sys.Console`.
+- **One-line install**: `bash -c "$(curl -fsSL
+  https://raw.githubusercontent.com/Mrdindon/pvetty/main/install.sh)"`
+  installs the latest `.deb` (checked with its SHA-256); `--uninstall`.
+- **Fix**: adding a user failed with "change password failed: user 'test'
+  does not exist" (the API wants `name@realm`). Add now asks the realm and
+  the name like the web UI; the password is only set for the pve realm.
+- The README says that pvetty is developed with Claude Code.
+
 ## 1.2.1 — 2026-10-06
 
 - **Fix**: pvetty kept running at full CPU after its terminal was closed

@@ -5,7 +5,7 @@
 set -o pipefail
 shopt -s extglob
 PVETTY_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
-for _m in core term theme glyphs i18n widgets api content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins actions layout; do
+for _m in core term theme glyphs i18n widgets api user content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins actions layout; do
     source "$PVETTY_HOME/lib/$_m.sh"
 done
 core_load_config

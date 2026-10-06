@@ -141,6 +141,17 @@ test_features() {
     check "Icons off: menu icons blank" test -z "${G[m_summary]-}"
     CFG[icons]=1; glyphs_load
 
+    # --- Running as another user ---------------------------------------------
+    local ro=pvetty-test-ro@pve
+    pveum user delete "$ro" >/dev/null 2>&1
+    check "User: test user $ro (PVEAuditor)" bash -c "pveum user add $ro && pveum acl modify / --users $ro --roles PVEAuditor"
+    check "User: read as $ro" cli_has '"node"' nodes list --user "$ro"
+    out=$(cli api set "/nodes/$NODE/lxc/$TEST_CT2/config" --description pvetty-ro --user "$ro" 2>&1)
+    check "User: write refused for $ro" grep -q "Permission check failed" <<< "$out"
+    check "User: write not done" eval '! kv_is "/nodes/$NODE/lxc/$TEST_CT2/config" description pvetty-ro'
+    check "User: console refused for $ro" eval '! PVETTY_USER=$ro perl "$PVETTY_HOME/lib/broker.pl" --once perm "/vms/$TEST_CT2" "priv=VM.Console" "" | grep -qx 1'
+    check "User: test user removed" pveum user delete "$ro"
+
     # --- Clean up ---------------------------------------------------------------
     pct stop "$TEST_CT2" >/dev/null 2>&1
     check "Test CT $TEST_CT2 removed" pct destroy "$TEST_CT2" --purge

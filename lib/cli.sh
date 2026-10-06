@@ -33,6 +33,7 @@ Commands:
 
 Options:
   -o, --output json|table            output format (default: json)
+  -u, --user USER                    run as this Proxmox VE user (its permissions apply)
   --no-wait                          return the UPID of a task immediately
   -h, --help                         this help
 EOF
@@ -51,6 +52,7 @@ cli_parse() {
         case $1 in
             -o|--output) CLI_OUTPUT=$2; shift ;;
             --no-wait) CLI_NOWAIT=1 ;;
+            -u|--user) CLI_USER=$2; shift ;;
             --running) CLI_OPT[running]=1 ;;
             -h|--help) cli_usage; exit 0 ;;
             --*) CLI_OPT[${1#--}]=${2-}; shift ;;
@@ -147,6 +149,7 @@ cli_main() {
     cli_parse "$@"
     (( EUID == 0 )) || cli_error "must be run as root on a Proxmox VE node"
     core_init_rundir
+    user_apply "${CLI_USER:-${CFG[user]:-root@pam}}"
     trap 'core_cleanup' EXIT
     spinner_start() { :; }; spinner_stop() { :; }
     TCAP[colors]=8; glyphs_load; i18n_load; theme_load; views_load
@@ -197,6 +200,8 @@ cli_main() {
             local cmd="${CLI_ARGS[*]:1}" node=${R_NODE[$CLI_GID]} vmid=${R_VMID[$CLI_GID]}
             [[ -n $cmd ]] || cli_error "missing command"
             if [[ $CLI_GID == lxc/* ]]; then
+                # pct exec runs as root on the node: same privilege as the console.
+                perm_ok "/vms/$vmid" VM.Console || cli_error "Permission check failed (/vms/$vmid, VM.Console) for $PVE_USER"
                 if [[ $node == "$LOCAL_NODE" ]]; then pct exec "$vmid" -- /bin/sh -c "$cmd"; exit $?
                 else node_ip "$node"; ssh -o BatchMode=yes "root@$REPLY" pct exec "$vmid" -- /bin/sh -c "$(printf '%q' "$cmd")"; exit $?
                 fi

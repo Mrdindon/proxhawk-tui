@@ -19,6 +19,8 @@ lib/glyphs.sh         icon / box drawing sets (G[...]), spinner frames
 lib/i18n.sh           T / Tf translation helpers, language loading
 lib/widgets.sh        formatting, ANSI-aware fit/strip, bars, braille charts, spinner
 lib/api.sh            API access: broker co-process, pvesh fallback, background jobs
+lib/user.sh           Proxmox VE user to run as (prompt, permissions, pvesh wrapper)
+lib/pvesh-as.pl       pvesh as another user, with the API server permission check
 lib/broker.pl         persistent read-only API helper (Perl)
 lib/content.sh        content model (C_LINES...), tables, key/value lists
 lib/resources.sh      /cluster/resources model (R_*), tree building (4 views)

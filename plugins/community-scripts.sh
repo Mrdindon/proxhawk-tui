@@ -52,6 +52,8 @@ v_node_communityscripts__enter() {
             curl -fsSL --max-time 20 "$url" > "$RUN_DIR/cs-script.sh" 2>&1
             pager_show "$RUN_DIR/cs-script.sh" "$s" ;;
         run)
+            # Scripts run as root on the node: root@pam only.
+            [[ $PVE_USER == root@pam ]] || { dlg_msg "Community Scripts" "Installing scripts requires running pvetty as root@pam."; return; }
             Tf "Run %s as root on node %s? It is third-party code." "$s" "$CTX_NODE"
             dlg_yesno "Community Scripts" "$REPLY" || return
             node_cmd "$CTX_NODE" bash -c "bash -c \"\$(curl -fsSL '$url')\"; echo; read -rp '[Enter] to return to pvetty' _"
