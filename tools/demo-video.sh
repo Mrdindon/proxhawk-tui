@@ -3,7 +3,7 @@
 # pvetty (detached tmux session, recorded API answers) and renders the
 # screens to an MP4 with tools/render-video.py.
 #
-#   tools/demo-video.sh [output.mp4]          (default: docs/demo.mp4)
+#   tools/demo-video.sh [output.mp4|.gif]     (default: docs/demo.mp4)
 #   tools/demo-video.sh --record DIR          record the API answers of the
 #                                             storyboard on this node into DIR
 #

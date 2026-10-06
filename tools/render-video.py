@@ -209,9 +209,27 @@ def render(path, cols, rows):
     return img
 
 
+def write_gif(out, frames, steps, cols, rows):
+    """Animated GIF (shown inline by GitHub): one image per screen, scaled by
+    DEMO_GIF_SCALE, with the screen durations."""
+    scale = float(os.environ.get("DEMO_GIF_SCALE", "0.75"))
+    images, durations = [], []
+    for name, secs in steps:
+        img = render(os.path.join(frames, name), cols, rows)
+        if scale != 1:
+            img = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
+        images.append(img.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE))
+        durations.append(round(float(secs) * 1000))
+    images[0].save(out, save_all=True, append_images=images[1:], duration=durations, loop=0, optimize=True)
+    print(f"{out}: {images[0].width}x{images[0].height}, {len(steps)} screens, {sum(durations) / 1000:.1f} s")
+
+
 def main():
     frames, out, cols, rows = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
     steps = [line.split() for line in open(os.path.join(frames, "list")) if line.strip()]
+    if out.endswith(".gif"):
+        write_gif(out, frames, steps, cols, rows)
+        return
     first = render(os.path.join(frames, steps[0][0]), cols, rows)
     size = first.size
     writer = imageio_ffmpeg.write_frames(out, size, fps=FPS, codec="libx264", pix_fmt_out="yuv420p",

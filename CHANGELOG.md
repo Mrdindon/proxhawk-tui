@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.1 — 2026-10-06
+
+- **Fix**: pvetty kept running at full CPU after its terminal was closed
+  (SSH disconnect, killed tmux session) or on SIGTERM while a dialog or the
+  help window was open. It now exits and cleans up.
+- **Plugins dialog**: a checklist (`Space` ticks, `Enter` validates; `Enter`
+  on Ok toggled a plugin again) and an offer to restart pvetty, keeping the
+  current selection.
+- **Dialogs**: action menus name their buttons (Settings: Change / Close,
+  forms: Select / Cancel); menus fit the width of their longest line;
+  message, question and input boxes take the size of their text (long
+  errors were cut).
+- **Demo** in the README (GIF and MP4), made from a storyboard on demo data
+  with `tools/demo-video.sh` and `tools/render-video.py`.
+
 ## 1.2.0 — 2026-10-06
 
 - **Renamed pvetui → pvetty** (PVE + TTY): another project is called pvetui.
