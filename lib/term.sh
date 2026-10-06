@@ -70,7 +70,14 @@ KEY="" MOUSE_B=0 MOUSE_X=0 MOUSE_Y=0 MOUSE_REL=0
 read_key() {
     local k="" rest="" c
     KEY=""
-    IFS= read -rsn1 -t "${1:-0.5}" k || { [[ -z $k ]] && return 1; }
+    local rc=0
+    IFS= read -rsn1 -t "${1:-0.5}" k || rc=$?
+    # rc > 128: timeout. rc 1 with nothing read: end of file / read error,
+    # i.e. the terminal is gone: quit instead of looping on failed reads.
+    if (( rc )); then
+        (( rc == 1 )) && [[ -z $k ]] && exit 129
+        [[ -z $k ]] && return 1
+    fi
     if [[ $k == $'\e' ]]; then
         IFS= read -rsn2 -t 0.01 rest
         if [[ $rest == '[<' ]]; then

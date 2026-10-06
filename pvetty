@@ -95,7 +95,11 @@ LAST_REFRESH=0
 
 core_init_rundir
 trap 'spinner_stop; term_restore; STATE[last]=${SEL_ID:-root}; core_state_save; core_cleanup' EXIT
-trap 'RUNNING=0' INT TERM HUP
+trap 'RUNNING=0' INT
+# Terminal closed (SSH disconnect, tmux session killed) or kill: leave at once,
+# whatever loop is running (dialogs, help window...); the EXIT trap cleans up.
+trap 'exit 129' HUP
+trap 'exit 143' TERM
 trap 'NEED_RESIZE=1' WINCH
 
 i18n_load
