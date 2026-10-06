@@ -1,0 +1,7 @@
+quorum	OK
+master	pve1 (active, Tue Oct 06 18:55:00 2026)
+lrm:pve1	pve1 (active, Tue Oct 06 18:55:02 2026)
+service:vm:102	pve1 (started)
+service:vm:103	pve1 (started)
+service:vm:104	pve1 (started)
+service:ct:105	pve1 (started)

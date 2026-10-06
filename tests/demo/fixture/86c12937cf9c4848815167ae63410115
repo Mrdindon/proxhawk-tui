@@ -1,0 +1,4 @@
+vm:102	started		1	1	1	Kubernetes control plane
+vm:103	started		1	1	1	Kubernetes worker
+vm:104	started		1	1	1	Kubernetes worker
+ct:105	started		1	1	1	Reverse proxy

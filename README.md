@@ -8,9 +8,9 @@ of the web UI with Unicode box drawing, braille charts, Nerd Font icons and
 ANSI colours, and needs nothing that is not already installed on a Proxmox VE
 node.
 
-![pvetty demo: datacenter, node and VM summaries, help window, tree views](docs/demo.gif)
+![pvetty demo: Datacenter summary and HA, node summary, network, system log, community scripts and disks, VM summary and options](docs/demo.gif)
 
-*Demo data, 44 s — also as [MP4 video](docs/demo.mp4). Made with `tools/demo-video.sh`.*
+*Demo data. Made with `tools/make-demo.sh`.*
 
 ## Highlights
 

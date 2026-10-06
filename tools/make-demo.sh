@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
-# demo-video.sh - make the demo video of the README: plays a storyboard in
-# pvetty (detached tmux session, recorded API answers) and renders the
-# screens to an MP4 with tools/render-video.py.
+# make-demo.sh - make the animated GIF of the README: plays a storyboard in
+# pvetty (detached tmux session, recorded API answers) and renders one image
+# per step with tools/render-demo.py.
 #
-#   tools/demo-video.sh [output.mp4|.gif]     (default: docs/demo.mp4)
-#   tools/demo-video.sh --record DIR          record the API answers of the
-#                                             storyboard on this node into DIR
+#   tools/make-demo.sh [output.gif]          (default: docs/demo.gif)
+#   tools/make-demo.sh --record DIR          record the API answers of the
+#                                            storyboard on this node into DIR
 #
-# Storyboard (tests/demo/storyboard), one step per line:
-#   <seconds> <key> [key...]     keys as "tmux send-keys" names; the screen
-#                                after the last key is shown <seconds>
-#   type:<text>                  as a key: types the text one letter at a time
+# Storyboard (tests/demo/storyboard), one image per line:
+#   <seconds> [key...]     keys as "tmux send-keys" names, Key*N repeats a key;
+#                          the screen after the last key is shown <seconds>
 # The fixture (tests/demo/fixture) holds demo data only: a recording made on
 # a real node must be anonymised before it is copied there.
-# Rendering needs Python with Pillow and imageio-ffmpeg (development only):
-#   python3 -m venv /tmp/v && /tmp/v/bin/pip install pillow imageio-ffmpeg
-#   PYTHON=/tmp/v/bin/python tools/demo-video.sh
+# Rendering needs Python with Pillow and fontTools (development only):
+#   python3 -m venv /tmp/v && /tmp/v/bin/pip install pillow fonttools
+#   PYTHON=/tmp/v/bin/python DEMO_FONT=... tools/make-demo.sh
 set -u
 cd "$(dirname "$0")/.." || exit 1
 ROOT=$PWD
 W=${DEMO_COLS:-120} H=${DEMO_ROWS:-38}
 FIX=$ROOT/tests/demo/fixture
-OUT=$ROOT/docs/demo.mp4
+OUT=$ROOT/docs/demo.gif
 RECORD=""
 case ${1-} in
     --record) RECORD=$2 ;;
@@ -42,6 +41,7 @@ onboarding = 0
 refresh = 0
 ip_column = 0
 ask_user = 0
+plugins = community-scripts
 EOF
 
 # Screen once it stopped changing.
@@ -84,15 +84,10 @@ settle
 while read -r hold keys; do
     [[ -z $hold || $hold == \#* ]] && continue
     for k in $keys; do
-        if [[ $k == type:* ]]; then
-            local_text=${k#type:}
-            for (( i = 0; i < ${#local_text}; i++ )); do
-                tmux send-keys -t "$SESSION" -l "${local_text:i:1}"; settle; frame 0.12
-            done
-        else
-            tmux send-keys -t "$SESSION" "$k"; settle
-            [[ -n $RECORD ]] || frame 0.35
-        fi
+        n=1
+        [[ $k =~ ^(.+)\*([0-9]+)$ ]] && { k=${BASH_REMATCH[1]}; n=${BASH_REMATCH[2]}; }
+        for (( i = 0; i < n; i++ )); do tmux send-keys -t "$SESSION" "$k"; sleep 0.05; done
+        settle
     done
     [[ -n $RECORD ]] || frame "$hold"
 done < "$ROOT/tests/demo/storyboard"
@@ -104,4 +99,4 @@ if [[ -n $RECORD ]]; then
 fi
 grep -l "not recorded" "$TMP"/frames/*.ans >/dev/null && echo "warning: some answers are not recorded" >&2
 mkdir -p "$(dirname "$OUT")"
-"$PYTHON" "$ROOT/tools/render-video.py" "$TMP/frames" "$OUT" "$W" "$H"
+"$PYTHON" "$ROOT/tools/render-demo.py" "$TMP/frames" "$OUT" "$W" "$H"

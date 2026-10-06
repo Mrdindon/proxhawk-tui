@@ -1,26 +1,13 @@
-# seconds  keys (see tools/demo-video.sh)
-# Datacenter search grid, then the datacenter summary
-2.5
-2.5 Tab Down
-1.0 Escape
-# Node: search grid, then summary with graphs
-1.5 Down
-3.0 Tab Down
-1.0 Escape
-# VM: summary, hardware, options
-3.5 Down
-2.5 Tab Down Down
-2.0 Down Down
-# Help window (keys of the current panel)
-3.5 F1
-0.8 Escape
-1.0 Escape
-# Container summary
-2.5 Down
-# Tree views: folder, pool, storage, back to server
-2.0 v
-0.7 v
-1.5 v
-1.0 v
-# Tasks panel
-3.0 Tab Tab Tab
+# seconds  keys (tmux send-keys names, Key*N repeats; one image per line)
+# Datacenter > Summary, Datacenter > HA
+3.5 Tab Home Down
+3.0 Down*16
+# Node > Summary, Network, System Log, Community Scripts, Disks
+3.5 Escape Down Tab Home Down
+3.0 Down*4
+3.0 Down*6
+3.5 End
+3.0 Home Down*17
+# VM > Summary, Options
+3.5 Escape Down Tab Home
+3.0 Down*4

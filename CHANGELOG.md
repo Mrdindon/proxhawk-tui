@@ -10,6 +10,11 @@
   create it if the user it runs as may create Linux accounts (a pam user
   that is root or may run `useradd` with sudo); the account is created
   through that user's sudo, after checking `Realm.AllocateUser`.
+- **Demo**: the README GIF shows Datacenter Summary and HA, Node Summary,
+  Network, System Log, Community Scripts and Disks, VM Summary and Options,
+  on fictional data; the MP4 version is removed (`tools/make-demo.sh`,
+  `tools/render-demo.py`, GIF only). The Community Scripts plugin works on
+  recorded data.
 - **Ansible inventory plugin**: `s` wrote nothing ("Cannot write": the file
   name was lost before writing); it now creates the folders, asks before
   replacing a file and reports the hosts written. The inventory lines are

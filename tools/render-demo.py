@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""render-video.py - render terminal screens captured by demo-video.sh
-(tmux capture-pane -e: text with SGR colour codes) to an MP4 video.
+"""render-demo.py - render terminal screens captured by make-demo.sh
+(tmux capture-pane -e: text with SGR colour codes) to an animated GIF.
 
-    render-video.py FRAMES_DIR OUTPUT.mp4 COLS ROWS
+    render-demo.py FRAMES_DIR OUTPUT.gif COLS ROWS
 
-FRAMES_DIR/list holds one "file seconds" line per screen. Needs Pillow,
-imageio-ffmpeg and fontTools (development only, not used by pvetty).
+FRAMES_DIR/list holds one "file seconds" line per screen. Needs Pillow and
+fontTools (development only, not used by pvetty).
 Fonts: DEMO_FONT / DEMO_FONT_BOLD (a Nerd Font Mono, for the icons), then
 DejaVu Sans Mono and DejaVu Sans for the symbols they lack.
 """
@@ -13,12 +13,10 @@ import os
 import re
 import sys
 
-import imageio_ffmpeg
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
 
 SIZE = int(os.environ.get("DEMO_FONT_SIZE", "20"))
-FPS = 20
 PAD = 24
 BG = (29, 33, 39)
 FG = (213, 217, 224)
@@ -189,8 +187,7 @@ def draw_special(d, ch, px, py, fg, bg):
 
 
 def render(path, cols, rows):
-    w, h = cols * CW + 2 * PAD, rows * CH + 2 * PAD
-    img = Image.new("RGB", (w + (-w) % 16, h + (-h) % 16), BG)    # H.264 blocks
+    img = Image.new("RGB", (cols * CW + 2 * PAD, rows * CH + 2 * PAD), BG)
     d = ImageDraw.Draw(img)
     with open(path, encoding="utf-8", errors="replace") as fh:
         lines = fh.read().split("\n")
@@ -216,6 +213,8 @@ def write_gif(out, frames, steps, cols, rows):
     images, durations = [], []
     for name, secs in steps:
         img = render(os.path.join(frames, name), cols, rows)
+        if os.environ.get("DEMO_PNG"):     # keep the screens as PNG (checking)
+            img.save(os.path.join(os.environ["DEMO_PNG"], name.replace(".ans", ".png")))
         if scale != 1:
             img = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
         images.append(img.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE))
@@ -227,24 +226,7 @@ def write_gif(out, frames, steps, cols, rows):
 def main():
     frames, out, cols, rows = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
     steps = [line.split() for line in open(os.path.join(frames, "list")) if line.strip()]
-    if out.endswith(".gif"):
-        write_gif(out, frames, steps, cols, rows)
-        return
-    first = render(os.path.join(frames, steps[0][0]), cols, rows)
-    size = first.size
-    writer = imageio_ffmpeg.write_frames(out, size, fps=FPS, codec="libx264", pix_fmt_out="yuv420p",
-                                         output_params=["-crf", "20", "-preset", "slow", "-movflags", "+faststart"])
-    writer.send(None)
-    for name, secs in steps:
-        img = render(os.path.join(frames, name), cols, rows)
-        if os.environ.get("DEMO_PNG"):     # keep the screens as PNG (checking)
-            img.save(os.path.join(os.environ["DEMO_PNG"], name.replace(".ans", ".png")))
-        data = img.tobytes()
-        for _ in range(max(1, round(float(secs) * FPS))):
-            writer.send(data)
-    writer.close()
-    total = sum(float(s) for _, s in steps)
-    print(f"{out}: {size[0]}x{size[1]}, {len(steps)} screens, {total:.1f} s")
+    write_gif(out, frames, steps, cols, rows)
 
 
 if __name__ == "__main__":
