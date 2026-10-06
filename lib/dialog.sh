@@ -120,6 +120,48 @@ dlg_menu() {
     _dlg_run --title " $title " "${extra[@]}" --menu "$text" "$DH" "$DW" "$mh" "$@"
 }
 
+# dlg_checklist <title> <text> <tag> <item> <on|off> ...
+# Space ticks / unticks, Enter validates. REPLY: the ticked tags, one per
+# line (rc 1 when cancelled).
+dlg_checklist() {
+    T "$1"; local title=$REPLY; T "$2"; local text=$REPLY
+    shift 2
+    local -a args=("$@") tags=()
+    local i tw=0 iw=0 w n=$(( $# / 3 ))
+    if [[ $DLG == builtin ]]; then
+        local -A on=()
+        for (( i = 0; i + 2 < ${#args[@]}; i += 3 )); do tags+=("${args[i]}"); [[ ${args[i+2]} == on ]] && on[${args[i]}]=1; done
+        term_leave
+        while :; do
+            printf '\n%s - %s\n' "$title" "$text"
+            for (( i = 0; i < ${#tags[@]}; i++ )); do
+                printf '  %d) [%s] %s  %s\n' $(( i + 1 )) "${on[${tags[i]}]:+x}${on[${tags[i]}]:- }" "${tags[i]}" "${args[i*3+1]}"
+            done
+            local a; read -r -p "$(T "Number to tick / untick, Enter to validate: "; printf '%s' "$REPLY")" a
+            [[ -z $a ]] && break
+            [[ $a =~ ^[0-9]+$ ]] && (( a >= 1 && a <= ${#tags[@]} )) || continue
+            if [[ -n ${on[${tags[a-1]}]-} ]]; then unset "on[${tags[a-1]}]"; else on[${tags[a-1]}]=1; fi
+        done
+        term_enter; NEED_REDRAW=1
+        REPLY=""; for i in "${tags[@]}"; do [[ -n ${on[$i]-} ]] && REPLY+="$i"$'\n'; done
+        return 0
+    fi
+    for (( i = 0; i + 2 < ${#args[@]}; i += 3 )); do
+        (( ${#args[i]} > tw )) && tw=${#args[i]}
+        (( ${#args[i+1]} > iw )) && iw=${#args[i+1]}
+    done
+    w=$(( tw + iw + 16 )); (( w < 76 )) && w=76
+    _dlg_size $(( n + 8 )) "$w"
+    local room=$(( DW - tw - 16 ))
+    if (( iw > room && room > 8 )); then
+        for (( i = 1; i < ${#args[@]}; i += 3 )); do
+            (( ${#args[i]} > room )) && args[i]="${args[i]:0:room-1}…"
+        done
+    fi
+    local lh=$(( DH - 8 )); (( lh > n )) && lh=$n; (( lh < 1 )) && lh=1
+    _dlg_run --title " $title " --separate-output --checklist "$text" "$DH" "$DW" "$lh" "${args[@]}"
+}
+
 dlg_msg() {
     T "$1"; local title=$REPLY; T "$2"; local text=$REPLY
     if [[ $DLG == builtin ]]; then

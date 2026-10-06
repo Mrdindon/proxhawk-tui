@@ -623,7 +623,7 @@ act_user_menu() {
             ssh_user|ssh_key|ssh_jump|console_host)
                 dlg_input "Settings" "$k (empty = default):" "${CFG[$k]}" || continue
                 core_save_config "$k" "$REPLY" ;;
-            plugins) plugins_dialog ;;
+            plugins) plugins_dialog; (( RUNNING )) || break ;;
             keys) help_overlay ;;
             about)
                 dlg_msg "About" "pvetty $PVETTY_VERSION - text console for Proxmox VE
