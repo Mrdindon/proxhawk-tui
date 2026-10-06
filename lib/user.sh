@@ -64,8 +64,14 @@ user_select() {
 }
 
 user_apply() {
-    local u=$1
+    local u=$1 d p=""
     [[ $u == *@* ]] || u="$u@pam"
+    # Drop the "pvesh" wrapper of an earlier choice (or of the pvetty that
+    # restarted this one) from PATH.
+    local IFS=:
+    for d in $PATH; do [[ $d == */pvetty.*/bin ]] || p+="${p:+:}$d"; done
+    unset IFS
+    PATH=$p
     if [[ $u != root@pam ]]; then
         user_list
         [[ " ${USERS[*]} " == *" $u "* ]] || return 1
@@ -74,9 +80,9 @@ user_apply() {
         mkdir -p "$RUN_DIR/bin"
         printf '#!/bin/sh\nexec perl %q "$@"\n' "$PVETTY_HOME/lib/pvesh-as.pl" > "$RUN_DIR/bin/pvesh"
         chmod +x "$RUN_DIR/bin/pvesh"
-        export PATH="$RUN_DIR/bin:$PATH"
+        PATH="$RUN_DIR/bin:$PATH"
     fi
-    export PVETTY_USER=$u
+    export PATH PVETTY_USER=$u
     PVE_USER=$u
     return 0
 }

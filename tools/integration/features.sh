@@ -151,6 +151,13 @@ test_features() {
     check "User: write not done" eval '! kv_is "/nodes/$NODE/lxc/$TEST_CT2/config" description pvetty-ro'
     check "User: console refused for $ro" eval '! PVETTY_USER=$ro perl "$PVETTY_HOME/lib/broker.pl" --once perm "/vms/$TEST_CT2" "priv=VM.Console" "" | grep -qx 1'
     check "User: test user removed" pveum user delete "$ro"
+    # A user with the rights on the container: the same write is allowed.
+    local adm=pvetty-test-vmadm@pve
+    pveum user delete "$adm" >/dev/null 2>&1
+    check "User: test user $adm (PVEVMAdmin on the CT)" bash -c "pveum user add $adm && pveum acl modify /vms/$TEST_CT2 --users $adm --roles PVEVMAdmin"
+    check "User: write allowed for $adm" cli api set "/nodes/$NODE/lxc/$TEST_CT2/config" --description pvetty-vmadm --user "$adm"
+    check "User: write done" kv_is "/nodes/$NODE/lxc/$TEST_CT2/config" description pvetty-vmadm
+    check "User: test user removed" pveum user delete "$adm"
 
     # --- Clean up ---------------------------------------------------------------
     pct stop "$TEST_CT2" >/dev/null 2>&1

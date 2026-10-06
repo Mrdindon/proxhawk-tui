@@ -6,6 +6,14 @@
   `ask_user = 0`, `--user` or `user = ...`): it was skipped when root@pam
   was the only Proxmox VE user. "Other user" accepts any user ID; an
   unknown or disabled user shows a message and asks again.
+- **PAM users**: when the Linux account does not exist, pvetty offers to
+  create it if the user it runs as may create Linux accounts (a pam user
+  that is root or may run `useradd` with sudo); the account is created
+  through that user's sudo, after checking `Realm.AllocateUser`.
+- **Fix** (running as another user): writes were refused for every user
+  other than root@pam, even with the right permissions (the pvesh wrapper
+  checked pvesh's own command instead of the API method). Methods open to
+  everyone (realm list) are no longer refused.
 
 ## 1.3.0 — 2026-10-06
 

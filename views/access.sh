@@ -83,9 +83,9 @@ crud v_dc_users label="User" add=/access/users edit="/access/users/{1}" del="/ac
     first="userid password groups expire enable firstname lastname email comment keys" \
     choices="groups:choice_groups" extra="p:Password u:Unlock_TFA"
 # Add a user like the web UI: realm, then the name, then the other fields
-# (the API wants the full "name@realm" user ID). The password is only set
-# for the "pve" realm: PAM users are Linux accounts, LDAP / AD / OpenID
-# users authenticate on their server.
+# (the API wants the full "name@realm" user ID). The password is set for
+# the "pve" and "pam" realms (for pam it is the Linux password); LDAP / AD /
+# OpenID users authenticate on their server.
 _users_add() {
     local realm name type="" row
     local -a f items=()
@@ -111,16 +111,59 @@ _users_add() {
         [[ -n ${CRUD_ANSWER[name]-} ]] && return
         dlg_msg "Add: User" "Invalid user name: no spaces, '@', ':' or '/'."
     done
-    [[ $type == pam ]] && ! id "$name" >/dev/null 2>&1 && \
-        { Tf "No Linux account '%s' on this node: create it first (useradd %s), PAM users log in with the Linux password." "$name" "$name"
-          dlg_msg "Add: User" "$REPLY"; }
+    if [[ $type == pam ]] && ! id "$name" >/dev/null 2>&1; then
+        _users_pam_account "$name" || return
+    fi
     form_reset
     FORM_FIX[userid]="$name@$realm"
     FORM_FIRST=${CRUD[v_dc_users|first]-}
-    [[ $type == pve ]] || FORM_HIDE="password"
+    # Password: pve realm, and pam (Proxmox VE then sets the Linux password).
+    [[ $type == pve || $type == pam ]] || FORM_HIDE="password"
     _crud_choices v_dc_users
     Tf "Add: User %s" "$name@$realm"
     form_run "$REPLY" POST /access/users && content_load 1
+}
+
+# Linux account of a new PAM user, created only when the user pvetty runs as
+# may create Linux accounts itself: a PAM user whose Linux account is root
+# or may run useradd through sudo. The account is created through that
+# account (runuser + sudo: its sudo rules apply, sudo may ask its password
+# and logs the action), never with pvetty's own root rights. rc 1: cancel.
+_users_pam_account() {
+    local name=$1 me=${PVE_USER%@pam} how=""
+    if [[ $PVE_USER == *@pam ]] && id "$me" >/dev/null 2>&1; then
+        if [[ $(id -u "$me") == 0 ]]; then how=root
+        elif command -v sudo >/dev/null && sudo -l -U "$me" "$(command -v useradd)" >/dev/null 2>&1; then how=sudo
+        fi
+    fi
+    if [[ -z $how ]]; then
+        Tf "No Linux account '%s' on node %s, and %s may not create Linux accounts (it must be a PAM user that is root or may run useradd with sudo). Create the account first: useradd -m %s" "$name" "$LOCAL_NODE" "$PVE_USER" "$name"
+        dlg_msg "Add: User" "$REPLY"
+        return 1
+    fi
+    # Proxmox VE side first: may this user add users to the pam realm?
+    perm_need /access/realm/pam Realm.AllocateUser || return 1
+    if [[ -z ${CRUD_ANSWER[create_account]-} ]]; then
+        Tf "No Linux account '%s' on node %s. Create it now as %s (useradd -m -s /bin/bash %s)?" "$name" "$LOCAL_NODE" "$PVE_USER" "$name"
+        DLG_DEFAULT_YES=1 dlg_yesno "Add: User" "$REPLY" || return 1
+    fi
+    local useradd; useradd=$(command -v useradd)
+    if [[ $how == root ]]; then
+        "$useradd" -m -s /bin/bash "$name" > "$RUN_DIR/useradd.log" 2>&1
+    else
+        # Interactive: sudo may ask the password of $me.
+        Tf "Creating the Linux account '%s' as %s with sudo (sudo may ask the password of %s)." "$name" "$me" "$me"
+        term_run bash -c 'clear; printf "%s\n\n" "$1"; runuser -u "$2" -- sudo "$3" -m -s /bin/bash "$4"; rc=$?
+            (( rc )) && read -rp "[Enter] " _; exit $rc' sh "$REPLY" "$me" "$useradd" "$name"
+    fi
+    if ! id "$name" >/dev/null 2>&1; then
+        Tf "The Linux account '%s' was not created: %s" "$name" "$(tail -n 1 "$RUN_DIR/useradd.log" 2>/dev/null)"
+        dlg_msg "Add: User" "$REPLY"
+        return 1
+    fi
+    Tf "Linux account '%s' created on %s (the password set below is its Linux password)" "$name" "$LOCAL_NODE"
+    status_msg ok "$REPLY"
+    return 0
 }
 
 v_dc_users__key() {

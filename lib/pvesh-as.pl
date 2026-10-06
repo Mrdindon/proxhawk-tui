@@ -24,10 +24,15 @@ my $handle = \&PVE::RESTHandler::handle;
 our $depth = 0;
 *PVE::RESTHandler::handle = sub {
     my ($self, $info, $param) = @_;
-    if ($depth == 0) {
+    # Only API methods are checked: pvesh runs its own command ("create",
+    # "set"...) through handle() too, without permissions. Internal calls
+    # of an API method (depth > 0) are not checked, like in the API server,
+    # nor are the methods open to everyone ("world").
+    my $api = (ref($self) || $self) =~ /^PVE::API2(::|$)/;
+    if ($api && $depth == 0 && (($info->{permissions} // {})->{user} // '') ne 'world') {
         PVE::RPCEnvironment->get()->check_api2_permissions($info->{permissions}, $user, $param // {});
     }
-    local $depth = $depth + 1;
+    local $depth = $depth + ($api ? 1 : 0);
     return $handle->(@_);
 };
 
