@@ -1,0 +1,3 @@
+
+Search
+Filter resources (name, ID, type, tag, node; empty = all): []:

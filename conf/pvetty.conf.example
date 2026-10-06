@@ -1,0 +1,43 @@
+# pvetty configuration example
+# Copy to /etc/pvetty.conf (all users) or ~/.config/pvetty/pvetty.conf.
+# Format: key = value   (# starts a comment). See docs/CONFIGURATION.md.
+
+# Interface language: auto | en | <code of a lang/<code>.sh file>
+language = auto
+
+# Icon set: auto | nerd | unicode | ascii   (nerd requires a Nerd Font)
+glyphs = auto
+
+# Colour theme: auto | default | dark | light | basic
+theme = auto
+
+# API backend for reads: auto | broker | pvesh
+backend = auto
+
+# Dialog tool: auto | dialog | whiptail | builtin
+dialog = auto
+
+# Automatic refresh interval in seconds (0 = off)
+refresh = 5
+
+# Mouse support (1 = on, 0 = off)
+mouse = 1
+
+# Resource tree width in columns (0 = automatic)
+tree_width = 0
+
+# Rows of the Tasks / Cluster log panel (0 = hidden)
+task_rows = 5
+
+# Initial graph timeframe: hour | day | week | month | year
+graph_timeframe = hour
+
+# Show guest tags in the resource tree
+show_tags = 1
+
+# Ask for confirmation before power and destructive actions
+confirm = 1
+
+# Editor for notes and pager for logs (empty = $VISUAL/$EDITOR/nano, $PAGER/less)
+editor =
+pager =

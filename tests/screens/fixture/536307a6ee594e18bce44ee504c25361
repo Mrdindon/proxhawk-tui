@@ -1,0 +1,7 @@
+qemu/100	qemu	pve1	web01	running	100	0	73	2	304029696	4294967296	0	34359738368	82357										
+lxc/101	lxc	pve1	db01	stopped	101	0	0	4	0	1073741824	0	8589934592	0										
+node/pve1	node	pve1		online			4694	4	2806755328	16601665536	7237308416	29080793088	82379										
+storage/pve1/pbs-main	storage	pve1		available							56604446720	105089261568						pbs-main	pbs	backup	1		
+storage/pve1/VM	storage	pve1		available							17846165504	457286037504						VM	dir	backup,iso,rootdir,images,vztmpl,snippets	0		
+storage/pve1/local	storage	pve1		available							7237308416	29080793088						local	dir	backup,rootdir,iso,snippets,images,vztmpl	0		
+network/pve1/zone/localnetwork	network	pve1		ok																		localnetwork	zone

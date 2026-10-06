@@ -1,0 +1,4 @@
+# Release archives are built outside the tree (tools/make-release.sh)
+*.tar.gz
+*~
+*.swp

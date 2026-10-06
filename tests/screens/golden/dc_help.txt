@@ -1,0 +1,36 @@
+ PROXMOX Virtual Environment 9.2.21             ? Documentation F1   ▭ Create VM F2   ◈ Create CT F3   @ root@pam ▾ F4
+╭─ Server View ▾ ────────╮╭────────────────────────────────────────────────────────────────────────────────────────────╮
+│▾ ▦ ╭─ Help ─────────────────────────────────────────────────────────────────────────────────────────────────────╮    │
+│  ▾ │ Datacenter                                                                                                 │────┤
+│    │                                                                                                            │    │
+│    │ Panel (when the content has the focus)                                                                     │pt… │
+│    │   Enter        Go to                                                                                       │─── │
+│    │   Space        Mark                                                                                        │  … │
+│    │   m            Batch actions                                                                               │  … │
+│    │   f            Filter                                                                                      │ 2… │
+│    │                                                                                                            │ 2… │
+│    │ Global                                                                                                     │  … │
+│    │   F1 ?         Help (keys of the current panel)                                                            │  … │
+│    │   F7           Documentation (user guide)                                                                  │  … │
+│    │   /            Search / filter resources                                                                   │    │
+│    │   r F5         Refresh now                                                                                 │    │
+│    │   F6           Pause / resume the automatic refresh                                                        │    │
+│    │   v            Cycle the tree view                                                                         │    │
+│    │   l            Switch Tasks / Cluster log                                                                  │    │
+│    │   F2 V         Create VM                                                                                   │    │
+│    │   F3 C         Create CT                                                                                   │    │
+│    │   F4 U         User menu and settings                                                                      │    │
+│    │   q F10        Quit                                                                                        │    │
+│    │                                                                                                            │    │
+│    │ Navigation                                                                                                 │    │
+│    │   Tab S-Tab    Next / previous panel (tree, menu, content, tasks)                                          │    │
+╰────│   ↑ ↓ j k      Move                                                                                        │────╯
+╭─ Ta│   PgUp PgDn    Page up / down                                                                              │────╮
+│ Sta│   ← →          Collapse / expand (tree), previous / next panel                                             │    │
+│ Oct│   Space        Collapse / expand (tree), mark a guest (search grids)                                       │    │
+│ Oct│   Enter        Open / edit the selected row                                                                │    │
+│ Oct├────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    │
+│ Oct│ 1-28 of 34   Documentation d   Close Esc                                                                  │     │
+│ Oct╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯    │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ F1 Help  Tab Panel  / Search  Space Expand  v View  r Refresh  q Quit

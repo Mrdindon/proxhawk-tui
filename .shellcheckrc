@@ -1,0 +1,14 @@
+# shellcheck configuration of pvetty (see tools/lint.sh).
+shell=bash
+external-sources=true
+# Modules share global variables and arrays defined in other files
+# (CFG, C, G, L, R_*, CTX_*...): unused / unassigned checks are meaningless.
+disable=SC2034,SC2154
+# Modules are sourced dynamically (lib/*.sh, views/*.sh, themes, languages).
+disable=SC1090,SC1091
+# Different functions reuse local names for arrays and strings (f, s, keys).
+disable=SC2128,SC2178
+# Optional parameters of functions called without arguments in some places.
+disable=SC2120
+# "ed=nano" / "cmd=set" are plain strings, not commands.
+disable=SC2209

@@ -1,0 +1,36 @@
+ PROXMOX Virtual Environment 9.2.21             ? Documentation F1   ▭ Create VM F2   ◈ Create CT F3   @ root@pam ▾ F4
+╭─ Server View ▾ ────────╮╭────────────────────────────────────────────────────────────────────────────────────────────╮
+│▾ ▦ Datacenter          ││ Node 'pve1'                                                  ↻ b   ◉ h   › S   › w   ≡ B   │
+│  ▾ ▣ pve1              │├────────────────────────┬───────────────────────────────────────────────────────────────────┤
+│      ▭ 100 (web01)     ││ ⌕ Search               │  Go to ⏎   Mark Space   Batch actions m   Filter f                │
+│      ◈ 101 (db01)      ││ ≣ Summary              │  Type     Descrip…  Disk usa…  Memory u…  CPU usage          Upt… │
+│      ⌗ localnetwork (p…││ ✎ Notes                │ ───────────────────────────────────────────────────────────────── │
+│      ◫ local (pve1)    ││ › Shell                │  ◈ lxc      101 (db…      0.00%                                 … │
+│      ◫ pbs-main (pve1) ││ ⚙ System               │  ⌗ sdn      localne…                                            … │
+│      ◫ VM (pve1)       ││   ⇄ Network            │  ▭ qemu     100 (we…                 7.07%  0.73% of 2 CPU(s)  2… │
+│                        ││   ✓ Certificates       │  ◫ storage  VM (pve…      3.90%                                 … │
+│                        ││   ◍ DNS                │  ◫ storage  local (…     24.88%                                 … │
+│                        ││   ≣ Hosts              │  ◫ storage  pbs-mai…     53.86%                                 … │
+│                        ││   ≡ Options            │                                                                   │
+│                        ││   ◷ Time               │                                                                   │
+│                        ││   ≣ System Log         │                                                                   │
+│                        ││ ↻ Updates              │                                                                   │
+│                        ││   ⊟ Repositories       │                                                                   │
+│                        ││ ▥ Firewall             │                                                                   │
+│                        ││   ≡ Options            │                                                                   │
+│                        ││   ≣ Log                │                                                                   │
+│                        ││ ▤ Disks                │                                                                   │
+│                        ││   ▢ LVM                │                                                                   │
+│                        ││   ▫ LVM-Thin           │                                                                   │
+│                        ││   ▪ Directory          │                                                                   │
+│                        ││   ⊞ ZFS                │                                                                   │
+╰────────────────────────╯╰────────────────────────┴───────────────────────────────────────────────────────────────────╯
+╭─ Tasks │ Cluster log ────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Start Time       End Time         Node        User name       Description                             Status         │
+│ Oct 06 13:30:53  Oct 06 13:30:58  pve1        root@pam        CT 101 - Shutdown                       OK             │
+│ Oct 06 13:30:36  Oct 06 13:30:39  pve1        root@pam        CT 101 - Start                          OK             │
+│ Oct 06 12:50:50  Oct 06 12:50:50  pve1        root@pam        Erase data                              OK             │
+│ Oct 06 12:50:05  Oct 06 12:50:38  pve1        root@pam        VM/CT 101 - Backup                      OK             │
+│ Oct 06 12:48:08  Oct 06 12:48:08  pve1        root@pam        Erase data                              OK             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ F1 Help  Tab Panel  / Search  Space Expand  v View  r Refresh  q Quit

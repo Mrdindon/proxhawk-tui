@@ -1,0 +1,496 @@
+#!/usr/bin/env bash
+# pvetty - text console version of the Proxmox VE web interface.
+#
+# Requirements: bash >= 4.3, perl (shipped with Proxmox VE), pvesh,
+# optional: whiptail or dialog (whiptail ships with Proxmox VE), less.
+# Must run as root on a Proxmox VE node (already authenticated as root@pam).
+#
+# Copyright (C) 2026 francois
+# SPDX-License-Identifier: AGPL-3.0-or-later (see LICENSE)
+
+set -o pipefail
+shopt -s extglob
+
+PVETTY_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+
+for _m in core term theme glyphs i18n widgets api content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins onboarding cli actions layout; do
+    # shellcheck source=/dev/null
+    source "$PVETTY_HOME/lib/$_m.sh"
+done
+unset _m
+
+usage() {
+    cat <<EOF
+Usage: pvetty [options]
+
+Text console for Proxmox VE, modelled on the web interface (port 8006).
+
+Options:
+  -l, --lang CODE       interface language (default: auto)
+  -g, --glyphs SET      icon set: nerd | unicode | ascii (default: auto)
+  -t, --theme NAME      colour theme: default | dark | light | basic
+  -b, --backend NAME    API backend: broker | pvesh | replay (default: auto)
+  -r, --refresh SEC     auto refresh interval in seconds (0 = off)
+  -c, --config FILE     additional configuration file
+      --no-mouse        disable mouse support
+      --select ID       initial selection (e.g. qemu/100, node/pve1)
+  -h, --help            show this help
+  -V, --version         show the version
+
+Non-interactive commands (JSON / table output): pvetty help
+
+Configuration files: /etc/pvetty.conf, ~/.config/pvetty/pvetty.conf
+Documentation: $PVETTY_HOME/docs/
+EOF
+}
+
+# ---------------------------------------------------------------------------
+# Non-interactive subcommands (lib/cli.sh): pvetty guests list ...
+# ---------------------------------------------------------------------------
+case ${1-} in
+    nodes|guests|tasks|storage|api|help)
+        core_load_config
+        cli_main "$@"
+        exit $? ;;
+esac
+
+# ---------------------------------------------------------------------------
+# Argument parsing
+# ---------------------------------------------------------------------------
+declare -a EXTRA_CONF=()
+INITIAL_SEL=root
+declare -A CLI=()
+while (( $# )); do
+    case $1 in
+        -l|--lang) CLI[language]=$2; shift ;;
+        -g|--glyphs) CLI[glyphs]=$2; shift ;;
+        -t|--theme) CLI[theme]=$2; shift ;;
+        -b|--backend) CLI[backend]=$2; shift ;;
+        -r|--refresh) CLI[refresh]=$2; shift ;;
+        -c|--config) EXTRA_CONF+=("$2"); shift ;;
+        --no-mouse) CLI[mouse]=0 ;;
+        --select) INITIAL_SEL=$2; CLI_SELECT=1; shift ;;
+        -h|--help) usage; exit 0 ;;
+        -V|--version) echo "pvetty $PVETTY_VERSION"; exit 0 ;;
+        *) echo "pvetty: unknown option '$1'" >&2; usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+core_load_config "${EXTRA_CONF[@]}"
+for _k in "${!CLI[@]}"; do CFG[$_k]=${CLI[$_k]}; done
+unset _k
+keys_load
+
+(( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )) || { echo "pvetty: bash >= 4.3 required" >&2; exit 1; }
+[[ -t 0 && -t 1 ]] || { echo "pvetty: must be run in a terminal" >&2; exit 1; }
+(( EUID == 0 )) || { echo "pvetty: must be run as root on a Proxmox VE node" >&2; exit 1; }
+command -v pvesh >/dev/null || { echo "pvetty: pvesh not found - is this a Proxmox VE node?" >&2; exit 1; }
+
+# ---------------------------------------------------------------------------
+# Initialisation
+# ---------------------------------------------------------------------------
+NEED_REDRAW=1 NEED_REFRESH=0 NEED_RESIZE=0 RUNNING=1 SPIN_ACTIVE=0 AUTO_REFRESH=1
+LAST_REFRESH=0
+
+core_init_rundir
+trap 'spinner_stop; term_restore; STATE[last]=${SEL_ID:-root}; core_state_save; core_cleanup' EXIT
+trap 'RUNNING=0' INT TERM HUP
+trap 'NEED_RESIZE=1' WINCH
+
+i18n_load
+term_init
+glyphs_load
+theme_load
+chart_init
+dlg_init
+views_load
+plugins_load
+onboarding_run
+layout_compute
+
+T "Connecting to the Proxmox VE API..."
+printf '\e[%d;%dH%s' $(( ROWS / 2 )) $(( (COLS - ${#REPLY}) / 2 )) "$REPLY"
+spinner_start "$REPLY"
+api_start
+api_get rows /version "" "version" && PVE_VERSION=${API_ROWS[0]-}
+PVE_USER=root@pam
+res_load || { spinner_stop; die "cannot read /cluster/resources: $API_ERR"; }
+tasks_load
+spinner_stop
+tree_build
+# Startup selection: --select, else the "startup" setting (root, last, an id).
+core_state_load
+if [[ -z ${CLI_SELECT-} ]]; then
+    case ${CFG[startup]} in
+        last) INITIAL_SEL=${STATE[last]:-root} ;;
+        *) INITIAL_SEL=${CFG[startup]} ;;
+    esac
+fi
+[[ $INITIAL_SEL != root && -n ${R_TYPE[$INITIAL_SEL]-} ]] || INITIAL_SEL=root
+select_id "$INITIAL_SEL"
+tree_visible
+now; LAST_REFRESH=$NOW
+
+# ---------------------------------------------------------------------------
+# Refresh: resources, tree, tasks and "live" content.
+# ---------------------------------------------------------------------------
+refresh_all() {
+    local full=${1:-0}
+    res_load
+    tree_build
+    # The selected resource disappeared (removed / migrated): back to root.
+    if [[ $SEL_ID != root && $SEL_ID != folder/* && -z ${R_TYPE[$SEL_ID]-} ]]; then
+        select_id root
+    else
+        ctx_set "$SEL_ID"
+        if (( full )) || [[ -n ${VIEW_LIVE[$VIEW_FN]-} ]]; then content_load 1; fi
+    fi
+    tasks_load
+    now; LAST_REFRESH=$NOW
+    NEED_REDRAW=1
+}
+
+# ---------------------------------------------------------------------------
+# Navigation helpers
+# ---------------------------------------------------------------------------
+tree_move() {
+    local n=${#TV_IDX[@]} c=$(( TREE_CUR + $1 ))
+    (( c < 0 )) && c=0
+    (( c >= n )) && c=$(( n - 1 ))
+    (( c == TREE_CUR )) && return
+    TREE_CUR=$c
+    PENDING_SELECT=${TREE_ID[TV_IDX[TREE_CUR]]}
+    NEED_REDRAW=1
+}
+
+menu_move() {
+    local n=${#M_ID[@]} c=$(( MENU_CUR + $1 ))
+    (( c < 0 )) && c=0
+    (( c >= n )) && c=$(( n - 1 ))
+    (( c == MENU_CUR )) && return
+    MENU_CUR=$c
+    PENDING_CONTENT=1
+    NEED_REDRAW=1
+}
+
+content_move() {
+    local n=${#C_SELL[@]}
+    if (( n == 0 )); then
+        # No selectable rows: scroll the text.
+        (( C_SCROLL += $1 ))
+        (( C_SCROLL > ${#C_LINES[@]} - CONTENT_H )) && C_SCROLL=$(( ${#C_LINES[@]} - CONTENT_H ))
+        (( C_SCROLL < 0 )) && C_SCROLL=0
+    else
+        local c=$(( C_CUR + $1 ))
+        (( c < 0 )) && c=0
+        (( c >= n )) && c=$(( n - 1 ))
+        C_CUR=$c
+    fi
+    NEED_REDRAW=1
+}
+
+tasks_move() {
+    local n=${#TASK_LINES[@]} c=$(( TASK_CUR + $1 ))
+    (( c >= n )) && c=$(( n - 1 ))
+    (( c < 0 )) && c=0
+    TASK_CUR=$c
+    NEED_REDRAW=1
+}
+
+focus_next() {
+    local i n=${#FOCI[@]}
+    for i in "${!FOCI[@]}"; do
+        if [[ ${FOCI[i]} == "$FOCUS" ]]; then
+            FOCUS=${FOCI[(i + $1 + n) % n]}
+            break
+        fi
+    done
+    [[ $FOCUS == tasks ]] && (( TASK_H == 0 )) && focus_next "$1"
+    NEED_REDRAW=1
+}
+
+move_focused() {
+    case $FOCUS in
+        tree) tree_move "$1" ;;
+        menu) menu_move "$1" ;;
+        content) content_move "$1" ;;
+        tasks) tasks_move "$1" ;;
+    esac
+}
+
+do_search() {
+    dlg_input "Search" "Filter resources (name, ID, type, tag, node; empty = all):" "$SEARCH_TERM" || return
+    SEARCH_TERM=$REPLY
+    SEL_ID=root
+    tree_visible
+    TREE_CUR=0
+    ctx_set root
+    menu_load
+    MENU_CUR=0
+    content_load
+    FOCUS=content
+}
+
+do_enter() {
+    case $FOCUS in
+        tree)
+            if [[ ${TREE_ID[TV_IDX[TREE_CUR]]} != "$SEL_ID" ]]; then
+                select_id "${TREE_ID[TV_IDX[TREE_CUR]]}"
+            fi
+            FOCUS=menu ;;
+        menu) FOCUS=content ;;
+        content)
+            content_key
+            if declare -F "${VIEW_FN}__enter" >/dev/null; then "${VIEW_FN}__enter" "$REPLY"
+            elif crud_has "$VIEW_FN"; then crud_enter "$VIEW_FN" "$REPLY"
+            fi ;;
+        tasks)
+            if [[ $TASK_TAB == tasks ]]; then show_task_log "${TASK_UPID[TASK_CUR]-}" "${TASK_NODE[TASK_CUR]-}"; fi ;;
+    esac
+    NEED_REDRAW=1
+}
+
+# ---------------------------------------------------------------------------
+# Mouse: click to select/focus, double-click = Enter, wheel = scroll.
+# ---------------------------------------------------------------------------
+LAST_CLICK_T=0 LAST_CLICK_POS=""
+handle_mouse() {
+    (( MOUSE_REL )) && return
+    local b=$MOUSE_B x=$MOUSE_X y=$MOUSE_Y i dbl=0
+    if (( b == 64 || b == 65 )); then
+        local d=-3; (( b == 65 )) && d=3
+        if (( y > MAIN_TOP && y < MAIN_TOP + MAIN_H - 1 )); then
+            if (( x <= TW )); then FOCUS=tree; tree_move "$d"
+            elif (( x < CX )); then FOCUS=menu; menu_move $(( d > 0 ? 1 : -1 ))
+            else FOCUS=content; content_move "$d"
+            fi
+        elif (( TASK_H > 0 && y >= MAIN_TOP + MAIN_H )); then
+            FOCUS=tasks; tasks_move "$d"
+        fi
+        return
+    fi
+    (( b == 0 )) || return
+    local t; printf -v t '%(%s)T' -1
+    [[ "$x,$y" == "$LAST_CLICK_POS" ]] && (( t - LAST_CLICK_T <= 1 )) && dbl=1
+    LAST_CLICK_T=$t LAST_CLICK_POS="$x,$y"
+    # Hit boxes (header buttons, toolbar, tabs).
+    for i in "${!HIT_R[@]}"; do
+        if (( y == HIT_R[i] && x >= HIT_C1[i] && x <= HIT_C2[i] )); then
+            run_hit "${HIT_ACT[i]}"
+            return
+        fi
+    done
+    if (( y > MAIN_TOP && y < MAIN_TOP + MAIN_H - 1 )); then
+        if (( x <= TW )); then
+            FOCUS=tree
+            i=$(( TREE_SCROLL + y - MAIN_TOP - 1 ))
+            if (( i < ${#TV_IDX[@]} )); then
+                TREE_CUR=$i
+                local id=${TREE_ID[TV_IDX[i]]} depth=${TREE_DEPTH[TV_IDX[i]]}
+                # Click on the expander toggles the entry.
+                if (( x >= depth * 2 + 2 && x <= depth * 2 + 3 )) && [[ -n ${TREE_KIDS[${TV_IDX[i]}]-} ]]; then
+                    tree_toggle
+                elif [[ $id != "$SEL_ID" ]]; then
+                    select_id "$id"
+                fi
+            fi
+        elif (( x < CX && y >= CY )); then
+            FOCUS=menu
+            i=$(( MENU_SCROLL + y - CY ))
+            if (( i < ${#M_ID[@]} && i != MENU_CUR )); then MENU_CUR=$i; content_load; fi
+        elif (( y >= CY )); then
+            FOCUS=content
+            local line=$(( C_SCROLL + y - ${CONTENT_Y:-$CY} ))
+            for i in "${!C_SELL[@]}"; do
+                if (( C_SELL[i] == line )); then
+                    C_CUR=$i
+                    (( dbl )) && do_enter
+                    break
+                fi
+            done
+        fi
+    elif (( TASK_H > 0 && y >= MAIN_TOP + MAIN_H + 2 && y < MAIN_TOP + MAIN_H + 2 + TASK_ROWS )); then
+        FOCUS=tasks
+        i=$(( TASK_SCROLL + y - MAIN_TOP - MAIN_H - 2 ))
+        (( i < ${#TASK_LINES[@]} )) && TASK_CUR=$i
+        (( dbl )) && do_enter
+    fi
+    NEED_REDRAW=1
+}
+
+run_hit() {
+    case $1 in
+        tb:*) local i=${1#tb:}; toolbar_key "${TB_KEY[i]}" ;;
+        search) do_search ;;
+        help) act_help ;;
+        create_vm) act_create_vm ;;
+        create_ct) act_create_ct ;;
+        user_menu) act_user_menu ;;
+        treeview) tree_cycle_view; select_id "$SEL_ID" ;;
+        tasktab) toggle_task_tab ;;
+        ckey:*)
+            # Panel button: same as pressing its key in the content panel.
+            FOCUS=content
+            local k=${1#ckey:}
+            [[ $k == Enter || $k == ENTER ]] && k=ENTER
+            handle_key "$k" ;;
+    esac
+    NEED_REDRAW=1
+}
+
+toggle_task_tab() {
+    [[ $TASK_TAB == tasks ]] && TASK_TAB=log || TASK_TAB=tasks
+    TASK_CUR=0 TASK_SCROLL=0
+    tasks_load
+    NEED_REDRAW=1
+}
+
+# ---------------------------------------------------------------------------
+# Keyboard
+# ---------------------------------------------------------------------------
+handle_key() {
+    local k=$1
+    # Apply a pending (debounced) selection before anything but navigation,
+    # so that an action key always targets the entry under the cursor.
+    case $k in
+        UP|DOWN|k|j|PGUP|PGDN|HOME|END|g|G) ;;
+        *)
+            if [[ -n $PENDING_SELECT ]]; then
+                [[ $PENDING_SELECT != "$SEL_ID" ]] && select_id "$PENDING_SELECT"
+                PENDING_SELECT=""
+            fi
+            if (( PENDING_CONTENT )); then PENDING_CONTENT=0; content_load; fi ;;
+    esac
+    # View specific keys (content panel focused).
+    if [[ $FOCUS == content ]] && declare -F "${VIEW_FN}__key" >/dev/null; then
+        content_key
+        "${VIEW_FN}__key" "$k" "$REPLY" && { NEED_REDRAW=1; return; }
+    fi
+    # Generic Add / Edit / Remove keys of table panels.
+    if [[ $FOCUS == content ]] && crud_has "$VIEW_FN"; then
+        content_key
+        crud_key "$VIEW_FN" "$k" "$REPLY" && { NEED_REDRAW=1; return; }
+    fi
+    case $k in
+        UP|k) move_focused -1 ;;
+        DOWN|j) move_focused 1 ;;
+        PGUP) move_focused $(( -(CONTENT_H - 1) )) ;;
+        PGDN) move_focused $(( CONTENT_H - 1 )) ;;
+        HOME|g) move_focused -999999 ;;
+        END|G) move_focused 999999 ;;
+        TAB) focus_next 1 ;;
+        BTAB) focus_next -1 ;;
+        LEFT)
+            case $FOCUS in
+                tree)
+                    local i=${TV_IDX[TREE_CUR]} id=${TREE_ID[${TV_IDX[TREE_CUR]}]}
+                    if [[ -n ${TREE_KIDS[$i]-} && -z ${COLLAPSED[$id]-} ]]; then tree_toggle
+                    else
+                        # Jump to the parent entry.
+                        local d=${TREE_DEPTH[i]} j
+                        for (( j = TREE_CUR - 1; j >= 0; j-- )); do
+                            (( TREE_DEPTH[TV_IDX[j]] < d )) && { tree_move $(( j - TREE_CUR )); break; }
+                        done
+                    fi ;;
+                menu) FOCUS=tree ;;
+                content) FOCUS=menu ;;
+            esac
+            NEED_REDRAW=1 ;;
+        RIGHT)
+            case $FOCUS in
+                tree)
+                    local id=${TREE_ID[${TV_IDX[TREE_CUR]}]}
+                    if [[ -n ${COLLAPSED[$id]-} ]]; then tree_toggle; else FOCUS=menu; fi ;;
+                menu) FOCUS=content ;;
+            esac
+            NEED_REDRAW=1 ;;
+        SPACE) [[ $FOCUS == tree ]] && { tree_toggle; NEED_REDRAW=1; } ;;
+        ENTER) do_enter ;;
+        ESC) FOCUS=tree; NEED_REDRAW=1 ;;
+        x) if [[ $FOCUS == tasks ]]; then task_stop_or_cancel "${TASK_UPID[TASK_CUR]-}"; NEED_REDRAW=1; else toolbar_key x; fi ;;
+        e) [[ $FOCUS == content ]] && { content_key; declare -F "${VIEW_FN}__enter" >/dev/null && "${VIEW_FN}__enter" "$REPLY"; } ;;
+        MOUSE) handle_mouse ;;
+        *)
+            # Global actions (configurable, lib/keys.sh), then toolbar keys.
+            if key_action "$k"; then run_action "$REPLY"; else toolbar_key "$k"; fi ;;
+    esac
+}
+
+run_action() {
+    case $1 in
+        help) help_overlay ;;
+        docs) act_help ;;
+        search) do_search ;;
+        refresh) api_cache_clear; refresh_all 1; T "Refreshed"; status_msg info "$REPLY" ;;
+        auto_refresh)
+            if (( AUTO_REFRESH )); then AUTO_REFRESH=0; T "Automatic refresh paused"
+            else AUTO_REFRESH=1; now; LAST_REFRESH=$NOW; T "Automatic refresh resumed"
+            fi
+            status_msg info "$REPLY" ;;
+        view) tree_cycle_view; NEED_REDRAW=1 ;;
+        tasklog) toggle_task_tab ;;
+        create_vm) act_create_vm ;;
+        create_ct) act_create_ct ;;
+        user_menu) act_user_menu ;;
+        quit) quit_request ;;
+    esac
+}
+
+# Quit, asking first when tasks started by pvetty are still followed.
+quit_request() {
+    local n=$(( ${#TASK_WATCH[@]} + ${#BG_CMDS[@]} ))
+    declare -p GQUEUE >/dev/null 2>&1 && { local q; for q in "${GQUEUE[@]}"; do [[ -n $q ]] && (( n++ )); done; }
+    if (( n > 0 )) && [[ ${CFG[confirm_quit]} == 1 ]]; then
+        Tf "%d task(s) started by pvetty are still running or queued. Quit anyway? (the running tasks continue)" "$n"
+        dlg_yesno "Quit" "$REPLY" || return
+    fi
+    RUNNING=0
+}
+
+# ---------------------------------------------------------------------------
+# Main loop
+# ---------------------------------------------------------------------------
+PENDING_SELECT="" PENDING_CONTENT=0
+draw
+while (( RUNNING )); do
+    if (( NEED_RESIZE )); then
+        NEED_RESIZE=0
+        layout_compute
+        content_load 1
+        printf '\e[2J'
+        NEED_REDRAW=1
+    fi
+    (( NEED_REDRAW )) && draw
+    timeout=1
+    (( SPIN_ACTIVE )) && timeout=0.25
+    [[ -n $PENDING_SELECT || $PENDING_CONTENT == 1 ]] && timeout=0.15
+    if read_key "$timeout"; then
+        handle_key "$KEY"
+        continue
+    fi
+    # Something is running: next spinner frame.
+    if (( SPIN_ACTIVE )); then (( SPIN_FRAME++ )); NEED_REDRAW=1; fi
+    # Idle: apply the debounced selection / menu change.
+    if [[ -n $PENDING_SELECT ]]; then
+        [[ $PENDING_SELECT != "$SEL_ID" ]] && select_id "$PENDING_SELECT"
+        PENDING_SELECT=""
+        continue
+    fi
+    if (( PENDING_CONTENT )); then
+        PENDING_CONTENT=0
+        content_load
+        continue
+    fi
+    api_jobs_poll
+    now
+    if (( NEED_REFRESH )) || (( AUTO_REFRESH && CFG[refresh] > 0 && NOW - LAST_REFRESH >= CFG[refresh] )); then
+        NEED_REFRESH=0
+        refresh_all 0
+    fi
+    # Countdown of the automatic refresh in the footer.
+    (( AUTO_REFRESH && CFG[refresh] > 0 )) && NEED_REDRAW=1
+    # Expire the status message.
+    [[ -n $STATUS_MSG ]] && (( NOW - STATUS_T >= 8 )) && { STATUS_MSG=""; NEED_REDRAW=1; }
+done
+exit 0

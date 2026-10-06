@@ -1,0 +1,10 @@
+# name          keys sent to pvetty (tmux send-keys names), see tools/screen-test.sh
+dc_summary
+dc_help         F1
+dc_search       /
+node_summary    Down
+node_menu       Down Tab Down Down
+guest_summary   Down Down
+storage_view    v
+tasks_panel     Tab Tab Tab
+node_status     Down Tab Down

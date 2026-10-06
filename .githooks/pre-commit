@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Pre-commit hook: lint + self test (read only). Enable with:
+#   git config core.hooksPath .githooks
+cd "$(git rev-parse --show-toplevel)" || exit 1
+tools/lint.sh || { echo "pre-commit: lint failed"; exit 1; }
+if [[ $EUID -eq 0 ]] && command -v pvesh >/dev/null; then
+    tools/selftest.sh >/tmp/pvetty-selftest.log 2>&1 || { echo "pre-commit: selftest failed (see /tmp/pvetty-selftest.log)"; exit 1; }
+fi
