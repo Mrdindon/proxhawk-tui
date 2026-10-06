@@ -1,6 +1,6 @@
 # pvetty — a text console for Proxmox VE
 
-Version 1.3.0 · licence AGPL-3.0-or-later
+Version 1.3.1 · licence AGPL-3.0-or-later
 
 `pvetty` is a text console version of the Proxmox VE web interface (the GUI
 served on port 8006). It reproduces the layout, the navigation and most panels
@@ -10,7 +10,7 @@ node.
 
 ![pvetty demo: Datacenter summary and HA, node summary, network, system log, community scripts and disks, VM summary and options](docs/demo.gif)
 
-*Demo data. Made with `tools/make-demo.sh`.*
+*Demo data.*
 
 ## Highlights
 

@@ -1,5 +1,0 @@
-bond0	bond	1	1			active-backup			
-eno1	eth	1	1						
-eno2	eth	1	1						
-vmbr0	bridge	1	1	1	bond0		192.0.2.10/24	192.0.2.1	LAN (VLAN aware)
-vmbr1	bridge	1	1				10.10.10.1/24		Lab network (internal)

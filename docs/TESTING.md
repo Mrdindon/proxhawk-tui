@@ -40,28 +40,7 @@ The API is not called: `backend = replay` serves the answers recorded in
 `tests/screens/fixture` (`PVETTY_RECORD`), so the tests give the same result
 on any machine with bash and tmux, and catch layout regressions. Re-record
 when a panel reads new API data (it would show `not recorded: ...`). The
-fixture is a snapshot of the node it was recorded on (names, addresses).
-
-### Demo (animated GIF of the README)
-
-`tools/make-demo.sh` plays `tests/demo/storyboard` in pvetty on the demo
-data of `tests/demo/fixture` (one image per line: seconds to show the
-screen, then the keys; `Key*N` repeats a key) and `tools/render-demo.py`
-renders the screens to `docs/demo.gif` (box drawing, gauges and braille
-graphs are drawn as shapes). Rendering needs Python with Pillow and
-fontTools and, for the icons, a Nerd Font Mono (`DEMO_FONT`,
-`DEMO_FONT_BOLD`):
-
-```bash
-python3 -m venv /tmp/v && /tmp/v/bin/pip install pillow fonttools
-PYTHON=/tmp/v/bin/python DEMO_FONT=JetBrainsMonoNerdFontMono-Regular.ttf \
-  DEMO_FONT_BOLD=JetBrainsMonoNerdFontMono-Bold.ttf tools/make-demo.sh
-```
-
-`tools/make-demo.sh --record DIR` records the API answers of the storyboard
-on a node (and the Community Scripts list). Never copy a recording as is:
-the demo data must be fictional (names, addresses, MACs, serial numbers,
-logs, descriptions).
+fixture is an anonymised snapshot of a node (no real names or addresses).
 
 ## 3. Integration tests (read and write)
 
