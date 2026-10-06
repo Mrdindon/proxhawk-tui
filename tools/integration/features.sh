@@ -130,6 +130,9 @@ test_features() {
     ctx root
     check "Plugin ansible-inventory: view" view ansible
     check "Plugin ansible-inventory: guest listed" grep -q "pvetty-test-feat" <<< "$(printf '%s\n' "${ANSIBLE_LINES[@]}")"
+    rm -rf "$RUN_DIR/inv"; reset_step; answers "$RUN_DIR/inv/new/dir/inventory.yml"
+    check "Plugin ansible-inventory: save (s) to a new directory" key s ""
+    check "Plugin ansible-inventory: saved file is valid YAML with the guest" python3 -c "import sys, yaml; d = yaml.safe_load(open(sys.argv[1])); assert 'pvetty-test-feat' in d['all']['hosts']" "$RUN_DIR/inv/new/dir/inventory.yml"
     ctx "node/$NODE"
     check "Plugin community-scripts: menu entry" eval '[[ " ${M_ID[*]} " == *" communityscripts "* ]]'
     CFGX[key.help]="h F1"; keys_load

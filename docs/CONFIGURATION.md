@@ -154,7 +154,7 @@ selection, since plugins are loaded at start-up) or with `plugins = name name`. 
 | Plugin | Adds |
 |--------|------|
 | `community-scripts` | Node › *Community Scripts*: browse the [community-scripts](https://github.com/community-scripts/ProxmoxVE) catalogue (CT, VM, tools) and run an install script on the node after confirmation (needs Internet access) |
-| `ansible-inventory` | Datacenter › *Ansible Inventory*: YAML inventory of the guests grouped by node, type, status and tag; `s` saves it to a file |
+| `ansible-inventory` | Datacenter › *Ansible Inventory*: YAML inventory of the guests grouped by node, type, status and tag; `s` saves it to a file (folders created, confirmation before replacing), `v` opens it in the pager |
 
 Writing a plugin: [EXTENDING.md](EXTENDING.md#plugins).
 

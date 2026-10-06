@@ -10,6 +10,12 @@
   create it if the user it runs as may create Linux accounts (a pam user
   that is root or may run `useradd` with sudo); the account is created
   through that user's sudo, after checking `Realm.AllocateUser`.
+- **Ansible inventory plugin**: `s` wrote nothing ("Cannot write": the file
+  name was lost before writing); it now creates the folders, asks before
+  replacing a file and reports the hosts written. The inventory lines are
+  selectable (a cursor shows the position when scrolling), `v` opens it in
+  the pager, and guests with the same name no longer produce a duplicate
+  YAML key.
 - **Fix** (running as another user): writes were refused for every user
   other than root@pam, even with the right permissions (the pvesh wrapper
   checked pvesh's own command instead of the API method). Methods open to
