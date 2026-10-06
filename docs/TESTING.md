@@ -42,6 +42,25 @@ on any machine with bash and tmux, and catch layout regressions. Re-record
 when a panel reads new API data (it would show `not recorded: ...`). The
 fixture is a snapshot of the node it was recorded on (names, addresses).
 
+### Demo video
+
+`tools/demo-video.sh` plays `tests/demo/storyboard` (one step per line:
+seconds to show the screen, then the keys) in pvetty on the demo data of
+`tests/demo/fixture`, and `tools/render-video.py` renders the screens to
+`docs/demo.mp4` (box drawing, gauges and braille graphs are drawn as
+shapes); `tools/demo-video.sh docs/demo.gif` makes the GIF of the README. Rendering needs Python with Pillow, fontTools and imageio-ffmpeg
+and, for the icons, a Nerd Font Mono (`DEMO_FONT`, `DEMO_FONT_BOLD`):
+
+```bash
+python3 -m venv /tmp/v && /tmp/v/bin/pip install pillow fonttools imageio-ffmpeg
+PYTHON=/tmp/v/bin/python DEMO_FONT=JetBrainsMonoNerdFontMono-Regular.ttf \
+  DEMO_FONT_BOLD=JetBrainsMonoNerdFontMono-Bold.ttf tools/demo-video.sh
+```
+
+`tools/demo-video.sh --record DIR` records the API answers of the storyboard
+on a node; anonymise them (names, addresses, MACs, descriptions) before
+copying them to `tests/demo/fixture`.
+
 ## 3. Integration tests (read and write)
 
 ```bash

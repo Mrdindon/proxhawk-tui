@@ -188,9 +188,9 @@ form_run() {
         done
         if (( hidden )); then Tf "Advanced (%d more options)" "$hidden"; items+=(_adv "${G[exp_closed]} $REPLY"); fi
         local text=${FORM_TEXT:-}
-        [[ -z $text ]] && { T "Select a field to change it, then OK.  * = required"; text=$REPLY; }
+        [[ -z $text ]] && { T "Select a field to change it, then the first line to apply.  * = required"; text=$REPLY; }
         DLG_NOTAGS=1
-        dlg_menu "$title" "$text" "${items[@]}" || { DLG_NOTAGS=0; return 1; }
+        DLG_OK_LABEL="Select" DLG_CANCEL_LABEL="Cancel" dlg_menu "$title" "$text" "${items[@]}" || { DLG_NOTAGS=0; return 1; }
         DLG_NOTAGS=0
         case $REPLY in
             _ok) _form_submit && return 0 ;;
@@ -273,7 +273,7 @@ _form_propstr() {
         done
         _form_label "$n"
         DLG_NOTAGS=1
-        dlg_menu "$REPLY" "${desc[$n]}" "${items[@]}" || { DLG_NOTAGS=0; return 1; }
+        DLG_OK_LABEL="Select" DLG_CANCEL_LABEL="Cancel" dlg_menu "$REPLY" "${desc[$n]}" "${items[@]}" || { DLG_NOTAGS=0; return 1; }
         DLG_NOTAGS=0
         sn=$REPLY
         if [[ $sn == _ok ]]; then

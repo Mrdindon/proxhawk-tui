@@ -581,7 +581,8 @@ act_user_menu() {
         T "Logout (quit)"; items+=(quit "$REPLY")
         T "Application Settings"
         DLG_NOTAGS=1
-        dlg_menu "$REPLY" "${PVE_USER:-root@pam} - $(T "saved in ~/.config/pvetty/pvetty.conf"; printf '%s' "$REPLY")" "${items[@]}" || { DLG_NOTAGS=0; break; }
+        DLG_OK_LABEL="Change" DLG_CANCEL_LABEL="Close" \
+            dlg_menu "$REPLY" "${PVE_USER:-root@pam} - $(T "saved in ~/.config/pvetty/pvetty.conf"; printf '%s' "$REPLY")" "${items[@]}" || { DLG_NOTAGS=0; break; }
         DLG_NOTAGS=0
         k=$REPLY
         case $k in
@@ -623,7 +624,7 @@ act_user_menu() {
             ssh_user|ssh_key|ssh_jump|console_host)
                 dlg_input "Settings" "$k (empty = default):" "${CFG[$k]}" || continue
                 core_save_config "$k" "$REPLY" ;;
-            plugins) plugins_dialog ;;
+            plugins) plugins_dialog; (( RUNNING )) || break ;;
             keys) help_overlay ;;
             about)
                 dlg_msg "About" "pvetty $PVETTY_VERSION - text console for Proxmox VE

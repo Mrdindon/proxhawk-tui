@@ -41,8 +41,9 @@ for my $file (@ARGV) {
         # T "..." / Tf "..."
         add($1) while $l =~ /\bTf? $q/g;
         # helpers whose first (or second) argument is a source string
-        add($1) while $l =~ /\b(?:c_section|c_kv|c_kv_sel|cfg_line|usage_line|menu_add \S+|tb_add \S+|c_msg \S+|dlg_(?:yesno|input|password|msg|textbox|menu)) $q/g;
-        add($1) while $l =~ /\bdlg_(?:yesno|input|password|msg|menu) "[^"]*" $q/g;
+        add($1) while $l =~ /\b(?:c_section|c_kv|c_kv_sel|cfg_line|usage_line|menu_add \S+|tb_add \S+|c_msg \S+|dlg_(?:yesno|input|password|msg|textbox|menu|checklist)) $q/g;
+        add($1) while $l =~ /\bDLG_(?:OK|CANCEL)_LABEL=$q/g;
+        add($1) while $l =~ /\bdlg_(?:yesno|input|password|msg|menu|checklist) "[^"]*" $q/g;
         # view_menu entries "id|Label|icon|level"
         add($1) while $l =~ /"[\w-]+\|([^|"]+)\|[\w-]*\|\d"/g;
         # table specs "field:Header:width..." separated by |

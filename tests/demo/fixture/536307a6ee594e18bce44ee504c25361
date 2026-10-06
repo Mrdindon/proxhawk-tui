@@ -1,0 +1,14 @@
+qemu/100	qemu	pve1	web01	running	100	0	93	2	330526720	4294967296	0	34359738368	101557										
+lxc/101	lxc	pve1	db01	running	101	0	420	4	601295421	1073741824	2469606195	8589934592	1203311										
+node/pve1	node	pve1		online			2350	4	10630044057	16601665536	7282434048	29080793088	101579										
+storage/pve1/pbs-main	storage	pve1		available							56604446720	105089261568						pbs-main	pbs	backup	1		
+storage/pve1/local	storage	pve1		available							7282434048	29080793088						local	dir	vztmpl,backup,iso,images,rootdir,snippets	0		
+storage/pve1/VM	storage	pve1		available							17846894592	457286037504						VM	dir	images,iso,backup,vztmpl,snippets,rootdir	0		
+network/pve1/zone/localnetwork	network	pve1		ok																		localnetwork	zone
+qemu/102	qemu	pve1	k8s-cp01	running	102	0	812	4	3328599654	8589934592	0	68719476736	512340	k8s;prod									
+qemu/103	qemu	pve1	k8s-worker01	running	103	0	2240	8	12240656793	17179869184	0	137438953472	512298	k8s;prod									
+qemu/104	qemu	pve1	k8s-worker02	running	104	0	1975	8	10522669875	17179869184	0	137438953472	512301	k8s;prod									
+lxc/105	lxc	pve1	nginx-proxy	running	105	0	35	2	214748364	1073741824	2254857830	8589934592	1203345	web									
+lxc/106	lxc	pve1	pihole	running	106	0	12	1	161061273	536870912	1503238553	4294967296	1203350	dns									
+qemu/107	qemu	pve1	win11-lab	stopped	107	0	0	4	0	8589934592	0	85899345920	0	lab									
+qemu/9000	qemu	pve1	debian12-tmpl	stopped	9000	1	0	2	0	2147483648	0	17179869184	0										

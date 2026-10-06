@@ -12,6 +12,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 1.2.1 | 2026-10-06 | exit when the terminal is closed (runaway CPU fix), plugins checklist and restart, dialog sizing and button labels, demo video |
 | 1.2.0 | 2026-10-06 | renamed pvetui → pvetty (name clash, Proxmox trademark guidelines), AGPL-3.0-or-later licence, migration of the old user files |
 | 1.1.0 | 2026-10-06 | help window, key bindings, colours/themes, settings screen, onboarding, action queue, batch actions, filter, IP column, run command, browser console URL, CLI subcommands, plugins, git + lint, replay backend, screen tests, .deb |
 | 1.0.0 | 2026-10-06 | first release: read/write console for every menu of the PVE 9 web UI, schema-driven forms, task viewer, Ceph/ACME/storage/disks, SSH console for Linux VMs, integration tests (703 checks) |
@@ -94,6 +95,12 @@ kernel 7.0.14-20-pve, two spare test disks (`/dev/sdb`, `/dev/sdc`).
 - Wait loops must not match themselves (`pgrep -f "[i]ntegration-test"`).
 - Test writes of the CLI only on test guests: `pvetty guests start 101`
   during a CLI test started a real container of the user (1.1 development).
+- Every loop reading keys must end when the terminal is gone: `read`
+  fails at once on a closed terminal, and a loop that ignores it spins at
+  100 % CPU forever (1.2.1: screen-test leftovers ran for hours). `read_key`
+  exits on end of file; HUP / TERM exit directly.
+- A whiptail `--menu` used as a toggle list toggles again on Enter on Ok:
+  use `dlg_checklist`, or name the buttons (`DLG_OK_LABEL`).
 - `printf %-Ns` counts bytes with some locales: pad with `fit` (multibyte
   glyphs in the help window).
 

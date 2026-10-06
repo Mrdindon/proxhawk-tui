@@ -40,24 +40,24 @@ plugins_load() {
 }
 
 plugins_dialog() {
-    local n on
+    local n sel old new=""
+    local -a items=()
     plugins_scan
-    while :; do
-        local -a items=()
-        for n in $(printf '%s\n' "${!PLUGIN_FILES[@]}" | sort); do
-            [[ " ${CFG[plugins]} " == *" $n "* ]] && on="[x]" || on="[ ]"
-            items+=("$n" "$on ${PLUGIN_DESC[$n]}")
-        done
-        (( ${#items[@]} )) || { dlg_msg "Plugins" "No plugin found."; return; }
-        T "Plugins"
-        dlg_menu "$REPLY" "$(T "Enter toggles a plugin. Changes apply after restarting pvetty."; printf '%s' "$REPLY")" "${items[@]}" || break
-        n=$REPLY
-        if [[ " ${CFG[plugins]} " == *" $n "* ]]; then
-            on=" ${CFG[plugins]} "; on=${on/ $n / }
-        else
-            on="${CFG[plugins]} $n"
-        fi
-        on=${on#"${on%%[! ]*}"}; on=${on%"${on##*[! ]}"}
-        core_save_config plugins "$on"
+    for n in $(printf '%s\n' "${!PLUGIN_FILES[@]}" | sort); do
+        [[ " ${CFG[plugins]} " == *" $n "* ]] && sel=on || sel=off
+        items+=("$n" "${PLUGIN_DESC[$n]}" "$sel")
     done
+    (( ${#items[@]} )) || { dlg_msg "Plugins" "No plugin found."; return; }
+    dlg_checklist "Plugins" "Space: enable / disable a plugin. Enter: validate." "${items[@]}" || return
+    for n in $REPLY; do new+="$n "; done
+    new=${new% }
+    old=$(printf '%s\n' ${CFG[plugins]} | sort | xargs)
+    [[ $(printf '%s\n' $new | sort | xargs) == "$old" ]] && return
+    core_save_config plugins "$new"
+    # Plugins are loaded at start-up (they define panels and menus).
+    if DLG_DEFAULT_YES=1 dlg_yesno "Plugins" "Restart pvetty now to apply the change? (the current selection is kept)"; then
+        RESTART=1 RUNNING=0
+    else
+        T "The plugin change applies at the next start of pvetty"; status_msg info "$REPLY"
+    fi
 }

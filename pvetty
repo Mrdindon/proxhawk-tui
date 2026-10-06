@@ -57,6 +57,7 @@ esac
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
+ORIG_ARGS=("$@")
 declare -a EXTRA_CONF=()
 INITIAL_SEL=root
 declare -A CLI=()
@@ -90,12 +91,17 @@ command -v pvesh >/dev/null || { echo "pvetty: pvesh not found - is this a Proxm
 # ---------------------------------------------------------------------------
 # Initialisation
 # ---------------------------------------------------------------------------
-NEED_REDRAW=1 NEED_REFRESH=0 NEED_RESIZE=0 RUNNING=1 SPIN_ACTIVE=0 AUTO_REFRESH=1
+NEED_REDRAW=1 NEED_REFRESH=0 NEED_RESIZE=0 RUNNING=1 RESTART=0 SPIN_ACTIVE=0 AUTO_REFRESH=1
 LAST_REFRESH=0
 
 core_init_rundir
-trap 'spinner_stop; term_restore; STATE[last]=${SEL_ID:-root}; core_state_save; core_cleanup' EXIT
-trap 'RUNNING=0' INT TERM HUP
+on_exit() { spinner_stop; term_restore; STATE[last]=${SEL_ID:-root}; core_state_save; core_cleanup; }
+trap on_exit EXIT
+trap 'RUNNING=0' INT
+# Terminal closed (SSH disconnect, tmux session killed) or kill: leave at once,
+# whatever loop is running (dialogs, help window...); the EXIT trap cleans up.
+trap 'exit 129' HUP
+trap 'exit 143' TERM
 trap 'NEED_RESIZE=1' WINCH
 
 i18n_load
@@ -493,4 +499,10 @@ while (( RUNNING )); do
     # Expire the status message.
     [[ -n $STATUS_MSG ]] && (( NOW - STATUS_T >= 8 )) && { STATUS_MSG=""; NEED_REDRAW=1; }
 done
+# Restart (plugin change): same options, same selection.
+if (( RESTART )); then
+    trap - EXIT
+    on_exit
+    exec "$PVETTY_HOME/pvetty" "${ORIG_ARGS[@]}" --select "${SEL_ID:-root}"
+fi
 exit 0

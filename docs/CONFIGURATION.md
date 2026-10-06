@@ -123,8 +123,9 @@ pvetty <nodes|guests|tasks|storage|api> ...   non-interactive commands (CLI.md)
 ## Plugins
 
 Plugins are bash files in `plugins/` (or `~/.config/pvetty/plugins/`) that add
-menu entries or toolbar buttons. Enable them in `F4` › Plugins or with
-`plugins = name name`. Bundled plugins:
+menu entries or toolbar buttons. Enable them in `F4` › Plugins (`Space` ticks
+a plugin, `Enter` validates; pvetty offers to restart, keeping the current
+selection, since plugins are loaded at start-up) or with `plugins = name name`. Bundled plugins:
 
 | Plugin | Adds |
 |--------|------|
