@@ -2,3 +2,5 @@
 *.tar.gz
 *~
 *.swp
+__pycache__/
+*.pyc
