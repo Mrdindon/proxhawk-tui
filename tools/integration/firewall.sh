@@ -6,16 +6,16 @@ fw_suite() {
     local id=$1 base=$2 lbl=$3 k pos
     ctx "$id"
     check "$lbl Firewall: view" view firewall
-    reset_step; preset type=in action=ACCEPT proto=tcp dport=12345 enable=0 comment="pvetty rule A"
+    reset_step; preset type=in action=ACCEPT proto=tcp dport=12345 enable=0 comment="proxhawk-tui rule A"
     check "$lbl Firewall: add rule" key a ""
-    reset_step; preset type=out action=DROP macro=SSH enable=0 comment="pvetty rule B"
+    reset_step; preset type=out action=DROP macro=SSH enable=0 comment="proxhawk-tui rule B"
     check "$lbl Firewall: add rule with macro" key a ""
     view firewall
     pos=""
     api_get rows "$base/rules" "" "pos,comment"
-    for k in "${API_ROWS[@]}"; do [[ ${k#*$'\t'} == "pvetty rule A" ]] && pos=${k%%$'\t'*}; done
+    for k in "${API_ROWS[@]}"; do [[ ${k#*$'\t'} == "proxhawk-tui rule A" ]] && pos=${k%%$'\t'*}; done
     if [[ -n $pos ]]; then
-        reset_step; preset comment="pvetty rule A edited" dport=12346
+        reset_step; preset comment="proxhawk-tui rule A edited" dport=12346
         check "$lbl Firewall: edit rule" key e "$pos"
         check "$lbl Firewall: rule edited" kv_is "$base/rules/$pos" dport 12346
         reset_step; answers 0
@@ -25,12 +25,12 @@ fw_suite() {
     local n
     for n in 1 2; do
         api_get rows "$base/rules" "" "pos,comment"; pos=""
-        for k in "${API_ROWS[@]}"; do [[ ${k#*$'\t'} == pvetty\ rule* ]] && { pos=${k%%$'\t'*}; break; }; done
+        for k in "${API_ROWS[@]}"; do [[ ${k#*$'\t'} == proxhawk-tui\ rule* ]] && { pos=${k%%$'\t'*}; break; }; done
         [[ -n $pos ]] || break
         view firewall; reset_step
         check "$lbl Firewall: remove rule $n" key d "$pos"
     done
-    check "$lbl Firewall: rules removed" api_lacks "$base/rules" comment "pvetty rule B"
+    check "$lbl Firewall: rules removed" api_lacks "$base/rules" comment "proxhawk-tui rule B"
 
     check "$lbl Firewall: Options view" view fwoptions
     [[ $id != root ]] && check "$lbl Firewall: Log view" view fwlog
@@ -58,12 +58,12 @@ test_firewall() {
 
     # Security groups and their rules.
     check "Security Group: view" view fwgroups
-    reset_step; crud_answers sub=group; preset group=pvtgrp comment="pvetty group"
+    reset_step; crud_answers sub=group; preset group=pvtgrp comment="proxhawk-tui group"
     check "Security Group: add group" key a ""
     view fwgroups; reset_step; crud_answers sub=grule; CRUD_SEL="pvtgrp"
-    preset type=in action=ACCEPT proto=udp dport=5353 enable=1 comment="pvetty group rule"
+    preset type=in action=ACCEPT proto=udp dport=5353 enable=1 comment="proxhawk-tui group rule"
     STATUS_LVL=none; crud_add v_dc_fwgroups; [[ $STATUS_LVL != err ]] && ok "Security Group: add rule" || ko "Security Group: add rule" "$STATUS_MSG"
-    check "Security Group: rule created" api_has /cluster/firewall/groups/pvtgrp comment "pvetty group rule"
+    check "Security Group: rule created" api_has /cluster/firewall/groups/pvtgrp comment "proxhawk-tui group rule"
     view fwgroups; reset_step; preset comment="edited group rule"
     check "Security Group: edit rule" key e "grule|pvtgrp|0"
     reset_step; check "Security Group: remove rule" key d "grule|pvtgrp|0"
@@ -72,7 +72,7 @@ test_firewall() {
 
     # Aliases.
     check "Alias: view" view fwalias
-    reset_step; preset name=pvtalias cidr=192.0.2.10 comment="pvetty alias"
+    reset_step; preset name=pvtalias cidr=192.0.2.10 comment="proxhawk-tui alias"
     check "Alias: add" key a ""
     view fwalias; reset_step; preset cidr=192.0.2.11
     check "Alias: edit" key e pvtalias
@@ -81,9 +81,9 @@ test_firewall() {
 
     # IPSets and entries.
     check "IPSet: view" view fwipset
-    reset_step; crud_answers sub=ipset; preset name=pvtset comment="pvetty ipset"
+    reset_step; crud_answers sub=ipset; preset name=pvtset comment="proxhawk-tui ipset"
     check "IPSet: add" key a ""
-    view fwipset; reset_step; crud_answers sub=cidr; CRUD_SEL=pvtset; preset cidr=198.51.100.0/24 comment="pvetty cidr"
+    view fwipset; reset_step; crud_answers sub=cidr; CRUD_SEL=pvtset; preset cidr=198.51.100.0/24 comment="proxhawk-tui cidr"
     STATUS_LVL=none; crud_add v_dc_fwipset; [[ $STATUS_LVL != err ]] && ok "IPSet: add CIDR" || ko "IPSet: add CIDR" "$STATUS_MSG"
     check "IPSet: CIDR created" api_has /cluster/firewall/ipset/pvtset cidr 198.51.100.0/24
     view fwipset; reset_step; preset nomatch=1

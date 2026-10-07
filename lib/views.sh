@@ -170,7 +170,7 @@ toolbar_key() {
 # Load every view module.
 views_load() {
     local f
-    for f in "$PVETTY_HOME"/views/*.sh; do
+    for f in "$PROXHAWK_TUI_HOME"/views/*.sh; do
         # shellcheck source=/dev/null
         source "$f"
     done

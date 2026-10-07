@@ -1,7 +1,15 @@
 # Changelog
 
-## Unreleased
+## 2.0.0 — 2026-10-06
 
+- **Renamed pvetty → proxhawk-tui**: command `proxhawk-tui`, files
+  `~/.config/proxhawk-tui/proxhawk-tui.conf`, `/etc/proxhawk-tui.conf`,
+  `~/.local/state/proxhawk-tui/`, variables `PROXHAWK_TUI_*`, package
+  `proxhawk-tui` (replaces the `pvetty` and `pvetui` packages). The user
+  files of pvetty and pvetui are moved automatically at the first start;
+  `/etc/pvetty.conf` (or `/etc/pvetui.conf`) is still read while
+  `/etc/proxhawk-tui.conf` does not exist. Variables `PVETTY_*` are no
+  longer read.
 - **Languages**: French, Spanish, German, Chinese (simplified) and Russian
   (about 93 %; the rest are names such as ZFS or SPICE). The official message
   catalog of the Proxmox VE web interface installed on the node is used at

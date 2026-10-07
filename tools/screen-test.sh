@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# screen-test.sh - golden screen tests: runs pvetty in a detached tmux
+# screen-test.sh - golden screen tests: runs proxhawk-tui in a detached tmux
 # session on recorded API answers (backend "replay"), sends the keys of each
 # scenario and compares the screen with tests/screens/golden/<name>.txt.
 #
@@ -26,10 +26,10 @@ case ${1-} in run|update|record) MODE=$1; shift ;; esac
 WANT=("$@")
 
 TMP=$(mktemp -d)
-SESSION=pvetty-screen-$$
+SESSION=proxhawk-tui-screen-$$
 trap 'tmux kill-session -t "$SESSION" 2>/dev/null; rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/config/pvetty" "$TMP/state"
-cat > "$TMP/config/pvetty/pvetty.conf" <<'EOF'
+mkdir -p "$TMP/config/proxhawk-tui" "$TMP/state"
+cat > "$TMP/config/proxhawk-tui/proxhawk-tui.conf" <<'EOF'
 glyphs = unicode
 theme = default
 dialog = builtin
@@ -40,7 +40,7 @@ ip_column = 0
 ask_user = 0
 EOF
 
-# Screen content once it stopped changing (pvetty loads asynchronously).
+# Screen content once it stopped changing (proxhawk-tui loads asynchronously).
 capture() {
     local prev="" cur i
     for (( i = 0; i < 50; i++ )); do
@@ -60,13 +60,13 @@ run_scenario() {
     [[ $name == *@* ]] && lang=${name#*@}
     local -a env=(env XDG_CONFIG_HOME="$TMP/config" XDG_STATE_HOME="$TMP/state"
                   TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=
-                  PVETTY_LANGUAGE="$lang")
+                  PROXHAWK_TUI_LANGUAGE="$lang")
     if [[ $MODE == record ]]; then
-        env+=(PVETTY_RECORD="$FIX")
+        env+=(PROXHAWK_TUI_RECORD="$FIX")
     else
-        env+=(PVETTY_REPLAY="$FIX" PVETTY_NOW="$(< "$FIX/now")")
+        env+=(PROXHAWK_TUI_REPLAY="$FIX" PROXHAWK_TUI_NOW="$(< "$FIX/now")")
     fi
-    local -a cmd=("${env[@]}" "$ROOT/pvetty")
+    local -a cmd=("${env[@]}" "$ROOT/proxhawk-tui")
     [[ $MODE == record ]] || cmd+=(--backend replay)
     tmux new-session -d -s "$SESSION" -x "$W" -y "$H" "$(printf '%q ' "${cmd[@]}")"
     capture > /dev/null

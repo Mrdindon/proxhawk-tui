@@ -1,10 +1,10 @@
-# pvetty — Development notes (internal)
+# proxhawk-tui — Development notes (internal)
 
-> pvetty is developed with Claude Code (Anthropic's AI coding agent),
+> proxhawk-tui is developed with Claude Code (Anthropic's AI coding agent),
 > directed and reviewed by the author; AGENTS.md is the agents' entry point.
 
-> Called *pvetui* until 1.1.0: the release archives 1.0.0 / 1.1.0, the git
-> history use the old name.
+> Called *pvetui* (1.0 – 1.1), then *pvetty* (1.2 – 1.3): the release
+> archives and the git history of these versions use the old names.
 
 Internal notes kept with the source: design decisions, Proxmox VE behaviours
 found during development, lessons learned and the release procedure. User
@@ -15,6 +15,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 2.0.0 | 2026-10-06 | renamed pvetty → proxhawk-tui; French, Spanish, German, Chinese, Russian (with the Proxmox VE GUI catalog), double width characters |
 | 1.3.1 | 2026-10-06 | user question always asked, PAM account creation by users allowed to (sudo), fix of writes as another user, Ansible plugin fixes, new demo GIF |
 | 1.3.0 | 2026-10-06 | run as another Proxmox VE user (permissions like the web UI), one-line install, add user with realm (fix) |
 | 1.2.1 | 2026-10-06 | exit when the terminal is closed (runaway CPU fix), plugins checklist and restart, dialog sizing and button labels, demo video |
@@ -98,7 +99,7 @@ kernel 7.0.14-20-pve, two spare test disks (`/dev/sdb`, `/dev/sdc`).
 - `REPLY` is overwritten by `T`/`Tf`: copy it before translating (the backup
   mode bug).
 - Wait loops must not match themselves (`pgrep -f "[i]ntegration-test"`).
-- Test writes of the CLI only on test guests: `pvetty guests start 101`
+- Test writes of the CLI only on test guests: `proxhawk-tui guests start 101`
   during a CLI test started a real container of the user (1.1 development).
 - Every loop reading keys must end when the terminal is gone: `read`
   fails at once on a closed terminal, and a loop that ignores it spins at
@@ -134,7 +135,7 @@ releases (tags `vX.Y.Z`), work is done on `develop`, one commit per feature.
 
 ## Release procedure
 
-1. Set `PVETTY_VERSION` in `lib/core.sh`, `VERSION`, and update
+1. Set `PROXHAWK_TUI_VERSION` in `lib/core.sh`, `VERSION`, and update
    `CHANGELOG.md` and the history above.
 2. `tools/lint.sh`, `tools/selftest.sh`, `tools/screen-test.sh`.
 3. Run the integration tests on a test node; update TEST-RESULTS.md.

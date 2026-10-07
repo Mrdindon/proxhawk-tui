@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 # integration-test.sh - read/write tests of every panel, run against the
-# local Proxmox VE node through the real pvetty functions.
+# local Proxmox VE node through the real proxhawk-tui functions.
 #
 #   tools/integration-test.sh [section ...]      (default: all sections)
 #   sections: access cluster firewall sdn acme node disks vm ct features storage ceph
 #
 # Dialogs are simulated (queued answers, forms submitted with FORM_PRESET),
 # every write is verified by reading the API back, and every test object is
-# removed afterwards. Objects are named "pvetty-test*" / "pvt*", guests use
+# removed afterwards. Objects are named "proxhawk-tui-test*" / "pvt*", guests use
 # the VMIDs 9901-9919. THIS MODIFIES THE NODE: run it on a test system.
 #
 # Results: one line per check, summary at the end, full log in $LOG.
 set -o pipefail
 shopt -s extglob
-PVETTY_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+PROXHAWK_TUI_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 for _m in core term theme glyphs i18n widgets api user content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins actions layout; do
     # shellcheck source=/dev/null
-    source "$PVETTY_HOME/lib/$_m.sh"
+    source "$PROXHAWK_TUI_HOME/lib/$_m.sh"
 done
 core_load_config
 core_init_rundir
-LOG=${LOG:-/tmp/pvetty-integration.log}
+LOG=${LOG:-/tmp/proxhawk-tui-integration.log}
 : > "$LOG"
 trap 'core_cleanup' EXIT
 TCAP[colors]=256
@@ -43,7 +43,7 @@ declare -ga TERM_CMDS=()      # commands run through term_run
 _dq() { if (( ${#DLG_Q[@]} )); then REPLY=${DLG_Q[0]}; DLG_Q=("${DLG_Q[@]:1}"); return 0; fi; return 1; }
 dlg_yesno() { echo "  [yesno] $1: $2" >> "$LOG"; if _dq; then [[ $REPLY == y* ]]; else return 0; fi; }
 dlg_input() { echo "  [input] $1: $2" >> "$LOG"; _dq || REPLY=${3:-}; [[ $REPLY != __CANCEL ]]; }
-dlg_password() { _dq || REPLY="Pvetty-Test-123"; [[ $REPLY != __CANCEL ]]; }
+dlg_password() { _dq || REPLY="Proxhawk-Test-123"; [[ $REPLY != __CANCEL ]]; }
 dlg_menu() {
     local t=$1 x=$2; shift 2
     echo "  [menu] $t: $x (${*:1:6}...)" >> "$LOG"
@@ -149,7 +149,7 @@ editor_writes() {  # the next "editor" run writes this text
 }
 
 # Sections are defined in tools/integration/*.sh
-for _f in "$PVETTY_HOME"/tools/integration/*.sh; do
+for _f in "$PROXHAWK_TUI_HOME"/tools/integration/*.sh; do
     # shellcheck source=/dev/null
     source "$_f"
 done

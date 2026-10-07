@@ -102,7 +102,7 @@ pending_load() {
             task_desc "${f[0]}" "${f[1]}"; PENDING[$id]=$REPLY
         done
     done
-    # Actions started or waiting in the pvetty queue.
+    # Actions started or waiting in the proxhawk-tui queue.
     if declare -p GQUEUE >/dev/null 2>&1; then
         for id in "${!GBUSY[@]}"; do [[ -z ${PENDING[$id]-} && ! -s ${GBUSY[$id]}.rc ]] && PENDING[$id]="${BG_CMDS[${GBUSY[$id]}]:-running}"; done
         for id in "${!GQUEUE[@]}"; do [[ -n ${GQUEUE[$id]} && -z ${PENDING[$id]-} ]] && PENDING[$id]="queued"; done
@@ -124,7 +124,7 @@ tasks_load() {
             tsv_split f "$row"
             if [[ -z ${f[2]} ]]; then running+=("$row"); else done_+=("$row"); fi
         done
-        # Actions queued by pvetty first (cancel with x).
+        # Actions queued by proxhawk-tui first (cancel with x).
         if declare -F queue_lines >/dev/null; then
             queue_lines
             local qi
@@ -198,7 +198,7 @@ task_stop_or_cancel() {
 
 # Display a text file in a pager (less, $PAGER, or a dialog text box).
 pager_show() {
-    local file=$1 title=${2:-pvetty} p=${CFG[pager]:-${PAGER:-}}
+    local file=$1 title=${2:-proxhawk-tui} p=${CFG[pager]:-${PAGER:-}}
     if [[ -z $p ]] && command -v less >/dev/null; then p="less -R"; fi
     if [[ -n $p ]]; then
         # shellcheck disable=SC2086

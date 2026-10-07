@@ -50,11 +50,11 @@ v_dc_ansible__key() {
     local file dir
     case $1 in
         s)
-            dlg_input "Ansible Inventory" "Save to file:" "${ANSIBLE_FILE:-/root/pvetty-inventory.yml}" || return 0
+            dlg_input "Ansible Inventory" "Save to file:" "${ANSIBLE_FILE:-/root/proxhawk-tui-inventory.yml}" || return 0
             file=$REPLY                # ansible_inventory overwrites REPLY
             [[ -n $file ]] || return 0
             [[ $file == /* ]] || file="$HOME/$file"
-            if [[ -d $file ]]; then file="${file%/}/pvetty-inventory.yml"; fi
+            if [[ -d $file ]]; then file="${file%/}/proxhawk-tui-inventory.yml"; fi
             if [[ -e $file ]]; then
                 Tf "%s already exists. Replace it?" "$file"
                 dlg_yesno "Ansible Inventory" "$REPLY" || return 0

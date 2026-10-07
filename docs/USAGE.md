@@ -1,4 +1,4 @@
-# pvetty — User guide
+# proxhawk-tui — User guide
 
 This guide follows the structure of the Proxmox VE web interface
 (<https://pve.proxmox.com/pve-docs/chapter-pve-gui.html>): if you know the web
@@ -7,11 +7,11 @@ UI you already know where everything is.
 ## 1. Starting
 
 ```bash
-pvetty [options]
+proxhawk-tui [options]
 ```
 
-`pvetty` runs on a Proxmox VE node as `root`, directly or with `sudo`: it
-uses the local API stack, like `pvesh`. There is no login. pvetty first asks
+`proxhawk-tui` runs on a Proxmox VE node as `root`, directly or with `sudo`: it
+uses the local API stack, like `pvesh`. There is no login. proxhawk-tui first asks
 which Proxmox VE user to act as (the launching user, `root@pam` or
 `<sudo user>@pam`, or another one): that user's permissions then apply, as in the web UI (see
 [CONFIGURATION.md](CONFIGURATION.md#running-as-another-user)). See
@@ -25,8 +25,8 @@ The first time (no user configuration file), a short wizard asks for the
 icon set (with a preview), the theme and the mouse support. It can be run
 again with `F4` › Settings, or disabled with `onboarding = 0`.
 
-`pvetty <command>` runs a non-interactive command instead of the interface
-(`pvetty guests list`, `pvetty api get /version`...): see [CLI.md](CLI.md).
+`proxhawk-tui <command>` runs a non-interactive command instead of the interface
+(`proxhawk-tui guests list`, `proxhawk-tui api get /version`...): see [CLI.md](CLI.md).
 
 ## 2. Screen layout
 
@@ -112,7 +112,7 @@ Global keys:
 | `F2` (or `V`) | header button **Create VM** (wizard) |
 | `F3` (or `C`) | header button **Create CT** (wizard) |
 | `F4` (or `U`) | header button **root@pam ▾**: *Application Settings* (language, icons with preview, theme, mouse, confirmations, refresh, start-up selection, IP column, SSH, plugins, key bindings, about) and quit |
-| `q`, `F10` | quit (asks first when actions started by pvetty are still running or queued) |
+| `q`, `F10` | quit (asks first when actions started by proxhawk-tui are still running or queued) |
 
 These keys can be changed in the configuration file (`key.<action>`, see
 [CONFIGURATION.md](CONFIGURATION.md#key-bindings)).
@@ -173,13 +173,13 @@ the `pve` and `pam` realms (for `pam` it is the Linux password); LDAP / AD /
 OpenID users authenticate on their server.
 
 A `pam` user needs a Linux account on the node. When it does not exist,
-pvetty offers to create it (`useradd -m -s /bin/bash`) only if the user
-pvetty runs as may create Linux accounts itself: a `pam` user whose Linux
+proxhawk-tui offers to create it (`useradd -m -s /bin/bash`) only if the user
+proxhawk-tui runs as may create Linux accounts itself: a `pam` user whose Linux
 account is root or may run `useradd` with sudo (checked with `sudo -l`).
 The account is then created through that account (`runuser` + `sudo`:
 its sudo rules apply, sudo may ask its password and logs the action), and
 the Proxmox VE right to add `pam` users (`Realm.AllocateUser` on
-`/access/realm/pam`) is checked first. Otherwise pvetty explains how to
+`/access/realm/pam`) is checked first. Otherwise proxhawk-tui explains how to
 create the account. On a cluster, create the account on the other nodes
 too.
 
@@ -396,4 +396,4 @@ zones), **Permissions**.
 | Wrong colours / unreadable | `--theme basic` (8 colours) or `--theme light` on light terminals |
 | "Terminal too small" | at least 80×18 is required |
 | Very slow panels | check `--backend`: the broker should be used (`U` › About shows the backend) |
-| Debug | `PVETTY_DEBUG=1 pvetty` writes a debug log to `/tmp/pvetty-debug.log` (or `$PVETTY_LOG`) |
+| Debug | `PROXHAWK_TUI_DEBUG=1 proxhawk-tui` writes a debug log to `/tmp/proxhawk-tui-debug.log` (or `$PROXHAWK_TUI_LOG`) |

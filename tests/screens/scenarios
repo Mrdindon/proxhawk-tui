@@ -1,4 +1,4 @@
-# name          keys sent to pvetty (tmux send-keys names), see tools/screen-test.sh
+# name          keys sent to proxhawk-tui (tmux send-keys names), see tools/screen-test.sh
 dc_summary
 dc_help         F1
 dc_search       /

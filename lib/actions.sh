@@ -213,8 +213,8 @@ act_ssh() {
     [[ -n ${CFG[ssh_jump]} ]] && sshopt+=(-J "${CFG[ssh_jump]}")
     # shellcheck disable=SC2206
     [[ -n ${CFG[ssh_options]} ]] && sshopt+=(${CFG[ssh_options]})
-    term_run bash -c 'clear; printf "\e[1m%s\e[0m\n" "$1"; shift; ssh "$@"; echo; read -rp "[Enter] to return to pvetty" _' \
-        sh "pvetty - ssh $user@$host" "${sshopt[@]}" "$user@$host"
+    term_run bash -c 'clear; printf "\e[1m%s\e[0m\n" "$1"; shift; ssh "$@"; echo; read -rp "[Enter] to return to proxhawk-tui" _' \
+        sh "proxhawk-tui - ssh $user@$host" "${sshopt[@]}" "$user@$host"
 }
 
 # Browser console: the URL of the console of the web UI (noVNC / xterm.js),
@@ -479,9 +479,9 @@ act_snapshot_delete() {
 act_node_shell() {
     perm_need "/nodes/$CTX_NODE" Sys.Console || return
     local sh=${SHELL:-/bin/bash}
-    T "Starting shell - type 'exit' to return to pvetty."; status_msg info "$REPLY"
+    T "Starting shell - type 'exit' to return to proxhawk-tui."; status_msg info "$REPLY"
     if [[ $CTX_NODE == "$LOCAL_NODE" ]]; then
-        term_run bash -c 'clear; printf "\e[1m%s\e[0m\n" "$1"; exec "$2" -l' sh "pvetty - shell on $CTX_NODE (exit to return)" "$sh"
+        term_run bash -c 'clear; printf "\e[1m%s\e[0m\n" "$1"; exec "$2" -l' sh "proxhawk-tui - shell on $CTX_NODE (exit to return)" "$sh"
     else
         node_cmd "$CTX_NODE" bash -l
     fi
@@ -552,8 +552,8 @@ toolbar_lxc() { _toolbar_guest; }
 # Header buttons
 # ---------------------------------------------------------------------------
 act_help() {
-    local f="$PVETTY_HOME/docs/USAGE.md"
-    [[ -r $f ]] || f="$PVETTY_HOME/README.md"
+    local f="$PROXHAWK_TUI_HOME/docs/USAGE.md"
+    [[ -r $f ]] || f="$PROXHAWK_TUI_HOME/README.md"
     pager_show "$f" "Documentation"
 }
 
@@ -583,12 +583,12 @@ act_user_menu() {
         T "Browser console host"; items+=(console_host "$REPLY: ${CFG[console_host]:-(node IP)}")
         T "Plugins"; items+=(plugins "$REPLY: ${CFG[plugins]:--}")
         T "Key bindings"; items+=(keys "$REPLY: key.<action> = <keys> (F1)")
-        T "About"; items+=(about "$REPLY: pvetty $PVETTY_VERSION")
+        T "About"; items+=(about "$REPLY: proxhawk-tui $PROXHAWK_TUI_VERSION")
         T "Logout (quit)"; items+=(quit "$REPLY")
         T "Application Settings"
         DLG_NOTAGS=1
         DLG_OK_LABEL="Change" DLG_CANCEL_LABEL="Close" \
-            dlg_menu "$REPLY" "${PVE_USER:-root@pam} - $(T "saved in ~/.config/pvetty/pvetty.conf"; printf '%s' "$REPLY")" "${items[@]}" || { DLG_NOTAGS=0; break; }
+            dlg_menu "$REPLY" "${PVE_USER:-root@pam} - $(T "saved in ~/.config/proxhawk-tui/proxhawk-tui.conf"; printf '%s' "$REPLY")" "${items[@]}" || { DLG_NOTAGS=0; break; }
         DLG_NOTAGS=0
         k=$REPLY
         case $k in
@@ -615,7 +615,7 @@ act_user_menu() {
                 term_leave; core_save_config mouse "$v"; term_enter ;;
             theme)
                 local -a th=() f
-                for f in "$PVETTY_HOME"/themes/*.sh; do f=${f##*/}; th+=("${f%.sh}" ""); done
+                for f in "$PROXHAWK_TUI_HOME"/themes/*.sh; do f=${f##*/}; th+=("${f%.sh}" ""); done
                 dlg_menu "Theme" "Colour theme:" "${th[@]}" || continue
                 core_save_config theme "$REPLY"; theme_load ;;
             refresh|task_rows|tree_width|queue_parallel)
@@ -624,7 +624,7 @@ act_user_menu() {
                 core_save_config "$k" "$REPLY"
                 layout_compute ;;
             startup)
-                dlg_menu "Startup selection" "Entry selected when pvetty starts:" \
+                dlg_menu "Startup selection" "Entry selected when proxhawk-tui starts:" \
                     root "Datacenter" last "$(T "Last selection"; printf '%s' "$REPLY")" "$SEL_ID" "$(T "Current selection"; printf '%s' "$REPLY")" || continue
                 core_save_config startup "$REPLY" ;;
             ssh_user|ssh_key|ssh_jump|console_host)
@@ -633,7 +633,7 @@ act_user_menu() {
             plugins) plugins_dialog; (( RUNNING )) || break ;;
             keys) help_overlay ;;
             about)
-                dlg_msg "About" "pvetty $PVETTY_VERSION - text console for Proxmox VE
+                dlg_msg "About" "proxhawk-tui $PROXHAWK_TUI_VERSION - text console for Proxmox VE
 Backend: $API_BACKEND | Dialogs: $DLG | Icons: $GLYPH_SET | Theme: $THEME_NAME
 Language: $LANG_NAME ($LANG_CODE)" ;;
             quit) quit_request; [[ $RUNNING == 0 ]] && break ;;

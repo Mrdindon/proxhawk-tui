@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-# i18n-pve.pl - translations of pvetty strings taken from the official
+# i18n-pve.pl - translations of proxhawk-tui strings taken from the official
 # message catalog of the Proxmox VE web interface (package pve-i18n,
-# /usr/share/pve-i18n/pve-lang-<code>.js), so that pvetty uses the same
+# /usr/share/pve-i18n/pve-lang-<code>.js), so that proxhawk-tui uses the same
 # words as the GUI.
 #
 #   i18n-pve.pl <catalog.js> <TEMPLATE.sh>   prints bash: L['English']='Translation'

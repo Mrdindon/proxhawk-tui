@@ -4,11 +4,11 @@ Source analysed: <https://github.com/devnullvoid/pvetui> (snapshot of
 2026-10-03, v1.4.4, MIT licence, created 2025-05-03, ~730 stars).
 Analysed on 2026-10-06. **No code of this project was changed**: this file
 only documents ideas. In this file "pvetui" is the other project, except in
-the column "this project" (renamed **pvetty** in 1.2.0).
+the column "this project" (renamed *pvetty* in 1.2.0, **proxhawk-tui** in 2.0.0).
 
 ## 1. Overview of the other project
 
-| Item | devnullvoid/pvetui | this project (pvetui 1.0.0, now pvetty) |
+| Item | devnullvoid/pvetui | this project (pvetui 1.0.0, now proxhawk-tui) |
 |------|--------------------|-----------------------------|
 | Language / size | Go, ~70 000 lines, 450 files; tview + tcell | bash + one Perl helper, ~10 000 lines |
 | Where it runs | on the **client** (Linux, macOS, Windows), talks to the HTTPS API | **on the Proxmox node**, local API stack as root (no network, no token) |
@@ -46,8 +46,9 @@ Both projects are called **pvetui** and use `~/.config/pvetui/`. Theirs uses
 command name and the directory do. **To decide before any publication**:
 rename ours (e.g. `pveconsole`, `pvegui-tui`, `proxtui`) or keep it private.
 
-**Resolved in 1.2.0**: this project is now **pvetty** (`pvetty` command,
-`~/.config/pvetty/pvetty.conf`, `PVETTY_*` variables); the old user
+**Resolved**: this project was renamed *pvetty* in 1.2.0, then **proxhawk-tui**
+in 2.0.0 (`proxhawk-tui` command, `~/.config/proxhawk-tui/proxhawk-tui.conf`,
+`PROXHAWK_TUI_*` variables); the old user
 configuration is migrated automatically. Names containing "Proxmox" were
 avoided: the Proxmox trademark guidelines do not allow it in product names.
 
@@ -95,7 +96,7 @@ Effort: S = small (< 1 day), M = medium, L = large. Fit = how well it fits our
 
 | # | Idea (from their code) | What it would be in ours | Effort | Fit |
 |---|------------------------|--------------------------|--------|-----|
-| 1 | **Pending operation indicator** (🗘 next to the guest while an action is in flight, `FormatPendingStatusIndicator`) | mark the tree entry / grid row of a guest that has a running task started by pvetty (we already track `TASK_WATCH`) | S | high |
+| 1 | **Pending operation indicator** (🗘 next to the guest while an action is in flight, `FormatPendingStatusIndicator`) | mark the tree entry / grid row of a guest that has a running task started by proxhawk-tui (we already track `TASK_WATCH`) | S | high |
 | 2 | **Per-guest task queue** (`internal/taskmanager`: one active task per node/VMID, next ones queued, cancel queued, max running) | queue actions on a guest that already has a running task instead of failing on the lock; show the queue in the Tasks panel | M | high |
 | 3 | **Batch selection** (Space marks several guests, *Batch Actions* menu: start/stop/shutdown/restart...) | Space in the Search grids marks rows; `m` offers batch actions (one task each, through the queue) | M | high |
 | 4 | **Configurable key bindings** (`key_bindings` section, help generated from it, `Alt`/`Ctrl` combos) | `[keys]` in the config file mapping actions to keys; help screen built from the map | M | medium |
@@ -120,14 +121,14 @@ Effort: S = small (< 1 day), M = medium, L = large. Fit = how well it fits our
 
 | # | Idea | In ours | Effort | Fit |
 |---|------|---------|--------|-----|
-| 16 | **CLI subcommands** with JSON / table output (`pvetui nodes list`, `guests start 100`, `--no-wait`...) | `pvetty cli <path> ...` reusing the broker (JSON already available) and `api_exec` for writes; useful for scripts and AI agents (with a skill/README for agents) | M | high |
-| 17 | **Remote mode / profiles** (HTTPS API with token, several profiles) | an HTTPS backend with `curl` + API token (curl is installed on PVE) so pvetty can run from another Linux machine; profiles in the config | L | medium (changes the "local root" design) |
+| 16 | **CLI subcommands** with JSON / table output (`pvetui nodes list`, `guests start 100`, `--no-wait`...) | `proxhawk-tui cli <path> ...` reusing the broker (JSON already available) and `api_exec` for writes; useful for scripts and AI agents (with a skill/README for agents) | M | high |
+| 17 | **Remote mode / profiles** (HTTPS API with token, several profiles) | an HTTPS backend with `curl` + API token (curl is installed on PVE) so proxhawk-tui can run from another Linux machine; profiles in the config | L | medium (changes the "local root" design) |
 | 18 | **Group mode** (several clusters in one view, active/passive failover) | only after #17 | L | low |
-| 19 | **Plugin system** (opt-in, enabled in the config / manager dialog) | load `~/.config/pvetty/plugins/*.sh` (views, toolbar actions) only when enabled; examples: community scripts installer, Ansible inventory export | S | high |
+| 19 | **Plugin system** (opt-in, enabled in the config / manager dialog) | load `~/.config/proxhawk-tui/plugins/*.sh` (views, toolbar actions) only when enabled; examples: community scripts installer, Ansible inventory export | S | high |
 | 20 | **Persisted cache** (file cache with TTL + LRU, Badger) | not needed with the broker (5 ms per read); could cache the API schema between runs | S | low |
 | 21 | **Config secrets encryption** (SOPS/age) | only relevant with #17 (tokens) | M | low |
 | 22 | **Onboarding / first-run wizard** | first run: choose icons (with preview), theme, language, mouse | S | medium |
-| 23 | **Log file with levels** (`--debug`) | we have `PVETTY_DEBUG`; add levels and log rotation | S | low |
+| 23 | **Log file with levels** (`--debug`) | we have `PROXHAWK_TUI_DEBUG`; add levels and log rotation | S | low |
 
 ### Quality, tests and distribution
 
@@ -136,7 +137,7 @@ Effort: S = small (< 1 day), M = medium, L = large. Fit = how well it fits our
 | 24 | **Mock PVE API server** (`cmd/pve-mock-api`, `pkg/mockpve`) for tests without a cluster | a *replay* backend for the broker: answers from recorded JSON fixtures, so the UI and the forms can be tested anywhere (CI, laptops) | M | high |
 | 25 | **Golden terminal tests** (VHS tapes + golden text output) | tmux based: run scripted key sequences, `capture-pane`, compare with golden files (we did it by hand during development) | S | high |
 | 26 | **Lint + CI** (golangci-lint, pre-commit, GitHub Actions) | `shellcheck` + `perlcritic` + selftest in a pre-commit hook / CI | S | high |
-| 27 | **Packaging** (.deb/.rpm, repository, Homebrew...) | a `.deb` (`pvetty_1.1.0_all.deb`, depends on `pve-manager`, installs into `/usr/share/pvetty` + `/usr/bin/pvetty`) | S | high |
+| 27 | **Packaging** (.deb/.rpm, repository, Homebrew...) | a `.deb` (`proxhawk-tui_<version>_all.deb`, depends on `pve-manager`, installs into `/usr/share/proxhawk-tui` + `/usr/bin/proxhawk-tui`) | S | high |
 | 28 | **AGENTS.md / CLAUDE.md** for AI contributors | our `docs/DEVELOPMENT.md` already plays this role; a short `AGENTS.md`/`CLAUDE.md` pointing to it and to the test rules would help AI-assisted maintenance | S | high |
 | 29 | **LICENSE, CONTRIBUTING, THIRD_PARTY_LICENSES, RELEASING** | we have no licence file: choose one before sharing | S | high |
 | 30 | **Screenshots / demo recordings** (VHS tapes) | text screenshots from tmux (already in README), a recorded demo (asciinema) | S | low |
@@ -163,4 +164,4 @@ To keep in mind when choosing what to transpose:
 3. Tooling: #25 golden tmux tests, #26 shellcheck/CI, #27 .deb, #28 AGENTS.md,
    #29 licence, and decide the name (section 1).
 4. Larger: #16 CLI subcommands, #24 replay backend, #19 plugins.
-5. Only if pvetty must run outside the node: #17 remote mode (then #18, #21).
+5. Only if proxhawk-tui must run outside the node: #17 remote mode (then #18, #21).

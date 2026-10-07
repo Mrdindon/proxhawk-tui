@@ -249,7 +249,7 @@ v_node_updates__key() {
         R) api_exec "Update package database" create "/nodes/$CTX_NODE/apt/update" ;;
         u)
             Tf "Run 'apt-get dist-upgrade' on node '%s'?" "$CTX_NODE"; confirm "$REPLY" || return 0
-            node_cmd "$CTX_NODE" bash -c 'apt-get dist-upgrade; echo; read -rp "[Enter] to return to pvetty" _' ;;
+            node_cmd "$CTX_NODE" bash -c 'apt-get dist-upgrade; echo; read -rp "[Enter] to return to proxhawk-tui" _' ;;
         *) return 1 ;;
     esac
     return 0

@@ -2,30 +2,30 @@
 # Datacenter > Permissions: users, tokens, TFA, groups, pools, roles, realms, ACL.
 
 test_access() {
-    local u="pvetty-test@pve" g="pvetty-test-grp" p="pvetty-test-pool" r="TuiTestRole" k
+    local u="proxhawk-tui-test@pve" g="proxhawk-tui-test-grp" p="proxhawk-tui-test-pool" r="TuiTestRole" k
     ctx root
 
     # Groups (needed by the user).
     check "Groups: view" view groups
-    reset_step; preset groupid=$g comment="pvetty test group"
+    reset_step; preset groupid=$g comment="proxhawk-tui test group"
     check "Groups: add" key a ""
-    check "Groups: created" kv_is "/access/groups/$g" comment "pvetty test group"
+    check "Groups: created" kv_is "/access/groups/$g" comment "proxhawk-tui test group"
     view groups; reset_step; preset comment="edited"
     check "Groups: edit" key e "$g"
     check "Groups: edited" kv_is "/access/groups/$g" comment "edited"
 
     # Users.
     check "Users: view" view users
-    reset_step; crud_answers realm=${u#*@} name=${u%@*}; preset password=Pvetty-Test-123 comment="pvetty test user" email=test@example.invalid groups=$g firstname=Test
+    reset_step; crud_answers realm=${u#*@} name=${u%@*}; preset password=Proxhawk-Test-123 comment="proxhawk-tui test user" email=test@example.invalid groups=$g firstname=Test
     check "Users: add" key a ""
     check "Users: created" kv_is "/access/users/$u" firstname Test
     view users; reset_step; preset comment="edited user" enable=0
     check "Users: edit" key e "$u"
     check "Users: edited" kv_is "/access/users/$u" enable 0
-    reset_step; preset password=Pvetty-Test-456 confirmation-password=""
+    reset_step; preset password=Proxhawk-Test-456 confirmation-password=""
     check "Users: change password" key p "$u"
 
-    # PAM users: the Linux account is created only when the user pvetty runs
+    # PAM users: the Linux account is created only when the user proxhawk-tui runs
     # as may create Linux accounts (root, or useradd allowed by sudo) and may
     # add users to the pam realm.
     test_pam_users
@@ -45,7 +45,7 @@ test_access() {
 
     # Two factor: recovery keys, then a TOTP entry with a code computed here.
     check "Two Factor: view" view tfa
-    reset_step; crud_answers userid=$u; preset type=recovery description="pvetty recovery"
+    reset_step; crud_answers userid=$u; preset type=recovery description="proxhawk-tui recovery"
     check "Two Factor: add recovery keys" key a ""
     check "Two Factor: keys returned" grep -q -i recovery <<< "$FORM_RESULT"
     local secret=JBSWY3DPEHPK3PXP code
@@ -54,7 +54,7 @@ k=base64.b32decode(sys.argv[1]); c=struct.pack(">Q",int(time.time())//30)
 h=hmac.new(k,c,hashlib.sha1).digest(); o=h[-1]&15
 print("%06d"%((struct.unpack(">I",h[o:o+4])[0]&0x7fffffff)%1000000))' "$secret")
     reset_step; crud_answers userid=$u
-    preset type=totp description="pvetty totp" totp="otpauth://totp/pvetty:test?secret=$secret&issuer=pvetty&algorithm=SHA1&digits=6&period=30" value="$code"
+    preset type=totp description="proxhawk-tui totp" totp="otpauth://totp/proxhawk-tui:test?secret=$secret&issuer=proxhawk-tui&algorithm=SHA1&digits=6&period=30" value="$code"
     check "Two Factor: add TOTP" key a ""
     view tfa
     local kt="" kr="" kk
@@ -90,7 +90,7 @@ print("%06d"%((struct.unpack(">I",h[o:o+4])[0]&0x7fffffff)%1000000))' "$secret")
 
     # Pools.
     check "Pools: view" view pools
-    reset_step; preset poolid=$p comment="pvetty test pool"
+    reset_step; preset poolid=$p comment="proxhawk-tui test pool"
     check "Pools: add" key a ""
     check "Pools: created" api_has /pools poolid "$p"
     view pools; reset_step; preset comment="edited pool"
@@ -113,16 +113,16 @@ print("%06d"%((struct.unpack(">I",h[o:o+4])[0]&0x7fffffff)%1000000))' "$secret")
 
     # Realms: LDAP realm (the sync is expected to fail: no LDAP server).
     check "Realms: view" view realms
-    reset_step; crud_answers type=ldap; preset realm=pvtldap server1=127.0.0.1 base_dn="dc=example,dc=invalid" user_attr=uid comment="pvetty test realm"
+    reset_step; crud_answers type=ldap; preset realm=pvtldap server1=127.0.0.1 base_dn="dc=example,dc=invalid" user_attr=uid comment="proxhawk-tui test realm"
     check "Realms: add LDAP" key a ""
-    check "Realms: created" kv_is /access/domains/pvtldap comment "pvetty test realm"
+    check "Realms: created" kv_is /access/domains/pvtldap comment "proxhawk-tui test realm"
     view realms; reset_step; preset comment="edited realm" port=1389
     check "Realms: edit" key e pvtldap
     check "Realms: edited" kv_is /access/domains/pvtldap port 1389
     reset_step; preset dry-run=1 scope=users
     if key s pvtldap; then ko "Realms: sync (no server)" "unexpected success"
     else ok "Realms: sync reports the LDAP error ($STATUS_MSG)"; fi
-    reset_step; crud_answers type=openid; preset realm=pvtoidc issuer-url=https://login.example.invalid client-id=pvetty
+    reset_step; crud_answers type=openid; preset realm=pvtoidc issuer-url=https://login.example.invalid client-id=proxhawk-tui
     check "Realms: add OpenID" key a ""
     view realms; reset_step
     check "Realms: remove OpenID" key d pvtoidc
@@ -151,19 +151,19 @@ as_user() {
     api_start
 }
 pam_add() {     # pam_add <name>: Add user in the pam realm, account creation accepted
-    reset_step; crud_answers realm=pam name="$1" create_account=1; preset password=Pvetty-Pam-123 comment="pvetty test"
+    reset_step; crud_answers realm=pam name="$1" create_account=1; preset password=Proxhawk-Pam-123 comment="proxhawk-tui test"
     view users; key a ""
 }
 pam_cleanup() {
     local n
-    for n in pvetty-t-new pvetty-t-adm pvetty-t-nos; do
+    for n in proxhawk-tui-t-new proxhawk-tui-t-adm proxhawk-tui-t-nos; do
         pveum user delete "$n@pam" >/dev/null 2>&1; id "$n" >/dev/null 2>&1 && userdel -r "$n" >/dev/null 2>&1
     done
-    pveum user delete pvetty-t-pve@pve >/dev/null 2>&1
-    rm -f /etc/sudoers.d/pvetty-test
+    pveum user delete proxhawk-tui-t-pve@pve >/dev/null 2>&1
+    rm -f /etc/sudoers.d/proxhawk-tui-test
 }
 test_pam_users() {
-    local new=pvetty-t-new
+    local new=proxhawk-tui-t-new
     pam_cleanup
     # As root@pam.
     pam_add "$new"
@@ -172,29 +172,29 @@ test_pam_users() {
     check "PAM user (root@pam): Linux password set" bash -c "grep -q '^$new:\\\$' /etc/shadow"
     pveum user delete "$new@pam" >/dev/null 2>&1; userdel -r "$new" >/dev/null 2>&1
     # Test users: Administrator in Proxmox VE, different Linux rights.
-    useradd -m pvetty-t-adm && useradd -m pvetty-t-nos
-    printf 'pvetty-t-adm ALL=(root) NOPASSWD: %s\n' "$(command -v useradd)" > "$RUN_DIR/sudoers"
+    useradd -m proxhawk-tui-t-adm && useradd -m proxhawk-tui-t-nos
+    printf 'proxhawk-tui-t-adm ALL=(root) NOPASSWD: %s\n' "$(command -v useradd)" > "$RUN_DIR/sudoers"
     check "PAM user: sudo rule for useradd (visudo -c)" visudo -cf "$RUN_DIR/sudoers"
-    install -m 440 "$RUN_DIR/sudoers" /etc/sudoers.d/pvetty-test
-    pveum user add pvetty-t-adm@pam && pveum user add pvetty-t-nos@pam && pveum user add pvetty-t-pve@pve
-    pveum acl modify / --users pvetty-t-adm@pam,pvetty-t-nos@pam,pvetty-t-pve@pve --roles Administrator
+    install -m 440 "$RUN_DIR/sudoers" /etc/sudoers.d/proxhawk-tui-test
+    pveum user add proxhawk-tui-t-adm@pam && pveum user add proxhawk-tui-t-nos@pam && pveum user add proxhawk-tui-t-pve@pve
+    pveum acl modify / --users proxhawk-tui-t-adm@pam,proxhawk-tui-t-nos@pam,proxhawk-tui-t-pve@pve --roles Administrator
     # pve realm user: no Linux account, refused.
-    as_user pvetty-t-pve@pve; pam_add "$new"
+    as_user proxhawk-tui-t-pve@pve; pam_add "$new"
     check "PAM user (pve realm user): refused" eval '[[ $LAST_MSG == *"may not create Linux accounts"* ]] && ! id $new'
     # PAM user without sudo rights: refused.
-    as_user pvetty-t-nos@pam; pam_add "$new"
+    as_user proxhawk-tui-t-nos@pam; pam_add "$new"
     check "PAM user (no sudo): refused" eval '[[ $LAST_MSG == *"may not create Linux accounts"* ]] && ! id $new'
     # PAM user allowed to run useradd with sudo: created through sudo.
-    as_user pvetty-t-adm@pam; pam_add "$new"
+    as_user proxhawk-tui-t-adm@pam; pam_add "$new"
     check "PAM user (sudo useradd): Linux account created" id "$new"
     check "PAM user (sudo useradd): Proxmox VE user created" api_has /access/users userid "$new@pam"
     pveum user delete "$new@pam" >/dev/null 2>&1; userdel -r "$new" >/dev/null 2>&1
     # Same, without the Proxmox VE right to add pam users: refused.
-    pveum acl delete / --users pvetty-t-adm@pam --roles Administrator
-    pveum acl modify / --users pvetty-t-adm@pam --roles PVEAuditor
-    as_user pvetty-t-adm@pam; pam_add "$new"
+    pveum acl delete / --users proxhawk-tui-t-adm@pam --roles Administrator
+    pveum acl modify / --users proxhawk-tui-t-adm@pam --roles PVEAuditor
+    as_user proxhawk-tui-t-adm@pam; pam_add "$new"
     check "PAM user (sudo, no Realm.AllocateUser): refused" eval '[[ $STATUS_MSG == *Realm.AllocateUser* ]] && ! id $new'
     as_user root@pam
     pam_cleanup
-    check "PAM user: test accounts removed" eval '! id pvetty-t-adm && ! id pvetty-t-nos && [[ ! -e /etc/sudoers.d/pvetty-test ]]'
+    check "PAM user: test accounts removed" eval '! id proxhawk-tui-t-adm && ! id proxhawk-tui-t-nos && [[ ! -e /etc/sudoers.d/proxhawk-tui-test ]]'
 }

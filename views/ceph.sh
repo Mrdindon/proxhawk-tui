@@ -60,7 +60,7 @@ ceph_install() {
     [[ -z $version ]] && { dlg_menu "Install Ceph" "Ceph version:" "${items[@]}" || return 0; version=$REPLY; }
     repo=${CRUD_ANSWER[repository]-}
     [[ -z $repo ]] && { dlg_menu "Install Ceph" "Repository:" no-subscription "No-Subscription" enterprise "Enterprise (subscription required)" test "Test" || return 0; repo=$REPLY; }
-    node_cmd "$CTX_NODE" bash -c "pveceph install --version '$version' --repository '$repo'; echo; read -rp '[Enter] to return to pvetty' _"
+    node_cmd "$CTX_NODE" bash -c "pveceph install --version '$version' --repository '$repo'; echo; read -rp '[Enter] to return to proxhawk-tui' _"
     content_load 1
 }
 

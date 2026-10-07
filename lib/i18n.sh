@@ -5,7 +5,7 @@
 # lookup keys:  T "Start"        -> REPLY="Start" (or its translation)
 #               Tf "VM %s" 100   -> REPLY="VM 100" (format string translated)
 # Translations of a language <code>, by priority:
-#   1. lang/<code>.sh                     strings of pvetty (array L)
+#   1. lang/<code>.sh                     strings of proxhawk-tui (array L)
 #   2. /usr/share/pve-i18n/pve-lang-<code>.js
 #                                         the official catalog of the Proxmox
 #                                         VE web interface (same words as the
@@ -43,7 +43,7 @@ _i18n_resolve() {
     [[ $v == ko* ]] && v=ko
     for c in "$v" "${v%%_*}"; do
         [[ -n $c ]] || continue
-        if [[ $c == en || -r $PVETTY_HOME/lang/$c.sh || -r $PVE_I18N_DIR/pve-lang-$c.js ]]; then
+        if [[ $c == en || -r $PROXHAWK_TUI_HOME/lang/$c.sh || -r $PVE_I18N_DIR/pve-lang-$c.js ]]; then
             REPLY=$c; return 0
         fi
     done
@@ -66,18 +66,18 @@ i18n_load() {
     i18n_code; code=$REPLY
     L=()
     # shellcheck source=/dev/null
-    source "$PVETTY_HOME/lang/en.sh"
+    source "$PROXHAWK_TUI_HOME/lang/en.sh"
     if [[ $code != en ]]; then
-        if [[ -r $PVETTY_HOME/lang/$code.sh ]]; then
+        if [[ -r $PROXHAWK_TUI_HOME/lang/$code.sh ]]; then
             # shellcheck source=/dev/null
-            source "$PVETTY_HOME/lang/$code.sh"
+            source "$PROXHAWK_TUI_HOME/lang/$code.sh"
         else
             LANG_NAME=${LANG_NAMES[$code]:-$code}
         fi
         # Official words of the web interface for what the file leaves empty.
         if [[ -r $PVE_I18N_DIR/pve-lang-$code.js ]]; then
             local -A P=()
-            eval "$(perl "$PVETTY_HOME/lib/i18n-pve.pl" "$PVE_I18N_DIR/pve-lang-$code.js" "$PVETTY_HOME/lang/TEMPLATE.sh" 2>/dev/null | sed 's/^L\[/P[/')"
+            eval "$(perl "$PROXHAWK_TUI_HOME/lib/i18n-pve.pl" "$PVE_I18N_DIR/pve-lang-$code.js" "$PROXHAWK_TUI_HOME/lang/TEMPLATE.sh" 2>/dev/null | sed 's/^L\[/P[/')"
             for k in "${!P[@]}"; do [[ -n ${L[$k]-} ]] || L[$k]=${P[$k]}; done
         fi
     fi
@@ -103,7 +103,7 @@ Tf() {
 i18n_list() {
     local f c name
     local -A seen=()
-    for f in "$PVETTY_HOME"/lang/*.sh "$PVE_I18N_DIR"/pve-lang-*.js; do
+    for f in "$PROXHAWK_TUI_HOME"/lang/*.sh "$PVE_I18N_DIR"/pve-lang-*.js; do
         [[ -r $f && $f != */TEMPLATE.sh ]] || continue
         c=${f##*/}; c=${c%.sh}; c=${c%.js}; c=${c#pve-lang-}
         [[ $c == kr && -n ${LANG_NAMES[ko]-} && -r $PVE_I18N_DIR/pve-lang-ko.js ]] && continue

@@ -2,7 +2,7 @@
 # plugins.sh - optional extensions, disabled by default.
 #
 # A plugin is a bash file loaded after the views, from
-#   $PVETTY_HOME/plugins/<name>.sh   or   ~/.config/pvetty/plugins/<name>.sh
+#   $PROXHAWK_TUI_HOME/plugins/<name>.sh   or   ~/.config/proxhawk-tui/plugins/<name>.sh
 # when <name> is listed in the "plugins" setting (F4 > Plugins). Its first
 # lines describe it:
 #   # plugin: <name>
@@ -17,7 +17,7 @@ declare -gA PLUGIN_FILES=() PLUGIN_DESC=()
 plugins_scan() {
     local f n d
     PLUGIN_FILES=() PLUGIN_DESC=()
-    for f in "$PVETTY_HOME"/plugins/*.sh "${XDG_CONFIG_HOME:-$HOME/.config}"/pvetty/plugins/*.sh; do
+    for f in "$PROXHAWK_TUI_HOME"/plugins/*.sh "${XDG_CONFIG_HOME:-$HOME/.config}"/proxhawk-tui/plugins/*.sh; do
         [[ -r $f ]] || continue
         n=$(sed -n 's/^# plugin: *//p' "$f" | head -1); [[ -n $n ]] || n=$(basename "$f" .sh)
         d=$(sed -n 's/^# description: *//p' "$f" | head -1)
@@ -55,9 +55,9 @@ plugins_dialog() {
     [[ $(printf '%s\n' $new | sort | xargs) == "$old" ]] && return
     core_save_config plugins "$new"
     # Plugins are loaded at start-up (they define panels and menus).
-    if DLG_DEFAULT_YES=1 dlg_yesno "Plugins" "Restart pvetty now to apply the change? (the current selection is kept)"; then
+    if DLG_DEFAULT_YES=1 dlg_yesno "Plugins" "Restart proxhawk-tui now to apply the change? (the current selection is kept)"; then
         RESTART=1 RUNNING=0
     else
-        T "The plugin change applies at the next start of pvetty"; status_msg info "$REPLY"
+        T "The plugin change applies at the next start of proxhawk-tui"; status_msg info "$REPLY"
     fi
 }

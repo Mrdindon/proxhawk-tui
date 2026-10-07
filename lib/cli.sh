@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # cli.sh - non-interactive subcommands (scripts, cron, AI agents).
 #
-#   pvetty <command> [arguments] [-o json|table] [--no-wait]
+#   proxhawk-tui <command> [arguments] [-o json|table] [--no-wait]
 #
 # Output: JSON on stdout (default) or a table (-o table, or cli_output = table
 # in the configuration). Errors: {"error": "..."} on stderr, exit code 1.
@@ -14,7 +14,7 @@ declare -gA CLI_OPT=()
 
 cli_usage() {
     cat <<'EOF'
-Usage: pvetty <command> [arguments] [options]
+Usage: proxhawk-tui <command> [arguments] [options]
 
 Commands:
   nodes list                         nodes of the cluster
@@ -111,7 +111,7 @@ cli_write() {
         printf -v t0 '%(%s)T' -1
         # pvesh outlives this process (and its run directory): its output
         # goes to a file of its own, removed a minute after the end.
-        out=$(mktemp "${TMPDIR:-/tmp}/pvetty-cli.XXXXXX")
+        out=$(mktemp "${TMPDIR:-/tmp}/proxhawk-tui-cli.XXXXXX")
         ( setsid bash -c 'pvesh "$@" > "$0" 2>&1 < /dev/null; echo $? > "$0.rc"; sleep 60; rm -f "$0" "$0.rc"' "$out" "$cmd" "$path" "$@" & )
         for (( i = 0; i < 120; i++ )); do
             api_get rows "/nodes/$node/tasks" "source=active" "upid,starttime"

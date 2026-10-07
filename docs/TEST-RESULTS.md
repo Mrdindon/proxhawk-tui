@@ -1,4 +1,4 @@
-# pvetty — Test results
+# proxhawk-tui — Test results
 
 ## 1.1.0 (2026-10-06)
 
@@ -64,10 +64,10 @@ Command: `tools/integration-test.sh` (all sections). The `vm` section was run ag
 
 ## Known Proxmox VE issues met during the tests
 
-| Issue | Behaviour in pvetty |
+| Issue | Behaviour in proxhawk-tui |
 |-------|---------------------|
 | `PUT /cluster/sdn/vnets/{vnet}/ips` (edit an IPAM mapping) fails with "can't find any subnet for ip", also with `pvesh` | the API error is displayed; remove + add works |
-| Rust backed SDN endpoints (prefix lists, route maps) refuse the numeric strings sent by `pvesh` ("invalid type: string, expected u32") | pvetty retries through its API helper with typed values (`write` mode) |
+| Rust backed SDN endpoints (prefix lists, route maps) refuse the numeric strings sent by `pvesh` ("invalid type: string, expected u32") | proxhawk-tui retries through its API helper with typed values (`write` mode) |
 | The schema of `POST /cluster/ha/rules` uses `allOf`/`oneOf` variants | merged by the helper so the form shows every field |
 | `pveceph purge` keeps `ceph.conf` when the local monitor is already stopped ("Foreign MON address") | test teardown only (purge is not part of the web UI) |
 | The SDN needs `source /etc/network/interfaces.d/*` in `/etc/network/interfaces` (missing on this node) | the SDN panel shows the same warning as the web UI; the test adds the line temporarily |
@@ -601,7 +601,7 @@ Command: `tools/integration-test.sh` (all sections). The `vm` section was run ag
 - ✔ Resume
 - ✔ VM resumed
 - ✔ Reset
-- ✔ Reboot: ACPI timeout reported (no guest OS: VM 9901 (pvetty-test-vm2) - Reboot: failed - VM quit/powerdown failed - got timeout)
+- ✔ Reboot: ACPI timeout reported (no guest OS: VM 9901 (proxhawk-tui-test-vm2) - Reboot: failed - VM quit/powerdown failed - got timeout)
 - ✔ VM running
 - ✔ Monitor: command
 - ✔ Monitor: output

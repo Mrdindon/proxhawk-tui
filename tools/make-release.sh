@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# make-release.sh - build the release archive of pvetty.
+# make-release.sh - build the release archive of proxhawk-tui.
 #   tools/make-release.sh [output directory]   (default: ../releases)
-# Produces pvetty-<version>.tar.gz, its SHA-256 and a manifest of the files.
+# Produces proxhawk-tui-<version>.tar.gz, its SHA-256 and a manifest of the files.
 set -euo pipefail
 src=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 ver=$(< "$src/VERSION")
 out=${1:-$(dirname "$src")/releases}
 mkdir -p "$out"
-name="pvetty-$ver"
+name="proxhawk-tui-$ver"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/$name"

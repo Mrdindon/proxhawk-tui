@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# pvetty API broker
+# proxhawk-tui API broker
 # -----------------
 # Long-running helper that loads the Proxmox VE API stack once and answers
 # read-only (GET) requests over stdin/stdout. This avoids the ~1-2 s start-up
@@ -26,7 +26,7 @@
 #   "\x04OK"  or  "\x04ERR\t<message>"
 # Inside values, TAB becomes a space and NEWLINE becomes "\x1f".
 #
-# PVETTY_USER (default root@pam): the Proxmox VE user the requests run as.
+# PROXHAWK_TUI_USER (default root@pam): the Proxmox VE user the requests run as.
 # Like the API server, each request is checked with check_api2_permissions
 # for that user, and the handlers filter their results for that user.
 use strict;
@@ -37,7 +37,7 @@ use JSON;
 $| = 1;
 my $json = JSON->new->canonical->allow_nonref;
 my $local = "";
-my $as_user = $ENV{PVETTY_USER} || 'root@pam';
+my $as_user = $ENV{PROXHAWK_TUI_USER} || 'root@pam';
 
 # Refresh the per-request state like pvedaemon (cluster file system, cached
 # user configuration: pools, ACL...) and set the user of the request.

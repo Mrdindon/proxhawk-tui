@@ -11,22 +11,22 @@
 # that the translations of lang/<code>.sh keep the printf placeholders (%s,
 # %d) in the same order. Exit code 1 when a check fails.
 set -u
-PVETTY_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+PROXHAWK_TUI_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 PVE_I18N_DIR=${PVE_I18N_DIR:-/usr/share/pve-i18n}
 verbose=0
 [[ ${1-} == -v ]] && { verbose=1; shift; }
 langs=("$@")
 if (( ! ${#langs[@]} )); then
-    for f in "$PVETTY_HOME"/lang/*.sh "$PVE_I18N_DIR"/pve-lang-*.js; do
+    for f in "$PROXHAWK_TUI_HOME"/lang/*.sh "$PVE_I18N_DIR"/pve-lang-*.js; do
         [[ -r $f && $f != */TEMPLATE.sh && $f != */en.sh && $f != *pve-lang-kr.js ]] || continue
         c=${f##*/}; c=${c%.sh}; c=${c%.js}; langs+=("${c#pve-lang-}")
     done
     mapfile -t langs < <(printf '%s\n' "${langs[@]}" | sort -u)
 fi
 rc=0
-printf '%-7s %7s %8s %8s %8s\n' "lang" "pvetty" "Proxmox" "English" "coverage"
+printf '%-7s %7s %8s %8s %8s\n' "lang" "file" "Proxmox" "English" "coverage"
 for code in "${langs[@]}"; do
-    out=$(perl - "$PVETTY_HOME" "$code" "$PVE_I18N_DIR" "$verbose" <<'PERL'
+    out=$(perl - "$PROXHAWK_TUI_HOME" "$code" "$PVE_I18N_DIR" "$verbose" <<'PERL'
 use strict; use warnings;
 my ($home, $code, $dir, $verbose) = @ARGV;
 binmode(STDOUT, ':encoding(UTF-8)');

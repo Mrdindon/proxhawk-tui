@@ -18,11 +18,11 @@ menu_extend node "communityscripts|Community Scripts|m_import|0"
 _cs_list() {
     local cat=$1 f="$RUN_DIR/cs-$1.list"
     # Recorded API answers (tests, demo): the list is part of the recording.
-    if [[ $API_BACKEND == replay ]]; then f="$PVETTY_REPLAY/cs-$cat.list"; [[ -r $f ]] || f=/dev/null; fi
+    if [[ $API_BACKEND == replay ]]; then f="$PROXHAWK_TUI_REPLAY/cs-$cat.list"; [[ -r $f ]] || f=/dev/null; fi
     if [[ ! -s $f && $f != /dev/null ]]; then
         curl -fsSL --max-time 20 "$CS_REPO_API/$cat" 2>/dev/null \
             | perl -MJSON -e 'my $d = eval { decode_json(join("", <STDIN>)) } || []; print map { "$_->{name}\n" } grep { $_->{name} =~ /\.sh$/ } @$d' > "$f"
-        [[ -n ${PVETTY_RECORD-} ]] && cp "$f" "$PVETTY_RECORD/cs-$cat.list"
+        [[ -n ${PROXHAWK_TUI_RECORD-} ]] && cp "$f" "$PROXHAWK_TUI_RECORD/cs-$cat.list"
     fi
     mapfile -t CS_LIST < "$f"
 }
@@ -56,10 +56,10 @@ v_node_communityscripts__enter() {
             pager_show "$RUN_DIR/cs-script.sh" "$s" ;;
         run)
             # Scripts run as root on the node: root@pam only.
-            [[ $PVE_USER == root@pam ]] || { dlg_msg "Community Scripts" "Installing scripts requires running pvetty as root@pam."; return; }
+            [[ $PVE_USER == root@pam ]] || { dlg_msg "Community Scripts" "Installing scripts requires running proxhawk-tui as root@pam."; return; }
             Tf "Run %s as root on node %s? It is third-party code." "$s" "$CTX_NODE"
             dlg_yesno "Community Scripts" "$REPLY" || return
-            node_cmd "$CTX_NODE" bash -c "bash -c \"\$(curl -fsSL '$url')\"; echo; read -rp '[Enter] to return to pvetty' _"
+            node_cmd "$CTX_NODE" bash -c "bash -c \"\$(curl -fsSL '$url')\"; echo; read -rp '[Enter] to return to proxhawk-tui' _"
             NEED_REFRESH=1 ;;
     esac
 }
