@@ -89,7 +89,7 @@ proxhawk-tui
 With sudo: `sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/Mrdindon/proxhawk-tui/main/install.sh)"`,
 then `sudo proxhawk-tui`.
 
-Update: run the same line again. Remove: `apt remove proxhawk-tui`. You can read
+Remove: `apt remove proxhawk-tui`. You can read
 [install.sh](install.sh) before running it; the packages are also on the
 [releases page](https://github.com/Mrdindon/proxhawk-tui/releases).
 
@@ -106,13 +106,31 @@ cd /opt/proxhawk-tui
 ./install.sh                             # command "proxhawk-tui" (symlink in /usr/local/bin)
 ```
 
-- **Update**: `cd /opt/proxhawk-tui && git pull` (the symlink follows).
+- **Update**: `proxhawk-tui upgrade` (see [Update](#update)).
 - **A given version**: `git checkout v1.3.1` (back to the latest: `git checkout main`).
 - **Remove**: `./install.sh --uninstall`, then delete the directory.
 - Any directory works; `./install.sh --prefix DIR` puts the command
   elsewhere than `/usr/local/bin`.
 - Do not mix both methods: remove the package (`apt remove proxhawk-tui`) before
   using a clone, or the reverse.
+
+### Update
+
+```bash
+proxhawk-tui upgrade --check    # is a new version available? (exit code 10 if so)
+proxhawk-tui upgrade            # update (asks for confirmation; --yes to skip)
+```
+
+`upgrade` detects how proxhawk-tui was installed:
+
+| Installed with | What `upgrade` does |
+|---|---|
+| the one-line install (`.deb` package) | downloads the `.deb` of the latest release, checks its SHA-256 and installs it with `apt` (as root or with `sudo`) |
+| `git clone` | `git fetch`, shows the new version and its commits, then `git pull --ff-only` of the current branch (refused when there are local changes) |
+| an archive unpacked by hand | shows the available version and how to install it |
+
+`--version X.Y.Z` installs a given release (package). Running the one-line
+install again also updates the package.
 
 ### Who can run it
 
