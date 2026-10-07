@@ -1,5 +1,7 @@
 # Proxhawk-tui — a text console for Proxmox VE
 
+**English** | [Français](README.fr.md) | [Español](README.es.md) | [Deutsch](README.de.md) | [简体中文](README.zh-CN.md) | [Русский](README.ru.md)
+
 Version 2.1.0 · licence AGPL-3.0-or-later
 
 `proxhawk-tui` is a text console version of the Proxmox VE web interface (the GUI
@@ -38,8 +40,9 @@ node.
   without serial port** (IP found through the guest agent, the neighbour table
   or a scan of the bridge network), `pct enter` for containers, node shell.
 - **Tiny footprint**: pure bash + the Perl and `pvesh` that ship with Proxmox
-  VE. `whiptail` (also shipped) or `dialog` for dialogs. No daemon, no package
-  to install, nothing written outside `~/.config/proxhawk-tui` and a temp directory.
+  VE. `whiptail` (also shipped) or `dialog` for dialogs. No daemon, no
+  dependency, nothing written outside `~/.config/proxhawk-tui` and a temp
+  directory.
 - **Fast**: a small persistent Perl helper loads the API once and answers
   requests in milliseconds instead of spawning `pvesh` (1–2 s) for every read.
 - **Tested**: `tools/integration-test.sh` drives every panel and action against
@@ -48,13 +51,13 @@ node.
 - **Modular**: every panel is a small function in `views/`; themes, icon sets
   and languages are plain files.
 - **Keyboard and mouse**, 256 colours, truecolor or 8 colours, Nerd Font,
-  Unicode, pure ASCII or no icons.
-- **34 languages**: French, Spanish, German, Chinese (simplified) and Russian
-  complete; the other languages of the web UI through the official Proxmox VE
-  catalog installed on the node (same words as the GUI). See
-  [docs/I18N.md](docs/I18N.md).
-  Key bindings and colours are configurable; ten themes (Dracula, Nord,
-  Gruvbox, Catppuccin, Tokyo Night...).
+  Unicode, pure ASCII or no icons. Key bindings and colours are
+  configurable; ten themes (Dracula, Nord, Gruvbox, Catppuccin, Tokyo
+  Night...).
+- **34 languages**: English, French, Spanish, German, Chinese (simplified)
+  and Russian complete; the other languages of the web UI through the
+  official Proxmox VE catalog installed on the node (same words as the GUI).
+  See [docs/I18N.md](docs/I18N.md).
 - **Batch actions and queue**: mark guests with `Space` in the search grids,
   start / stop / back them up together; actions on a busy guest are queued.
 - **Scriptable**: `proxhawk-tui guests list -o table`, `proxhawk-tui guests start 101`,
@@ -99,15 +102,15 @@ The branch `main` holds the released versions (tags `vX.Y.Z`); `develop` is
 work in progress.
 
 ```bash
-apt install git                          # if git is not installed yet
+apt install git            # if git is not installed yet
 git clone https://github.com/Mrdindon/proxhawk-tui.git /opt/proxhawk-tui
 cd /opt/proxhawk-tui
-./proxhawk-tui                                 # run in place, or:
-./install.sh                             # command "proxhawk-tui" (symlink in /usr/local/bin)
+./proxhawk-tui             # run in place, or:
+./install.sh               # command "proxhawk-tui" (symlink in /usr/local/bin)
 ```
 
 - **Update**: `proxhawk-tui upgrade` (see [Update](#update)).
-- **A given version**: `git checkout v1.3.1` (back to the latest: `git checkout main`).
+- **A given version**: `git checkout vX.Y.Z` (back to the latest: `git checkout main`).
 - **Remove**: `./install.sh --uninstall`, then delete the directory.
 - Any directory works; `./install.sh --prefix DIR` puts the command
   elsewhere than `/usr/local/bin`.
@@ -146,11 +149,12 @@ with a token: not supported yet.
 Useful options:
 
 ```bash
-proxhawk-tui --glyphs nerd          # Font Awesome icons of the web UI (needs a Nerd Font in YOUR terminal,
-                              # see docs/CONFIGURATION.md)
-proxhawk-tui --theme dark           # painted "Proxmox Dark" look
-proxhawk-tui --select qemu/100      # open directly on VM 100
-proxhawk-tui --backend pvesh        # do not use the persistent API helper
+proxhawk-tui --glyphs nerd       # Font Awesome icons of the web UI (needs a Nerd Font
+                                 # in YOUR terminal, see docs/CONFIGURATION.md)
+proxhawk-tui --theme dark        # painted "Proxmox Dark" look
+proxhawk-tui --lang fr           # interface language (default: automatic)
+proxhawk-tui --select qemu/100   # open directly on VM 100
+proxhawk-tui --backend pvesh     # do not use the persistent API helper
 ```
 
 ## Essential keys
@@ -197,20 +201,19 @@ The full list is in [docs/USAGE.md](docs/USAGE.md).
 ## Project layout
 
 ```
-proxhawk-tui              entry point (argument parsing, main loop, key/mouse handling)
-install.sh          install / uninstall a symlink in /usr/local/bin
-lib/                core modules (terminal, API, widgets, layout, actions...)
-lib/broker.pl       persistent read-only API helper (Perl, PVE modules)
-views/              one file per object type (datacenter, node, qemu, lxc...)
-themes/             colour themes
-plugins/            optional plugins (enabled in F4 > Plugins)
-tests/screens/      screen test scenarios, recorded API answers, golden screens
-lang/               language files (en.sh + TEMPLATE.sh)
-conf/               example configuration
-tools/              lint.sh, selftest.sh (render every panel), screen-test.sh,
-                    integration-test.sh + integration/*.sh (read/write tests),
-                    i18n-extract.sh, make-release.sh, make-deb.sh
-docs/               documentation
+proxhawk-tui     entry point (argument parsing, main loop, key/mouse handling)
+install.sh       install / uninstall (package from GitHub, or symlink)
+lib/             core modules (terminal, API, widgets, layout, actions...)
+lib/broker.pl    persistent API helper (Perl, PVE modules)
+views/           one file per object type (datacenter, node, qemu, lxc...)
+themes/          colour themes
+plugins/         optional plugins (enabled in F4 > Plugins)
+lang/            languages (en, fr, es, de, zh_CN, ru + TEMPLATE.sh)
+conf/            example configuration
+tests/screens/   screen test scenarios, recorded API answers, golden screens
+tools/           lint.sh, selftest.sh, screen-test.sh, integration-test.sh,
+                 i18n-extract.sh, i18n-check.sh, make-release.sh, make-deb.sh
+docs/            documentation
 ```
 
 ## Limitations
