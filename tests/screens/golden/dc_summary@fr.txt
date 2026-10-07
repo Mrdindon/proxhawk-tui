@@ -1,0 +1,36 @@
+ PROXMOX Virtual Environment 9.2.21              ⌕ Rechercher (/)                 ? F1   ▭ F2   ◈ F3   @ root@pam ▾ F4
+╭─ Vue serveur ▾ ────────╮╭────────────────────────────────────────────────────────────────────────────────────────────╮
+│▾ ▦ Centre de données   ││ Centre de données                                                                          │
+│  ▾ ▣ pve1              │├────────────────────────┬───────────────────────────────────────────────────────────────────┤
+│      ▭ 100 (web01)     ││ ⌕ Rechercher           │ État de santé                                                     │
+│      ◈ 101 (db01)      ││ ≣ Résumé               │ ───────────────────────────────────────────────────────────────── │
+│      ⌗ localnetwork (p…││ ✎ Notes                │ Statut                 ✔ Nœud autonome — aucune grappe de serveu… │
+│      ◫ local (pve1)    ││ ⁂ Grappe de serveurs   │ Nœuds                  ● En ligne 1    ✕ Hors ligne 0             │
+│      ◫ pbs-main (pve1) ││ ◎ Ceph                 │                                                                   │
+│      ◫ VM (pve1)       ││ ≡ Options              │ Invités                                                           │
+│                        ││ ◫ Stockage             │ ───────────────────────────────────────────────────────────────── │
+│                        ││ ⇩ Sauvegarde           │ Machines virtuelles    ● En cours d’exécution 1    ○ À l’arrêt 0… │
+│                        ││ ⇄ Réplication          │ Conteneur LXC          ● En cours d’exécution 0    ○ À l’arrêt 1… │
+│                        ││ ⊡ Permissions          │                                                                   │
+│                        ││   ○ Utilisateurs       │ Ressources                                                        │
+│                        ││   ⊸ Jetons d’API       │ ───────────────────────────────────────────────────────────────── │
+│                        ││   ⊶ Double facteur     │ Processeur         ████████▍░░░░░░░░░ 46.94% sur 4 CPU            │
+│                        ││   ∞ Groupes            │ Mémoire            ███░░░░░░░░░░░░░░░ 16.90% (2.61 GiB sur 15.46… │
+│                        ││   ◇ Pools              │ Stockage           ██▍░░░░░░░░░░░░░░░ 13.81% (76.07 GiB sur 550.… │
+│                        ││   ◌ Rôles              │                                                                   │
+│                        ││   ⊞ Royaumes           │ Nœuds                                                             │
+│                        ││ ♥ HA                   │ ───────────────────────────────────────────────────────────────── │
+│                        ││   ♥ Règles d’affinité  │  Nom               Ide…  En ligne  Support       Adresse du serv… │
+│                        ││   ♥ Clôture (fencing)  │ ───────────────────────────────────────────────────────────────── │
+│                        ││ ⌗ SDN                  │                                                                   │
+│                        ││   ⊞ Zones              │                                                                   │
+╰────────────────────────╯╰────────────────────────┴───────────────────────────────────────────────────────────────────╯
+╭─ Tâches │ Journal de la grappe de serveurs ──────────────────────────────────────────────────────────────────────────╮
+│ Heure de début   Heure de fin     Nœud        Nom d’utilisa…  Description                             Statut         │
+│ 06/10 13:30:53   06/10 13:30:58   pve1        root@pam        CT 101 - Arrêter                        OK             │
+│ 06/10 13:30:36   06/10 13:30:39   pve1        root@pam        CT 101 - Démarrer                       OK             │
+│ 06/10 12:50:50   06/10 12:50:50   pve1        root@pam        Supprimer les données                   OK             │
+│ 06/10 12:50:05   06/10 12:50:38   pve1        root@pam        VM/CT 101 - Sauvegarde                  OK             │
+│ 06/10 12:48:08   06/10 12:48:08   pve1        root@pam        Supprimer les données                   OK             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ F1 Aide  Tab Panel  / Rechercher  r Rafraîchir  q Quitter

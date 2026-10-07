@@ -11,6 +11,7 @@
 # Scenarios: tests/screens/scenarios, one per line:
 #   <name> <key> <key>...       keys as accepted by "tmux send-keys"
 #                               (Down, Enter, Tab, F1, Escape, q, ...)
+#   <name>@<code> ...           the same in a language (fr, de, zh_CN...)
 # Lines starting with # are comments. The fixture (tests/screens/fixture)
 # is a snapshot of a real node: re-record it when the API usage changes
 # (a missing answer shows as "not recorded: ..." on the screen).
@@ -53,9 +54,13 @@ capture() {
 
 # run_scenario <name> <keys...>  -> screen on stdout
 run_scenario() {
-    local name=$1 k; shift
+    local name=$1 k lang=en; shift
+    # name@code: the scenario in another language (the translations of the
+    # Proxmox VE catalog installed on this node are used too).
+    [[ $name == *@* ]] && lang=${name#*@}
     local -a env=(env XDG_CONFIG_HOME="$TMP/config" XDG_STATE_HOME="$TMP/state"
-                  TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=)
+                  TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=
+                  PVETTY_LANGUAGE="$lang")
     if [[ $MODE == record ]]; then
         env+=(PVETTY_RECORD="$FIX")
     else

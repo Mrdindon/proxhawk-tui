@@ -31,13 +31,30 @@ if ($existing && -r $existing) {
     }
 }
 
-sub add { my $s = shift; return if !defined $s || length($s) < 2 || $s =~ /^[\$\s]/ || $s !~ /[A-Za-z]/; $str{$s} = 1 }
+sub add {
+    my $s = shift;
+    return if !defined $s || length($s) < 2 || $s =~ /^[\$\s]/ || $s !~ /[A-Za-z]/;
+    # Technical strings: variables, paths, URLs, internal names, key names.
+    return if $s =~ /\$|^\/\w|\/\?|^choice[_ ]|^[a-z]+(?:_[a-z]+)+$|^F\d+(?: \S)?$|^[a-z] F\d+$|^[0-9A-F]{2}(?::[0-9A-F]{2})+$|^(?:ge|le)$/;
+    $str{$s} = 1;
+}
+# Key hints "k:Label k:Label_with_spaces": the labels are translated one by one.
+sub hint_like { my $s = shift; my @t = split ' ', $s; return @t && !grep { !m{^[^:|\s]{1,8}:[^:|\s]+$} } @t }
 
 my $q = qr/"((?:[^"\\\$]|\\.)*)"/;   # double quoted literal without expansions
 for my $file (@ARGV) {
     open(my $fh, '<', $file) or next;
     while (my $l = <$fh>) {
         next if $l =~ /^\s*#/;
+        # Key hints first (VIEW_HINT, GRID_HINT, crud extra=...), then removed
+        # from the line so that the other patterns do not see their pieces.
+        while ($l =~ /"((?:[^"\\\$]|\\.)*)"/g) {
+            my $h = $1;
+            next unless hint_like($h);
+            for my $t (split ' ', $h) { my ($k, $lab) = split /:/, $t, 2; $lab =~ tr/_/ /; add($lab) }
+        }
+        $l =~ s/"((?:[^"\\\$]|\\.)*)"/hint_like($1) ? '""' : "\"$1\""/ge;
+        $l =~ s/\b(extra|hint)="([^"]*)"/ do { my $h = $2; if (hint_like($h)) { for my $t (split ' ', $h) { my ($k, $lab) = split m{:}, $t, 2; $lab =~ tr{_}{ }; add($lab) } } "$1=\"\"" } /ge;
         # T "..." / Tf "..."
         add($1) while $l =~ /\bTf? $q/g;
         # helpers whose first (or second) argument is a source string
@@ -54,7 +71,7 @@ for my $file (@ARGV) {
             }
         }
         # Associative tables of display strings: [key]="Display"
-        add($1) while $l =~ /\[[\w-]+\]="([^"\$]+)"/g;
+        add($1) while $file !~ /i18n\.sh$/ && $l =~ /\[[\w-]+\]="([^"\$]+)"/g;
         # fw_options entries "key:Label:Default[:bool]"
         while ($l =~ /"[\w-]+:([^:"]+):([^:"]+)(?::bool)?"/g) { add($1); add($2) }
     }

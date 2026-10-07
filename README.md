@@ -48,7 +48,11 @@ node.
 - **Modular**: every panel is a small function in `views/`; themes, icon sets
   and languages are plain files.
 - **Keyboard and mouse**, 256 colours, truecolor or 8 colours, Nerd Font,
-  Unicode, pure ASCII or no icons, multi-language ready (English included).
+  Unicode, pure ASCII or no icons.
+- **34 languages**: French, Spanish, German, Chinese (simplified) and Russian
+  complete; the other languages of the web UI through the official Proxmox VE
+  catalog installed on the node (same words as the GUI). See
+  [docs/I18N.md](docs/I18N.md).
   Key bindings and colours are configurable; ten themes (Dracula, Nord,
   Gruvbox, Catppuccin, Tokyo Night...).
 - **Batch actions and queue**: mark guests with `Space` in the search grids,
@@ -165,7 +169,7 @@ The full list is in [docs/USAGE.md](docs/USAGE.md).
 | [docs/CLI.md](docs/CLI.md) | non-interactive commands (JSON / table) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | modules, data flow, API broker protocol, rendering |
 | [docs/EXTENDING.md](docs/EXTENDING.md) | how to add a panel, an action, a theme or an icon set |
-| [docs/I18N.md](docs/I18N.md) | translations and adding a language |
+| [docs/I18N.md](docs/I18N.md) | languages, translations, adding a language |
 | [docs/TESTING.md](docs/TESTING.md) | lint, self test, golden screen tests, read/write integration tests |
 | [AGENTS.md](AGENTS.md) | short guide for coding agents |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | internal notes: design decisions, Proxmox VE behaviours, release procedure |

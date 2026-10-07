@@ -107,14 +107,16 @@ draw_header() {
     T "Create VM"; bl+=("${G[qemu]} $REPLY"); bk+=(F2); ba+=(create_vm)
     T "Create CT"; bl+=("${G[lxc]} $REPLY"); bk+=(F3); ba+=(create_ct)
     bl+=("${G[user]} ${PVE_USER:-root@pam} ${G[caret]}"); bk+=(F4); ba+=(user_menu)
-    local w=0
-    for i in "${!bl[@]}"; do (( w += ${#bl[i]} + ${#bk[i]} + 4 )); done
-    # Narrow terminal: keep only the icons of the header buttons.
-    if (( COLS - w < 40 )); then
+    local w=0 sw lbw tw
+    for i in "${!bl[@]}"; do dwidth "${bl[i]}"; (( w += REPLY + ${#bk[i]} + 4 )); done
+    # Not enough room next to the title (the search box goes first): keep
+    # only the icons of the header buttons.
+    vlen "$left"; tw=$REPLY
+    if (( COLS - w < tw + 2 )); then
         w=0
         for i in "${!bl[@]}"; do
             [[ ${ba[i]} == user_menu ]] || bl[i]=${bl[i]%% *}
-            (( w += ${#bl[i]} + ${#bk[i]} + 4 ))
+            dwidth "${bl[i]}"; (( w += REPLY + ${#bk[i]} + 4 ))
         done
     fi
     x=$(( COLS - w + 1 ))
@@ -122,16 +124,17 @@ draw_header() {
     fit "$left" $(( COLS ))
     _put 1 1 "${C[header]}${REPLY}"
     # Search box in the middle when there is room.
-    if (( x - lw > ${#search} + 4 )); then
-        local sx=$(( lw + (x - lw - ${#search}) / 2 ))
+    dwidth "$search"; sw=$REPLY
+    if (( x - lw > sw + 4 )); then
+        local sx=$(( lw + (x - lw - sw) / 2 ))
         _put 1 "$sx" "${C[btn]}${search}${C[header]}"
-        _hit 1 "$sx" $(( sx + ${#search} )) "search"
+        _hit 1 "$sx" $(( sx + sw )) "search"
     fi
     for i in "${!bl[@]}"; do
-        label=" ${bl[i]} ${bk[i]} "
+        label=" ${bl[i]} ${bk[i]} "; dwidth "$label"; lbw=$REPLY
         _put 1 "$x" "${C[btn]} ${bl[i]} ${C[btn_key]}${bk[i]}${C[btn]} ${C[header]} "
-        _hit 1 "$x" $(( x + ${#label} )) "${ba[i]}"
-        (( x += ${#label} + 1 ))
+        _hit 1 "$x" $(( x + lbw )) "${ba[i]}"
+        (( x += lbw + 1 ))
     done
     FRAME+="${C[norm]}"
 }
@@ -250,11 +253,12 @@ draw_content_box() {
             case $key in a) icon="${G[btn_create]} " ;; e) icon="${G[btn_edit]} " ;; d) icon="${G[btn_remove]} " ;; *) icon="" ;; esac
             [[ $key == ENTER || $key == Enter ]] && key="⏎"
             (( UTF8 )) || [[ $key != "⏎" ]] || key="Enter"
-            local plain=" ${icon}${lab} ${key} "
-            (( bx2 + ${#plain} > COLS - 1 )) && break
+            local plain=" ${icon}${lab} ${key} " pw
+            dwidth "$plain"; pw=$REPLY
+            (( bx2 + pw > COLS - 1 )) && break
             bar+="${C[btn]} ${icon}${lab} ${C[btn_key]}${key}${C[btn]} ${C[norm]} "
-            _hit "$cy" "$bx2" $(( bx2 + ${#plain} - 1 )) "ckey:${PB_KEYS[i]}"
-            (( bx2 += ${#plain} + 1 ))
+            _hit "$cy" "$bx2" $(( bx2 + pw - 1 )) "ckey:${PB_KEYS[i]}"
+            (( bx2 += pw + 1 ))
         done
         fit "$bar" "$CONTENT_W"
         _put "$cy" $(( CX - 1 )) " ${REPLY}${C[norm]} "

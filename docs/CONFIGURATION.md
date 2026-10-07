@@ -18,7 +18,7 @@ See [`conf/pvetty.conf.example`](../conf/pvetty.conf.example).
 
 | Key | Default | Values | Description |
 |-----|---------|--------|-------------|
-| `language` | `auto` | `auto`, `en`, any `lang/<code>.sh` | interface language; `auto` uses `LC_ALL` / `LC_MESSAGES` / `LANG` |
+| `language` | `auto` | `auto`, `en`, `fr`, `de`, `es`, `zh_CN`, `ru`... (34 languages) | interface language; `auto` = the locale when it is not English, else the datacenter language, else English (see [I18N.md](I18N.md)) |
 | `glyphs` | `auto` | `auto`, `nerd`, `unicode`, `ascii` | icon set; `auto` = `unicode` on UTF-8 terminals (`nerd` when `NERD_FONT=1` is exported), `ascii` otherwise |
 | `theme` | `auto` | `auto`, `default`, `dark`, `light`, `basic`, any `themes/<name>.sh` | colour theme; `auto` = `default` with 256 colours, `basic` otherwise |
 | `backend` | `auto` | `auto`, `broker`, `pvesh`, `replay` | API access for reads (see ARCHITECTURE.md); `replay` serves answers recorded with `PVETTY_RECORD` (tests) |
