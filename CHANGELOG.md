@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.0 — 2026-10-06
 
 - **`proxhawk-tui upgrade`**: update from GitHub according to the install
   method: the `.deb` of the latest release (checked with its SHA-256) for a

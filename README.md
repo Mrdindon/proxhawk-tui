@@ -1,6 +1,6 @@
 # Proxhawk-tui — a text console for Proxmox VE
 
-Version 2.0.0 · licence AGPL-3.0-or-later
+Version 2.1.0 · licence AGPL-3.0-or-later
 
 `proxhawk-tui` is a text console version of the Proxmox VE web interface (the GUI
 served on port 8006). It reproduces the layout, the navigation and most panels

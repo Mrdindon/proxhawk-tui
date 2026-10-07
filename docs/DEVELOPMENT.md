@@ -15,6 +15,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 2.1.0 | 2026-10-06 | `proxhawk-tui upgrade` (package or git clone) |
 | 2.0.0 | 2026-10-06 | renamed pvetty → proxhawk-tui; French, Spanish, German, Chinese, Russian (with the Proxmox VE GUI catalog), double width characters |
 | 1.3.1 | 2026-10-06 | user question always asked, PAM account creation by users allowed to (sudo), fix of writes as another user, Ansible plugin fixes, new demo GIF |
 | 1.3.0 | 2026-10-06 | run as another Proxmox VE user (permissions like the web UI), one-line install, add user with realm (fix) |
