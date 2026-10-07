@@ -30,6 +30,7 @@ Commands:
   storage list [--node N]            storages
   storage content <node> <storage> [--type iso|vztmpl|backup|images|rootdir]
   api get|create|set|delete <path> [--param value ...]   any API call
+  upgrade [--check] [--version X.Y.Z] [--yes]   update from GitHub (package or git clone)
 
 Options:
   -o, --output json|table            output format (default: json)
