@@ -26,6 +26,7 @@ proxhawk-tui help
 | `storage list [--node N]` | storages |
 | `storage content <node> <storage> [--type iso\|vztmpl\|backup\|images\|rootdir]` | content of a storage |
 | `api get\|create\|set\|delete <path> [--param value ...]` | any API call (same syntax as `pvesh`) |
+| `upgrade [--check] [--version X.Y.Z] [--yes]` | update proxhawk-tui from GitHub: the `.deb` of the latest release (package install) or `git pull` (git clone); `--check` only reports (exit code 10 when an update is available). See the README, *Update* |
 
 A guest is given by its VMID or its name.
 

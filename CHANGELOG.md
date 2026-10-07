@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.0 — 2026-10-06
+
+- **`proxhawk-tui upgrade`**: update from GitHub according to the install
+  method: the `.deb` of the latest release (checked with its SHA-256) for a
+  package install, `git pull --ff-only` for a git clone; `--check` only
+  reports (exit code 10 when an update is available).
+
 ## 2.0.0 — 2026-10-06
 
 - **Renamed pvetty → proxhawk-tui**: command `proxhawk-tui`, files
