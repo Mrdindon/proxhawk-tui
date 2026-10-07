@@ -25,7 +25,7 @@ test_sdn() {
     check "Zones: add VLAN" key a ""
 
     check "VNets: view" view vnets
-    reset_step; crud_answers sub=vnet; preset vnet=pvtvn1 zone=pvtz1 alias="pvetty vnet"
+    reset_step; crud_answers sub=vnet; preset vnet=pvtvn1 zone=pvtz1 alias="proxhawk-tui vnet"
     check "VNets: add" key a ""
     check "VNets: created" api_has /cluster/sdn/vnets vnet pvtvn1 "pending=1"
     view vnets; reset_step; preset alias="edited vnet"
@@ -116,7 +116,7 @@ test_sdn() {
     view sdnipam; rowkey "pvtvn4|pvtz4|10.96.0.50|*"; k=$REPLY
     reset_step; check "IPAM: remove IP mapping" key d "$k"
     check "VNet Firewall: view" view sdnfirewall
-    reset_step; crud_answers sub=fwrule; CRUD_SEL=pvtvn1; preset type=forward action=ACCEPT proto=icmp enable=0 comment="pvetty vnet rule"
+    reset_step; crud_answers sub=fwrule; CRUD_SEL=pvtvn1; preset type=forward action=ACCEPT proto=icmp enable=0 comment="proxhawk-tui vnet rule"
     STATUS_LVL=none; crud_add v_dc_sdnfirewall; [[ $STATUS_LVL != err ]] && ok "VNet Firewall: add rule" || ko "VNet Firewall: add rule" "$STATUS_MSG"
     view sdnfirewall; reset_step; preset comment="edited vnet rule"
     check "VNet Firewall: edit rule" key e "fwrule|pvtvn1|0"

@@ -16,10 +16,10 @@ theme_load() {
     if [[ $name == auto ]]; then
         (( ${TCAP[colors]:-8} >= 256 )) && name=default || name=basic
     fi
-    [[ -r $PVETTY_HOME/themes/$name.sh ]] || name=default
+    [[ -r $PROXHAWK_TUI_HOME/themes/$name.sh ]] || name=default
     # shellcheck source=/dev/null
-    source "$PVETTY_HOME/themes/default.sh"
-    [[ $name != default ]] && source "$PVETTY_HOME/themes/$name.sh"
+    source "$PROXHAWK_TUI_HOME/themes/default.sh"
+    [[ $name != default ]] && source "$PROXHAWK_TUI_HOME/themes/$name.sh"
     THEME_NAME=$name
     # Overrides of the configuration file: color.<token> = <colour>
     for k in "${!CFGX[@]}"; do

@@ -1,4 +1,4 @@
-# pvetty — Extending
+# proxhawk-tui — Extending
 
 Everything visible is built from small, independent pieces. This page shows
 how to add each of them. After a change, run `tools/selftest.sh` (read) and the matching section of
@@ -229,9 +229,9 @@ See [I18N.md](I18N.md).
 ## Plugins
 
 A plugin adds panels or buttons without changing the sources. It is a bash
-file `plugins/<name>.sh` (or `~/.config/pvetty/plugins/<name>.sh`), loaded
+file `plugins/<name>.sh` (or `~/.config/proxhawk-tui/plugins/<name>.sh`), loaded
 after the views when its name is listed in the `plugins` setting
-(`F4` › Plugins, or `PVETTY_PLUGINS`). The first lines describe it:
+(`F4` › Plugins, or `PROXHAWK_TUI_PLUGINS`). The first lines describe it:
 
 ```bash
 # plugin: uptime-report
@@ -264,7 +264,7 @@ VIEW_LIVE[v_dc_uptime]=1
   `crud`, `guest_ip_cached`...).
 
 `tools/selftest.sh` renders plugin panels when the plugin is enabled
-(`PVETTY_PLUGINS=name tools/selftest.sh`). The bundled plugins
+(`PROXHAWK_TUI_PLUGINS=name tools/selftest.sh`). The bundled plugins
 (`community-scripts`, `ansible-inventory`) are complete examples.
 
 ## Coding conventions

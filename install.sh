@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# install.sh - install, update or remove pvetty on a Proxmox VE node.
+# install.sh - install, update or remove proxhawk-tui on a Proxmox VE node.
 #
 # One line, from GitHub (installs the .deb of the latest release, checked
 # with its SHA-256):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/Mrdindon/pvetty/main/install.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/Mrdindon/proxhawk-tui/main/install.sh)"
 #   ... install.sh)" -- --version 1.2.1      a given release
 #   ... install.sh)" -- --uninstall          remove the package
 #
 # From a source directory (git clone or release archive):
-#   ./install.sh                 symlink /usr/local/bin/pvetty -> this directory
-#   ./install.sh --prefix DIR    symlink DIR/pvetty instead
+#   ./install.sh                 symlink /usr/local/bin/proxhawk-tui -> this directory
+#   ./install.sh --prefix DIR    symlink DIR/proxhawk-tui instead
 #   ./install.sh --uninstall     remove the symlink (the source directory is kept)
 set -euo pipefail
-REPO=Mrdindon/pvetty
+REPO=Mrdindon/proxhawk-tui
 prefix=/usr/local/bin
 action=install
 version=""
@@ -36,7 +36,7 @@ if [[ -z ${BASH_SOURCE[0]:-} || ! -f ${BASH_SOURCE[0]} ]]; then
     (( EUID == 0 )) || die "run it as root"
     command -v pveversion >/dev/null || die "this is not a Proxmox VE node (pveversion not found)"
     if [[ $action == uninstall ]]; then
-        apt-get remove -y pvetty
+        apt-get remove -y proxhawk-tui
         exit 0
     fi
     if [[ -z $version ]]; then
@@ -46,17 +46,17 @@ if [[ -z ${BASH_SOURCE[0]:-} || ! -f ${BASH_SOURCE[0]} ]]; then
         version=${url##*/v}
         [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "no release found ($url)"
     fi
-    deb="pvetty_${version}_all.deb"
+    deb="proxhawk-tui_${version}_all.deb"
     base="https://github.com/$REPO/releases/download/v$version"
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
-    echo "Downloading pvetty $version..."
+    echo "Downloading proxhawk-tui $version..."
     curl -fsSL -o "$tmp/$deb" "$base/$deb" || die "cannot download $base/$deb"
     curl -fsSL -o "$tmp/$deb.sha256" "$base/$deb.sha256" || die "cannot download the checksum"
     ( cd "$tmp" && sha256sum -c --quiet "$deb.sha256" ) || die "checksum mismatch: the package was not installed"
     apt-get install -y "$tmp/$deb"
     echo
-    echo "pvetty $version installed: run 'pvetty' (documentation: /usr/share/doc/pvetty, https://github.com/$REPO)"
+    echo "proxhawk-tui $version installed: run 'proxhawk-tui' (documentation: /usr/share/doc/proxhawk-tui, https://github.com/$REPO)"
     exit 0
 fi
 
@@ -64,13 +64,13 @@ fi
 # From a source directory.
 # ---------------------------------------------------------------------------
 src=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
-link="$prefix/pvetty"
+link="$prefix/proxhawk-tui"
 if [[ $action == uninstall ]]; then
     if [[ -L $link ]]; then rm -f "$link"; echo "removed $link"; else echo "$link is not a symlink - nothing done"; fi
     exit 0
 fi
-command -v pvesh >/dev/null || echo "warning: pvesh not found - pvetty must run on a Proxmox VE node" >&2
-chmod +x "$src/pvetty" "$src/lib/broker.pl" "$src"/tools/*.sh
+command -v pvesh >/dev/null || echo "warning: pvesh not found - proxhawk-tui must run on a Proxmox VE node" >&2
+chmod +x "$src/proxhawk-tui" "$src/lib/broker.pl" "$src"/tools/*.sh
 mkdir -p "$prefix"
-ln -sfn "$src/pvetty" "$link"
-echo "installed $link -> $src/pvetty"
+ln -sfn "$src/proxhawk-tui" "$link"
+echo "installed $link -> $src/proxhawk-tui"

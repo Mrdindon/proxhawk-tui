@@ -10,9 +10,9 @@ test_node() {
     # Notes.
     view notes
     api_kv "/nodes/$NODE/config"; old=${API_KV[description]-}
-    editor_writes "pvetty node note"
+    editor_writes "proxhawk-tui node note"
     check "Node Notes: edit" key e ""
-    check "Node Notes: saved" kv_is "/nodes/$NODE/config" description "pvetty node note"
+    check "Node Notes: saved" kv_is "/nodes/$NODE/config" description "proxhawk-tui node note"
     editor_writes "${old//$'\x1f'/$'\n'}"; key e "" >/dev/null
     check "Node Notes: restored" kv_is "/nodes/$NODE/config" description "${old%%+($'\x1f')}"
 
@@ -46,9 +46,9 @@ test_node() {
     # Hosts.
     check "Hosts: view" view hosts
     cp /etc/hosts "$RUN_DIR/hosts.orig"
-    editor_writes "$(cat /etc/hosts)"$'\n'"# pvetty test entry"
+    editor_writes "$(cat /etc/hosts)"$'\n'"# proxhawk-tui test entry"
     check "Hosts: edit" key e ""
-    check "Hosts: saved" grep -q "pvetty test entry" /etc/hosts
+    check "Hosts: saved" grep -q "proxhawk-tui test entry" /etc/hosts
     editor_writes "$(cat "$RUN_DIR/hosts.orig")"
     key e "" >/dev/null
     check "Hosts: restored" cmp -s /etc/hosts "$RUN_DIR/hosts.orig"
@@ -71,7 +71,7 @@ test_node() {
 
     # Network: bridge created, applied, removed; revert of pending changes.
     check "Network: view" view network
-    reset_step; crud_answers type=bridge; preset iface=vmbr99 cidr=10.97.0.1/24 autostart=1 comments="pvetty test bridge"
+    reset_step; crud_answers type=bridge; preset iface=vmbr99 cidr=10.97.0.1/24 autostart=1 comments="proxhawk-tui test bridge"
     check "Network: add Linux Bridge" key a ""
     view network
     check "Network: pending changes shown" bash -c "[[ '${C_LINES[*]}' == *vmbr99* ]]"
@@ -79,7 +79,7 @@ test_node() {
     check "Network: edit bridge" key e "vmbr99|bridge"
     reset_step; check "Network: apply configuration" key A ""
     check "Network: vmbr99 up with its address" wait_for 20 bash -c 'ip -4 addr show vmbr99 | grep -q 10.97.0.1'
-    reset_step; crud_answers type=vlan; preset iface=vmbr99.42 comments="pvetty vlan"
+    reset_step; crud_answers type=vlan; preset iface=vmbr99.42 comments="proxhawk-tui vlan"
     check "Network: add VLAN" key a ""
     reset_step; check "Network: revert pending changes" key X ""
     check "Network: VLAN discarded" api_lacks "/nodes/$NODE/network" iface vmbr99.42

@@ -1,0 +1,36 @@
+ PROXMOX Virtual Environment 9.2.21         ? Dokumentation F1   ▭ Erstelle VM F2   ◈ Erstelle CT F3   @ root@pam ▾ F4
+╭─ Server-Ansicht ▾ ─────╮╭────────────────────────────────────────────────────────────────────────────────────────────╮
+│▾ ▦ Rechenzentrum       ││ Knoten 'pve1'                                                ↻ b   ◉ h   › S   › w   ≡ B   │
+│  ▾ ▣ pve1              │├────────────────────────┬───────────────────────────────────────────────────────────────────┤
+│      ▭ 100 (web01)     ││ ⌕ Suche                │  Zeitraum t                                                       │
+│      ◈ 101 (db01)      ││ ≣ Übersicht            │ pve1 (Laufzeit: 22:52:48)                                         ▐
+│      ⌗ localnetwork (p…││ ✎ Hinweise             │ ───────────────────────────────────────────────────────────────── ▐
+│      ◫ local (pve1)    ││ › Shell                │ CPU-Auslastung     ████████▍░░░░░░░░░ 46.94% von 4 CPU(s)         ▐
+│      ◫ pbs-main (pve1) ││ ⚙ System               │ IO-Verzögerung     0.00%                                          ▐
+│      ◫ VM (pve1)       ││   ⇄ Netzwerk           │ Durchschnittliche… 0.47, 0.46, 0.44                               ▐
+│                        ││   ✓ Zertifikate        │ RAM-Auslastung     ███▏░░░░░░░░░░░░░░ 17.90% (2.76 GiB von 15.46… ▐
+│                        ││   ◍ DNS                │ KSM sharing        0 B                                            ▐
+│                        ││   ≣ Hosts              │ Festplattenplatz / ████▍░░░░░░░░░░░░░ 24.88% (6.74 GiB von 27.08… ▐
+│                        ││   ≡ Optionen           │ SWAP-Auslastung    ░░░░░░░░░░░░░░░░░░ 0.00% (0 B von 3.87 GiB)    ▐
+│                        ││   ◷ Zeit               │ CPU(s)             4 x Intel(R) Core(TM) i5-8500T CPU @ 2.10GHz … │
+│                        ││   ≣ System Log         │ Kernelversion      Linux 7.0.14-20-pve #1 SMP PREEMPT_DYNAMIC PM… │
+│                        ││ ↻ Updates              │ Boot Modus         EFI                                            │
+│                        ││   ⊟ Repositories       │ Manager-Version    pve-manager/9.2.21/4f6e0ac86f9e8c7f            │
+│                        ││ ▥ Firewall             │                                                                   │
+│                        ││   ≡ Optionen           │ Stunde (Durchschnitt)                                             │
+│                        ││   ≣ Log                │ ───────────────────────────────────────────────────────────────── │
+│                        ││ ▤ Disks                │  CPU-Auslastung  █ 4.12%  █ 0.05%  (max 29.93%)                   │
+│                        ││   ▢ LVM                │  │⠀⠀⠀⠀⠀⠀⠀⢠⡄⢀⡀⠀⠀⢸⡇⠀⠀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀  │
+│                        ││   ▫ LVM-Thin           │  │⠀⠀⠀⠀⠀⠀⢰⣾⡇⢸⡇⠀⠀⢸⡇⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣦⣼⡇⠀⠀⠀⢀⡀⠀⠀⠀⣀⠀⠀⠀⣿⠀⠀⠀⠀⠀⣿⣤⠀⠀  │
+│                        ││   ▪ Verzeichnis        │  │⠀⠀⠀⠀⠀⢠⣼⣿⡇⢸⡇⠀⢠⣼⡇⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⢸⡇⢸⡇⠀⠀⠀⣿⠀⠀⠀⣿⠀⣿⣤⣿⠀⣿⣿⠀⠀  │
+│                        ││   ⊞ ZFS                │  │⣶⣦⡄⠀⠀⢸⣿⣿⡇⢸⡇⠀⢸⣿⡇⠀⠀⣿⠀⠀⠀⣤⣿⠀⠀⠀⣀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣸⣿⣿⣇⡀⢸⣧⣼⣷⡆⢰⣶⣿⣿⣤⠀⣿⣿⣿⣿⣿⣀⣿⣿⠀⠀  │
+╰────────────────────────╯╰────────────────────────┴───────────────────────────────────────────────────────────────────╯
+╭─ Tasks │ Cluster-Log ────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Startzeit        Endzeit          Knoten      Benutzername    Beschreibung                            Status         │
+│ 06.10. 13:30:53  06.10. 13:30:58  pve1        root@pam        CT 101 - Herunterfahren                 OK             │
+│ 06.10. 13:30:36  06.10. 13:30:39  pve1        root@pam        CT 101 - Starten                        OK             │
+│ 06.10. 12:50:50  06.10. 12:50:50  pve1        root@pam        Daten löschen                           OK             │
+│ 06.10. 12:50:05  06.10. 12:50:38  pve1        root@pam        VM/CT 101 - Sicherung                   OK             │
+│ 06.10. 12:48:08  06.10. 12:48:08  pve1        root@pam        Daten löschen                           OK             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ F1 Hilfe  Tab Panel  / Suche  r Aktualisieren  q Beenden

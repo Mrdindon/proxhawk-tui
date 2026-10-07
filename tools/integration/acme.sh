@@ -27,24 +27,24 @@ test_acme() {
 
     # Account on the Let's Encrypt staging directory.
     if [[ -z $contact ]]; then skip "ACME: staging account" "ACME_CONTACT not set"; else
-        reset_step; crud_answers sub=account directory=$staging; preset name=pvetty-test contact="$contact"
+        reset_step; crud_answers sub=account directory=$staging; preset name=proxhawk-tui-test contact="$contact"
         check "ACME: register staging account" key a ""
-        check "ACME: account listed" api_has /cluster/acme/account name pvetty-test
+        check "ACME: account listed" api_has /cluster/acme/account name proxhawk-tui-test
         view acme
-        check "ACME: account details" enter "account|pvetty-test"
+        check "ACME: account details" enter "account|proxhawk-tui-test"
         reset_step; preset contact="$contact"
-        check "ACME: edit account" key e "account|pvetty-test"
-        reset_step; check "ACME: deactivate account" key d "account|pvetty-test"
-        check "ACME: account removed" api_lacks /cluster/acme/account name pvetty-test
+        check "ACME: edit account" key e "account|proxhawk-tui-test"
+        reset_step; check "ACME: deactivate account" key d "account|proxhawk-tui-test"
+        check "ACME: account removed" api_lacks /cluster/acme/account name proxhawk-tui-test
     fi
 
     # Node certificates.
     ctx "node/$NODE"
     check "Certificates: view" view certificates
-    reset_step; preset acmedomain1="pvetty-test.example.invalid,plugin=standalone"
+    reset_step; preset acmedomain1="proxhawk-tui-test.example.invalid,plugin=standalone"
     check "Certificates: add ACME domain" key a ""
-    check "Certificates: domain saved" kv_like "/nodes/$NODE/config" acmedomain1 "pvetty-test.example.invalid*"
-    view certificates; reset_step; preset acmedomain1="pvetty-test2.example.invalid,plugin=standalone"
+    check "Certificates: domain saved" kv_like "/nodes/$NODE/config" acmedomain1 "proxhawk-tui-test.example.invalid*"
+    view certificates; reset_step; preset acmedomain1="proxhawk-tui-test2.example.invalid,plugin=standalone"
     check "Certificates: edit domain" key e "domain|acmedomain1"
     reset_step; check "Certificates: remove domain" key d "domain|acmedomain1"
     api_kv "/nodes/$NODE/config"; local acme=${API_KV[acme]-}
@@ -56,13 +56,13 @@ test_acme() {
     local d=$RUN_DIR/cert
     mkdir -p "$d"
     cp /etc/pve/local/pveproxy-ssl.pem "$d/orig.pem" 2>/dev/null; cp /etc/pve/local/pveproxy-ssl.key "$d/orig.key" 2>/dev/null
-    openssl req -x509 -newkey rsa:2048 -nodes -keyout "$d/key.pem" -out "$d/cert.pem" -days 2 -subj "/CN=pvetty-test" >/dev/null 2>&1
+    openssl req -x509 -newkey rsa:2048 -nodes -keyout "$d/key.pem" -out "$d/cert.pem" -days 2 -subj "/CN=proxhawk-tui-test" >/dev/null 2>&1
     reset_step; answers "$d/cert.pem" "$d/key.pem"
     check "Certificates: upload custom certificate" key u ""
-    check "Certificates: custom certificate active" bash -c "pvesh get /nodes/$NODE/certificates/info --output-format json | grep -q 'CN=pvetty-test'"
+    check "Certificates: custom certificate active" bash -c "pvesh get /nodes/$NODE/certificates/info --output-format json | grep -q 'CN=proxhawk-tui-test'"
     reset_step
     check "Certificates: delete custom certificate" key D ""
-    check "Certificates: custom certificate removed" bash -c "! pvesh get /nodes/$NODE/certificates/info --output-format json | grep -q pvetty-test"
+    check "Certificates: custom certificate removed" bash -c "! pvesh get /nodes/$NODE/certificates/info --output-format json | grep -q proxhawk-tui-test"
 
     # Real order with the configured domains / plugin (restores a trusted certificate).
     api_kv "/nodes/$NODE/config"

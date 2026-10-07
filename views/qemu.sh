@@ -253,7 +253,7 @@ v_qemu_monitor__enter() {
     [[ -n $cmd ]] || return
     spinner_start "qm monitor $CTX_VMID"
     out=$(pvesh create "/nodes/$CTX_NODE/qemu/$CTX_VMID/monitor" --command "$cmd" --output-format json 2>&1 \
-        | perl "$PVETTY_HOME/lib/broker.pl" --filter rows "")
+        | perl "$PROXHAWK_TUI_HOME/lib/broker.pl" --filter rows "")
     spinner_stop
     MONITOR_LOG+=("${C[accent]}# ${cmd}${C[norm]}")
     local -a lines

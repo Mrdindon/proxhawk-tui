@@ -16,21 +16,21 @@ declare -ga API_ROWS=()
 declare -gA _API_CACHE=() _API_CACHE_T=()
 declare -gA JOBS=()     # pid -> description
 declare -gA JOBS_OUT=() # pid -> output file
-declare -gA TASK_WATCH=()   # UPID -> description (tasks started by pvetty)
+declare -gA TASK_WATCH=()   # UPID -> description (tasks started by proxhawk-tui)
 API_WAIT_TASKS=0            # 1 = api_exec_sync waits for the worker task to finish
 
 api_start() {
     local line=""
     # Replay of recorded API answers (tests without a Proxmox VE node).
     if [[ ${CFG[backend]} == replay ]]; then
-        [[ -d ${PVETTY_REPLAY-} ]] || die "backend replay: set PVETTY_REPLAY to a recorded directory"
+        [[ -d ${PROXHAWK_TUI_REPLAY-} ]] || die "backend replay: set PROXHAWK_TUI_REPLAY to a recorded directory"
         API_BACKEND=replay
-        LOCAL_NODE=$(< "$PVETTY_REPLAY/node")
+        LOCAL_NODE=$(< "$PROXHAWK_TUI_REPLAY/node")
         CLEANUP_HOOKS+=(api_stop)
         return 0
     fi
     if [[ ${CFG[backend]} != pvesh ]]; then
-        coproc BROKER { exec perl "$PVETTY_HOME/lib/broker.pl" 2>>"$RUN_DIR/broker.err"; }
+        coproc BROKER { exec perl "$PROXHAWK_TUI_HOME/lib/broker.pl" 2>>"$RUN_DIR/broker.err"; }
         if IFS= read -r -t 60 line <&"${BROKER[0]}" && [[ $line == $'\x04READY\t'* ]]; then
             API_BACKEND=broker
             LOCAL_NODE=${line#*$'\t'}
@@ -86,7 +86,7 @@ api_get() {
     fi
     if [[ $API_BACKEND == broker ]]; then
         if ! _api_broker_get "$mode" "$path" "$query" "$fields"; then
-            [[ -n $API_ERR ]] && { [[ -n ${PVETTY_RECORD-} ]] && _api_record "$key" 1; return 1; }
+            [[ -n $API_ERR ]] && { [[ -n ${PROXHAWK_TUI_RECORD-} ]] && _api_record "$key" 1; return 1; }
             # The broker died: fall back to pvesh for the rest of the session.
             log "broker lost, switching to pvesh"
             api_stop
@@ -101,13 +101,13 @@ api_get() {
         _API_CACHE[$key]="${API_ROWS[*]}"
         _API_CACHE_T[$key]=$NOW
     fi
-    [[ -n ${PVETTY_RECORD-} ]] && _api_record "$key" 0
+    [[ -n ${PROXHAWK_TUI_RECORD-} ]] && _api_record "$key" 0
     return 0
 }
 
 # ---------------------------------------------------------------------------
-# Record / replay. PVETTY_RECORD=<dir> saves every answer (and errors);
-# backend=replay with PVETTY_REPLAY=<dir> serves them back. Writes are not
+# Record / replay. PROXHAWK_TUI_RECORD=<dir> saves every answer (and errors);
+# backend=replay with PROXHAWK_TUI_REPLAY=<dir> serves them back. Writes are not
 # executed in replay mode (they succeed without effect). Used by
 # tools/screen-test.sh; also handy to reproduce a display problem elsewhere.
 # ---------------------------------------------------------------------------
@@ -116,7 +116,7 @@ _api_key_file() {
     h=$(printf '%s' "$1" | md5sum); REPLY=${h%% *}
 }
 _api_record() {
-    local key=$1 failed=$2 dir=$PVETTY_RECORD
+    local key=$1 failed=$2 dir=$PROXHAWK_TUI_RECORD
     mkdir -p "$dir"
     [[ -s $dir/node ]] || printf '%s' "$LOCAL_NODE" > "$dir/node"
     _api_key_file "$key"
@@ -127,7 +127,7 @@ _api_record() {
 }
 _api_replay_get() {
     local f
-    _api_key_file "$1"; f="$PVETTY_REPLAY/$REPLY"
+    _api_key_file "$1"; f="$PROXHAWK_TUI_REPLAY/$REPLY"
     if [[ ! -e $f ]]; then API_ERR="not recorded: $1"; return 1; fi
     mapfile -t API_ROWS < "$f"
     if [[ ${API_ROWS[0]-} == $'\x04ERR\t'* ]]; then API_ERR=${API_ROWS[0]#*$'\t'}; API_ROWS=(); return 1; fi
@@ -155,7 +155,7 @@ _api_pvesh_get() {
     case $mode in
         schema|propparse|propprint|pluginopts|perm)
             # Schema requests need the API stack: one-shot broker call.
-            mapfile -t API_ROWS < <(perl "$PVETTY_HOME/lib/broker.pl" --once "$mode" "$path" "$query" "$fields" 2>"$RUN_DIR/pvesh.err")
+            mapfile -t API_ROWS < <(perl "$PROXHAWK_TUI_HOME/lib/broker.pl" --once "$mode" "$path" "$query" "$fields" 2>"$RUN_DIR/pvesh.err")
             if [[ -s $RUN_DIR/pvesh.err ]]; then API_ERR=$(tail -n 1 "$RUN_DIR/pvesh.err"); return 1; fi
             return 0 ;;
     esac
@@ -168,7 +168,7 @@ _api_pvesh_get() {
         args+=("--$k" "$v")
     done
     mapfile -t API_ROWS < <(pvesh get "$path" "${args[@]}" --output-format json 2>"$RUN_DIR/pvesh.err" \
-        | perl "$PVETTY_HOME/lib/broker.pl" --filter "$mode" "$fields")
+        | perl "$PROXHAWK_TUI_HOME/lib/broker.pl" --filter "$mode" "$fields")
     if [[ -s $RUN_DIR/pvesh.err ]] && (( ${#API_ROWS[@]} == 0 )); then
         API_ERR=$(tail -n 1 "$RUN_DIR/pvesh.err")
         return 1

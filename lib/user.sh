@@ -1,13 +1,13 @@
 # shellcheck shell=bash
-# user.sh - the Proxmox VE user pvetty runs as.
+# user.sh - the Proxmox VE user proxhawk-tui runs as.
 #
-# pvetty runs as root on the node; by default it acts as root@pam. Another
+# proxhawk-tui runs as root on the node; by default it acts as root@pam. Another
 # user can be chosen at start-up (prompt), with --user or "user = ...": the
 # API requests then run as that user and are checked with its permissions,
 # like in the web UI (lib/broker.pl for reads, lib/pvesh-as.pl for writes,
-# put first in PATH as "pvesh"). No password is asked: pvetty already runs
+# put first in PATH as "pvesh"). No password is asked: proxhawk-tui already runs
 # as root, which can do anything on the node; the user only limits what
-# pvetty does.
+# proxhawk-tui does.
 #
 #   user_select      prompt (setting ask_user), then user_apply
 #   user_apply USER  run the API requests as USER (rc 1: unknown user)
@@ -30,7 +30,7 @@ user_list() {
     done < /etc/pve/user.cfg
 }
 
-# The user pvetty was launched by: SUDO_USER@pam when that PVE user exists.
+# The user proxhawk-tui was launched by: SUDO_USER@pam when that PVE user exists.
 user_default() {
     REPLY=root@pam
     [[ -n ${SUDO_USER-} && $SUDO_USER != root && " ${USERS[*]} " == *" $SUDO_USER@pam "* ]] && REPLY="$SUDO_USER@pam"
@@ -50,26 +50,26 @@ user_select() {
     T "Other user (name@realm)..."; items+=(_other "$REPLY")
     while :; do
         DLG_NOTAGS=1 DLG_OK_LABEL="Run" DLG_CANCEL_LABEL="Quit" \
-            dlg_menu "pvetty" "Run pvetty as which Proxmox VE user? Its permissions apply. (ask_user = 0 in the settings: always the launching user)" "${items[@]}" \
+            dlg_menu "proxhawk-tui" "Run proxhawk-tui as which Proxmox VE user? Its permissions apply. (ask_user = 0 in the settings: always the launching user)" "${items[@]}" \
             || exit 0
         u=$REPLY
         if [[ $u == _other ]]; then
-            dlg_input "pvetty" "Proxmox VE user ID (name@realm):" "" || continue
+            dlg_input "proxhawk-tui" "Proxmox VE user ID (name@realm):" "" || continue
             u=$REPLY
         fi
         user_apply "$u" && return
         Tf "Unknown or disabled Proxmox VE user: %s" "$u"
-        dlg_msg "pvetty" "$REPLY"
+        dlg_msg "proxhawk-tui" "$REPLY"
     done
 }
 
 user_apply() {
     local u=$1 d p=""
     [[ $u == *@* ]] || u="$u@pam"
-    # Drop the "pvesh" wrapper of an earlier choice (or of the pvetty that
+    # Drop the "pvesh" wrapper of an earlier choice (or of the proxhawk-tui that
     # restarted this one) from PATH.
     local IFS=:
-    for d in $PATH; do [[ $d == */pvetty.*/bin ]] || p+="${p:+:}$d"; done
+    for d in $PATH; do [[ $d == */proxhawk-tui.*/bin ]] || p+="${p:+:}$d"; done
     unset IFS
     PATH=$p
     if [[ $u != root@pam ]]; then
@@ -78,11 +78,11 @@ user_apply() {
         # Writes: a "pvesh" that runs as the user, first in PATH (also for
         # the background jobs and the API helper started later).
         mkdir -p "$RUN_DIR/bin"
-        printf '#!/bin/sh\nexec perl %q "$@"\n' "$PVETTY_HOME/lib/pvesh-as.pl" > "$RUN_DIR/bin/pvesh"
+        printf '#!/bin/sh\nexec perl %q "$@"\n' "$PROXHAWK_TUI_HOME/lib/pvesh-as.pl" > "$RUN_DIR/bin/pvesh"
         chmod +x "$RUN_DIR/bin/pvesh"
         PATH="$RUN_DIR/bin:$PATH"
     fi
-    export PATH PVETTY_USER=$u
+    export PATH PROXHAWK_TUI_USER=$u
     PVE_USER=$u
     return 0
 }

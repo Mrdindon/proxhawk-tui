@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pvetty - text console version of the Proxmox VE web interface.
+# proxhawk-tui - text console version of the Proxmox VE web interface.
 #
 # Requirements: bash >= 4.3, perl (shipped with Proxmox VE), pvesh,
 # optional: whiptail or dialog (whiptail ships with Proxmox VE), less.
@@ -11,17 +11,17 @@
 set -o pipefail
 shopt -s extglob
 
-PVETTY_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+PROXHAWK_TUI_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 
 for _m in core term theme glyphs i18n widgets api user content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins onboarding cli actions layout; do
     # shellcheck source=/dev/null
-    source "$PVETTY_HOME/lib/$_m.sh"
+    source "$PROXHAWK_TUI_HOME/lib/$_m.sh"
 done
 unset _m
 
 usage() {
     cat <<EOF
-Usage: pvetty [options]
+Usage: proxhawk-tui [options]
 
 Text console for Proxmox VE, modelled on the web interface (port 8006).
 
@@ -38,15 +38,15 @@ Options:
   -h, --help            show this help
   -V, --version         show the version
 
-Non-interactive commands (JSON / table output): pvetty help
+Non-interactive commands (JSON / table output): proxhawk-tui help
 
-Configuration files: /etc/pvetty.conf, ~/.config/pvetty/pvetty.conf
-Documentation: $PVETTY_HOME/docs/
+Configuration files: /etc/proxhawk-tui.conf, ~/.config/proxhawk-tui/proxhawk-tui.conf
+Documentation: $PROXHAWK_TUI_HOME/docs/
 EOF
 }
 
 # ---------------------------------------------------------------------------
-# Non-interactive subcommands (lib/cli.sh): pvetty guests list ...
+# Non-interactive subcommands (lib/cli.sh): proxhawk-tui guests list ...
 # ---------------------------------------------------------------------------
 case ${1-} in
     nodes|guests|tasks|storage|api|help)
@@ -74,8 +74,8 @@ while (( $# )); do
         --select) INITIAL_SEL=$2; CLI_SELECT=1; shift ;;
         -u|--user) CLI[user]=$2; shift ;;
         -h|--help) usage; exit 0 ;;
-        -V|--version) echo "pvetty $PVETTY_VERSION"; exit 0 ;;
-        *) echo "pvetty: unknown option '$1'" >&2; usage >&2; exit 2 ;;
+        -V|--version) echo "proxhawk-tui $PROXHAWK_TUI_VERSION"; exit 0 ;;
+        *) echo "proxhawk-tui: unknown option '$1'" >&2; usage >&2; exit 2 ;;
     esac
     shift
 done
@@ -85,10 +85,10 @@ for _k in "${!CLI[@]}"; do CFG[$_k]=${CLI[$_k]}; done
 unset _k
 keys_load
 
-(( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )) || { echo "pvetty: bash >= 4.3 required" >&2; exit 1; }
-[[ -t 0 && -t 1 ]] || { echo "pvetty: must be run in a terminal" >&2; exit 1; }
-(( EUID == 0 )) || { echo "pvetty: must be run as root on a Proxmox VE node" >&2; exit 1; }
-command -v pvesh >/dev/null || { echo "pvetty: pvesh not found - is this a Proxmox VE node?" >&2; exit 1; }
+(( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )) || { echo "proxhawk-tui: bash >= 4.3 required" >&2; exit 1; }
+[[ -t 0 && -t 1 ]] || { echo "proxhawk-tui: must be run in a terminal" >&2; exit 1; }
+(( EUID == 0 )) || { echo "proxhawk-tui: must be run as root on a Proxmox VE node" >&2; exit 1; }
+command -v pvesh >/dev/null || { echo "proxhawk-tui: pvesh not found - is this a Proxmox VE node?" >&2; exit 1; }
 
 # ---------------------------------------------------------------------------
 # Initialisation
@@ -446,12 +446,12 @@ run_action() {
     esac
 }
 
-# Quit, asking first when tasks started by pvetty are still followed.
+# Quit, asking first when tasks started by proxhawk-tui are still followed.
 quit_request() {
     local n=$(( ${#TASK_WATCH[@]} + ${#BG_CMDS[@]} ))
     declare -p GQUEUE >/dev/null 2>&1 && { local q; for q in "${GQUEUE[@]}"; do [[ -n $q ]] && (( n++ )); done; }
     if (( n > 0 )) && [[ ${CFG[confirm_quit]} == 1 ]]; then
-        Tf "%d task(s) started by pvetty are still running or queued. Quit anyway? (the running tasks continue)" "$n"
+        Tf "%d task(s) started by proxhawk-tui are still running or queued. Quit anyway? (the running tasks continue)" "$n"
         dlg_yesno "Quit" "$REPLY" || return
     fi
     RUNNING=0
@@ -506,6 +506,6 @@ done
 if (( RESTART )); then
     trap - EXIT
     on_exit
-    exec "$PVETTY_HOME/pvetty" "${ORIG_ARGS[@]}" --select "${SEL_ID:-root}"
+    exec "$PROXHAWK_TUI_HOME/proxhawk-tui" "${ORIG_ARGS[@]}" --select "${SEL_ID:-root}"
 fi
 exit 0

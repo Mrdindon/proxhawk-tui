@@ -12,9 +12,9 @@ test_cluster() {
     # Notes (edited in $EDITOR).
     check "Notes: view" view notes
     api_kv /cluster/options; old=${API_KV[description]-}
-    editor_writes "pvetty test note"
+    editor_writes "proxhawk-tui test note"
     check "Notes: edit" key e ""
-    check "Notes: saved" kv_is /cluster/options description "pvetty test note"
+    check "Notes: saved" kv_is /cluster/options description "proxhawk-tui test note"
     if [[ -n $old ]]; then editor_writes "${old//$'\x1f'/$'\n'}"; else editor_writes ""; fi
     key e "" >/dev/null
     check "Notes: restored" kv_is /cluster/options description "${old%%+($'\x1f')}"
@@ -39,31 +39,31 @@ test_cluster() {
     check "Options: max_workers removed" kv_is /cluster/options max_workers ""
 
     # Storage: a directory storage.
-    mkdir -p /var/tmp/pvetty-test-dir
-    pvesh delete /storage/pvetty-test-dir >/dev/null 2>&1
+    mkdir -p /var/tmp/proxhawk-tui-test-dir
+    pvesh delete /storage/proxhawk-tui-test-dir >/dev/null 2>&1
     check "Storage: view" view storage
-    reset_step; crud_answers type=dir; preset storage=pvetty-test-dir path=/var/tmp/pvetty-test-dir content="iso,backup"
+    reset_step; crud_answers type=dir; preset storage=proxhawk-tui-test-dir path=/var/tmp/proxhawk-tui-test-dir content="iso,backup"
     check "Storage: add Directory" key a ""
-    check "Storage: created" kv_is /storage/pvetty-test-dir path /var/tmp/pvetty-test-dir
+    check "Storage: created" kv_is /storage/proxhawk-tui-test-dir path /var/tmp/proxhawk-tui-test-dir
     view storage; reset_step; preset content="iso,backup,vztmpl" prune-backups="keep-last=2"
-    check "Storage: edit" key e pvetty-test-dir
-    check "Storage: edited" kv_like /storage/pvetty-test-dir content "*vztmpl*"
-    reset_step; crud_answers type=nfs; preset storage=pvetty-test-nfs server=127.0.0.1 export=/nonexistent content=iso disable=1
+    check "Storage: edit" key e proxhawk-tui-test-dir
+    check "Storage: edited" kv_like /storage/proxhawk-tui-test-dir content "*vztmpl*"
+    reset_step; crud_answers type=nfs; preset storage=proxhawk-tui-test-nfs server=127.0.0.1 export=/nonexistent content=iso disable=1
     check "Storage: add NFS (disabled)" key a ""
-    check "Storage: NFS created" kv_is /storage/pvetty-test-nfs server 127.0.0.1
+    check "Storage: NFS created" kv_is /storage/proxhawk-tui-test-nfs server 127.0.0.1
     view storage; reset_step
-    check "Storage: remove NFS" key d pvetty-test-nfs
-    reset_step; crud_answers type=pbs; preset storage=pvetty-test-pbs server=127.0.0.1 datastore=test username=root@pam password=x fingerprint="00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF" disable=1
-    if key a ""; then ok "Storage: add PBS (disabled)"; view storage; reset_step; check "Storage: remove PBS" key d pvetty-test-pbs
+    check "Storage: remove NFS" key d proxhawk-tui-test-nfs
+    reset_step; crud_answers type=pbs; preset storage=proxhawk-tui-test-pbs server=127.0.0.1 datastore=test username=root@pam password=x fingerprint="00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF" disable=1
+    if key a ""; then ok "Storage: add PBS (disabled)"; view storage; reset_step; check "Storage: remove PBS" key d proxhawk-tui-test-pbs
     else ok "Storage: add PBS rejected by the API ($STATUS_MSG)"; fi
     # The directory storage is removed at the end of the storage section.
 
     # Backup jobs.
     check "Backup: view" view backup
-    reset_step; preset schedule="sun 03:00" storage=local vmid=99999 enabled=0 comment="pvetty test job" mode=snapshot
+    reset_step; preset schedule="sun 03:00" storage=local vmid=99999 enabled=0 comment="proxhawk-tui test job" mode=snapshot
     check "Backup: add job" key a ""
     view backup; rowkey "backup-*"; local job=""
-    for k in "${C_SELK[@]}"; do api_kv "/cluster/backup/$k" && [[ ${API_KV[comment]-} == "pvetty test job" ]] && job=$k; done
+    for k in "${C_SELK[@]}"; do api_kv "/cluster/backup/$k" && [[ ${API_KV[comment]-} == "proxhawk-tui test job" ]] && job=$k; done
     if [[ -n $job ]]; then
         ok "Backup: job listed ($job)"
         reset_step; preset comment="edited job" schedule="sat 02:30"
@@ -98,7 +98,7 @@ test_cluster() {
 
     # Resource mappings: USB / PCI / directory.
     check "Resource Mappings: view" view mapping
-    reset_step; crud_answers sub=usb; preset id=pvtusb map="node=$NODE,id=0bda:8812" description="pvetty usb"
+    reset_step; crud_answers sub=usb; preset id=pvtusb map="node=$NODE,id=0bda:8812" description="proxhawk-tui usb"
     check "Mappings: add USB" key a ""
     check "Mappings: USB created" api_has /cluster/mapping/usb id pvtusb
     view mapping; reset_step; preset description="edited usb"
@@ -107,14 +107,14 @@ test_cluster() {
     local pci
     api_get rows "/nodes/$NODE/hardware/pci" "" "id,vendor,device"
     tsv_split pci "${API_ROWS[0]}"
-    reset_step; crud_answers sub=pci; preset id=pvtpci map="node=$NODE,path=${pci[0]},id=${pci[1]#0x}:${pci[2]#0x}" description="pvetty pci"
+    reset_step; crud_answers sub=pci; preset id=pvtpci map="node=$NODE,path=${pci[0]},id=${pci[1]#0x}:${pci[2]#0x}" description="proxhawk-tui pci"
     check "Mappings: add PCI" key a ""
     check "Mappings: PCI created" api_has /cluster/mapping/pci id pvtpci
     view mapping; reset_step; check "Mappings: remove PCI" key d "pci|pvtpci"
     reset_step; check "Mappings: remove USB" key d "usb|pvtusb"
     check "Mappings: USB removed" api_lacks /cluster/mapping/usb id pvtusb
     check "Directory Mappings: view" view dirmapping
-    reset_step; preset id=pvtdir map="node=$NODE,path=/var/tmp/pvetty-test-dir" description="pvetty dir"
+    reset_step; preset id=pvtdir map="node=$NODE,path=/var/tmp/proxhawk-tui-test-dir" description="proxhawk-tui dir"
     check "Directory Mappings: add" key a ""
     check "Directory Mappings: created" api_has /cluster/mapping/dir id pvtdir
     view dirmapping; reset_step; preset description="edited dir"
@@ -132,7 +132,7 @@ test_cluster() {
 
     # Notifications: targets of every type, test, matchers.
     check "Notifications: view" view notifications
-    reset_step; crud_answers sub=target type=sendmail; preset name=pvt-sendmail mailto-user=root@pam comment="pvetty sendmail"
+    reset_step; crud_answers sub=target type=sendmail; preset name=pvt-sendmail mailto-user=root@pam comment="proxhawk-tui sendmail"
     check "Notifications: add sendmail target" key a ""
     check "Notifications: sendmail created" api_has /cluster/notifications/targets name pvt-sendmail
     view notifications; reset_step; preset comment="edited sendmail"
@@ -140,13 +140,13 @@ test_cluster() {
     check "Notifications: sendmail edited" kv_is /cluster/notifications/endpoints/sendmail/pvt-sendmail comment "edited sendmail"
     reset_step
     check "Notifications: test target" key t "target|sendmail|pvt-sendmail"
-    reset_step; crud_answers sub=target type=smtp; preset name=pvt-smtp server=127.0.0.1 from-address=pvetty@example.invalid mailto=root@localhost disable=1
+    reset_step; crud_answers sub=target type=smtp; preset name=pvt-smtp server=127.0.0.1 from-address=proxhawk-tui@example.invalid mailto=root@localhost disable=1
     check "Notifications: add smtp target" key a ""
     reset_step; crud_answers sub=target type=gotify; preset name=pvt-gotify server=https://gotify.example.invalid token=abc disable=1
     check "Notifications: add gotify target" key a ""
     reset_step; crud_answers sub=target type=webhook; preset name=pvt-webhook url=https://hook.example.invalid method=post disable=1
     check "Notifications: add webhook target" key a ""
-    reset_step; crud_answers sub=matcher; preset name=pvt-matcher target=pvt-sendmail match-severity=error comment="pvetty matcher" disable=1
+    reset_step; crud_answers sub=matcher; preset name=pvt-matcher target=pvt-sendmail match-severity=error comment="proxhawk-tui matcher" disable=1
     check "Notifications: add matcher" key a ""
     check "Notifications: matcher created" api_has /cluster/notifications/matchers name pvt-matcher
     view notifications; reset_step; preset comment="edited matcher"

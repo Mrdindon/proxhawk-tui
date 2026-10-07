@@ -1,12 +1,12 @@
-# pvetty — Configuration
+# proxhawk-tui — Configuration
 
 Settings are read, in this order (later wins):
 
 1. built-in defaults (`lib/core.sh`, array `CFG`)
-2. `/etc/pvetty.conf`
-3. `~/.config/pvetty/pvetty.conf` (or `$XDG_CONFIG_HOME/pvetty/pvetty.conf`)
+2. `/etc/proxhawk-tui.conf`
+3. `~/.config/proxhawk-tui/proxhawk-tui.conf` (or `$XDG_CONFIG_HOME/proxhawk-tui/proxhawk-tui.conf`)
 4. files given with `-c FILE`
-5. environment variables `PVETTY_<KEY>` (upper case, e.g. `PVETTY_THEME=dark`)
+5. environment variables `PROXHAWK_TUI_<KEY>` (upper case, e.g. `PROXHAWK_TUI_THEME=dark`)
 6. command line options
 
 The user menu (`F4`) writes the changed keys into the user configuration file.
@@ -14,14 +14,14 @@ The user menu (`F4`) writes the changed keys into the user configuration file.
 ## Configuration file
 
 Plain `key = value` lines, `#` starts a comment. Unknown keys are ignored.
-See [`conf/pvetty.conf.example`](../conf/pvetty.conf.example).
+See [`conf/proxhawk-tui.conf.example`](../conf/proxhawk-tui.conf.example).
 
 | Key | Default | Values | Description |
 |-----|---------|--------|-------------|
-| `language` | `auto` | `auto`, `en`, any `lang/<code>.sh` | interface language; `auto` uses `LC_ALL` / `LC_MESSAGES` / `LANG` |
+| `language` | `auto` | `auto`, `en`, `fr`, `de`, `es`, `zh_CN`, `ru`... (34 languages) | interface language; `auto` = the locale when it is not English, else the datacenter language, else English (see [I18N.md](I18N.md)) |
 | `glyphs` | `auto` | `auto`, `nerd`, `unicode`, `ascii` | icon set; `auto` = `unicode` on UTF-8 terminals (`nerd` when `NERD_FONT=1` is exported), `ascii` otherwise |
 | `theme` | `auto` | `auto`, `default`, `dark`, `light`, `basic`, any `themes/<name>.sh` | colour theme; `auto` = `default` with 256 colours, `basic` otherwise |
-| `backend` | `auto` | `auto`, `broker`, `pvesh`, `replay` | API access for reads (see ARCHITECTURE.md); `replay` serves answers recorded with `PVETTY_RECORD` (tests) |
+| `backend` | `auto` | `auto`, `broker`, `pvesh`, `replay` | API access for reads (see ARCHITECTURE.md); `replay` serves answers recorded with `PROXHAWK_TUI_RECORD` (tests) |
 | `dialog` | `auto` | `auto`, `dialog`, `whiptail`, `builtin` | dialog tool |
 | `refresh` | `5` | seconds, `0` = off | automatic refresh interval |
 | `mouse` | `1` | `0`, `1` | mouse support |
@@ -34,7 +34,7 @@ See [`conf/pvetty.conf.example`](../conf/pvetty.conf.example).
 | `pager` | | command | pager for logs (default `$PAGER`, `less -R`) |
 | `icons` | `1` | `0`, `1` | `0` removes the icons of the tree, menus and buttons (objects get a bullet) |
 | `startup` | `root` | `root`, `last`, a tree id (`qemu/100`, `node/pve1`...) | initial selection; `last` restores the selection of the previous session |
-| `confirm_quit` | `1` | `0`, `1` | ask before quitting while actions started by pvetty are running or queued |
+| `confirm_quit` | `1` | `0`, `1` | ask before quitting while actions started by proxhawk-tui are running or queued |
 | `ip_column` | `1` | `0`, `1` | IP column of the guests in the search grids (LXC interfaces, guest agent, neighbour table; cached 60 s) |
 | `ssh_user` | `root` | user | default user of the SSH console of VMs |
 | `ssh_key` | | file | private key of the SSH console (`ssh -i`) |
@@ -91,7 +91,7 @@ color.sel = bg=#264f78 white
 ## Command line
 
 ```
-pvetty [options]
+proxhawk-tui [options]
   -l, --lang CODE       interface language
   -g, --glyphs SET      nerd | unicode | ascii
   -t, --theme NAME      default | dark | light | basic | <custom>
@@ -105,28 +105,28 @@ pvetty [options]
   -h, --help            help
   -V, --version         version
 
-pvetty <nodes|guests|tasks|storage|api> ...   non-interactive commands (CLI.md)
+proxhawk-tui <nodes|guests|tasks|storage|api> ...   non-interactive commands (CLI.md)
 ```
 
 ## Environment
 
 | Variable | Effect |
 |----------|--------|
-| `PVETTY_<KEY>` | overrides a configuration key (`PVETTY_GLYPHS=nerd`) |
+| `PROXHAWK_TUI_<KEY>` | overrides a configuration key (`PROXHAWK_TUI_GLYPHS=nerd`) |
 | `NERD_FONT=1` | `glyphs = auto` selects the Nerd Font set |
-| `PVETTY_DEBUG=1` | debug log to `$PVETTY_LOG` (default `/tmp/pvetty-debug.log`) |
+| `PROXHAWK_TUI_DEBUG=1` | debug log to `$PROXHAWK_TUI_LOG` (default `/tmp/proxhawk-tui-debug.log`) |
 | `VISUAL`, `EDITOR`, `PAGER` | editor and pager |
-| `TMPDIR` | location of the run directory (`pvetty.XXXXXX`, removed on exit) |
-| `PVETTY_PLUGINS` | enabled plugins, overrides `plugins` |
-| `PVETTY_USER` | Proxmox VE user to run as, overrides `user` |
-| `PVETTY_RECORD=DIR` | records every API answer in DIR (for `backend = replay`) |
-| `PVETTY_REPLAY=DIR` | answers used by `backend = replay` |
-| `PVETTY_NOW=EPOCH` | frozen clock (screen tests) |
+| `TMPDIR` | location of the run directory (`proxhawk-tui.XXXXXX`, removed on exit) |
+| `PROXHAWK_TUI_PLUGINS` | enabled plugins, overrides `plugins` |
+| `PROXHAWK_TUI_USER` | Proxmox VE user to run as, overrides `user` |
+| `PROXHAWK_TUI_RECORD=DIR` | records every API answer in DIR (for `backend = replay`) |
+| `PROXHAWK_TUI_REPLAY=DIR` | answers used by `backend = replay` |
+| `PROXHAWK_TUI_NOW=EPOCH` | frozen clock (screen tests) |
 | `XDG_STATE_HOME` | location of the state file |
 
 ## Running as another user
 
-pvetty runs as root on the node and acts by default as `root@pam` (or as
+proxhawk-tui runs as root on the node and acts by default as `root@pam` (or as
 `<sudo user>@pam` when it was started with `sudo` and that user exists). At
 start-up it asks which Proxmox VE user to run as (`ask_user`), or takes
 `--user name@realm` / `user = name@realm`. The header shows that user.
@@ -140,15 +140,15 @@ name. Consoles need `VM.Console` (guests) or `Sys.Console` (node shell),
 running a command in a container needs `VM.Console`, and installing
 community scripts needs `root@pam`.
 
-No password is asked: whoever runs pvetty is already root on the node.
-The feature limits what pvetty does (delegated administration, checking
+No password is asked: whoever runs proxhawk-tui is already root on the node.
+The feature limits what proxhawk-tui does (delegated administration, checking
 the rights of a user); it is not a security boundary against root.
 
 ## Plugins
 
-Plugins are bash files in `plugins/` (or `~/.config/pvetty/plugins/`) that add
+Plugins are bash files in `plugins/` (or `~/.config/proxhawk-tui/plugins/`) that add
 menu entries or toolbar buttons. Enable them in `F4` › Plugins (`Space` ticks
-a plugin, `Enter` validates; pvetty offers to restart, keeping the current
+a plugin, `Enter` validates; proxhawk-tui offers to restart, keeping the current
 selection, since plugins are loaded at start-up) or with `plugins = name name`. Bundled plugins:
 
 | Plugin | Adds |
@@ -171,7 +171,7 @@ All sets use single-cell characters only, so the layout never breaks.
 ### Nerd Font: squares instead of icons
 
 The icons are drawn by the **terminal on the computer you type on**, not by
-the Proxmox VE node: when pvetty runs over SSH, installing a font on the node
+the Proxmox VE node: when proxhawk-tui runs over SSH, installing a font on the node
 changes nothing. Squares (or `?`) mean that the font of that terminal has no
 Nerd Font glyphs. The icon menu (`F4` › Icons) shows a preview of each set
 before you choose.
@@ -189,7 +189,7 @@ before you choose.
    - MobaXterm: Settings › Terminal › Font;
    - macOS Terminal / iTerm2: Profiles › Text › Font;
    - GNOME Terminal / Konsole: profile › Text / Appearance › custom font.
-3. Restart pvetty, `F4` › Icons › Nerd Font (or `glyphs = nerd`, or
+3. Restart proxhawk-tui, `F4` › Icons › Nerd Font (or `glyphs = nerd`, or
    `NERD_FONT=1` with `glyphs = auto`).
 
 If the font cannot be changed (e.g. Linux console, web shell), use
@@ -207,11 +207,11 @@ If the font cannot be changed (e.g. Linux console, web shell), use
 
 Creating a theme is described in [EXTENDING.md](EXTENDING.md#themes).
 
-## Files written by pvetty
+## Files written by proxhawk-tui
 
 | Path | When |
 |------|------|
-| `~/.config/pvetty/pvetty.conf` | settings changed from the user menu or the first run wizard |
-| `~/.local/state/pvetty/state` | last selection (for `startup = last`) |
-| `$TMPDIR/pvetty.XXXXXX/` | run directory (job outputs, temporary text), removed on exit |
-| `/tmp/pvetty-debug.log` | only with `PVETTY_DEBUG=1` |
+| `~/.config/proxhawk-tui/proxhawk-tui.conf` | settings changed from the user menu or the first run wizard |
+| `~/.local/state/proxhawk-tui/state` | last selection (for `startup = last`) |
+| `$TMPDIR/proxhawk-tui.XXXXXX/` | run directory (job outputs, temporary text), removed on exit |
+| `/tmp/proxhawk-tui-debug.log` | only with `PROXHAWK_TUI_DEBUG=1` |

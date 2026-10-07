@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.0 — 2026-10-06
+
+- **Renamed pvetty → proxhawk-tui**: command `proxhawk-tui`, files
+  `~/.config/proxhawk-tui/proxhawk-tui.conf`, `/etc/proxhawk-tui.conf`,
+  `~/.local/state/proxhawk-tui/`, variables `PROXHAWK_TUI_*`, package
+  `proxhawk-tui` (replaces the `pvetty` and `pvetui` packages). The user
+  files of pvetty and pvetui are moved automatically at the first start;
+  `/etc/pvetty.conf` (or `/etc/pvetui.conf`) is still read while
+  `/etc/proxhawk-tui.conf` does not exist. Variables `PVETTY_*` are no
+  longer read.
+- **Languages**: French, Spanish, German, Chinese (simplified) and Russian
+  (about 93 %; the rest are names such as ZFS or SPICE). The official message
+  catalog of the Proxmox VE web interface installed on the node is used at
+  run time: the same words as the GUI, and 34 languages available (12 to 51 %
+  for the languages without a pvetty file).
+- `language = auto`: the locale when it is not English, else the datacenter
+  language (Datacenter › Options › Language), else English.
+- Double width characters (Chinese, Japanese, Korean) are laid out correctly.
+- `tools/i18n-check.sh` (coverage, placeholder check); the extractor splits
+  key hints into labels and ignores technical strings; screen tests in other
+  languages (`name@code`).
+
 ## 1.3.1 — 2026-10-06
 
 - The start-up question "run as which user" is now always asked (unless

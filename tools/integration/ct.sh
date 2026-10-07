@@ -28,7 +28,7 @@ test_ct() {
     # Create CT wizard.
     ctx root
     reset_step
-    answers "$TEST_CT" pvetty-test-ct 512 1 "$st" 4 "$br" "$tmpl" Pvetty-Test-123 no yes
+    answers "$TEST_CT" proxhawk-tui-test-ct 512 1 "$st" 4 "$br" "$tmpl" Proxhawk-Test-123 no yes
     check "Create CT wizard" act_create_ct
     check "CT created" wait_for 120 pvesh get "/nodes/$NODE/lxc/$TEST_CT/config"
     ctx "$id"
@@ -70,9 +70,9 @@ test_ct() {
     view dns
     reset_step; preset nameserver=9.9.9.9 searchdomain=example.invalid
     check "DNS: edit" enter nameserver
-    reset_step; preset hostname=pvetty-ct2
+    reset_step; preset hostname=proxhawk-tui-ct2
     check "DNS: hostname" enter hostname
-    check "DNS: hostname saved" ct_cfg hostname pvetty-ct2
+    check "DNS: hostname saved" ct_cfg hostname proxhawk-tui-ct2
     reset_step; check "DNS: reset nameserver" key d nameserver
     view options
     reset_step; preset features="nesting=1"
@@ -91,13 +91,13 @@ test_ct() {
     TERM_CMDS=()
     act_console
     check "Console: pct enter used" bash -c "[[ '${TERM_CMDS[*]}' == *'pct enter $TEST_CT'* ]]"
-    check "CT: command runs inside" bash -c "pct exec $TEST_CT -- hostname | grep -q pvetty-ct2"
+    check "CT: command runs inside" bash -c "pct exec $TEST_CT -- hostname | grep -q proxhawk-tui-ct2"
     res_load; ctx "$id"
     check "Summary with IPs" view summary
     reset_step; answers reboot; check "Reboot" act_shutdown_menu
     check "CT running after reboot" wait_for 60 ct_running
     view snapshots
-    reset_step; answers pvtsnap "pvetty ct snapshot"
+    reset_step; answers pvtsnap "proxhawk-tui ct snapshot"
     check "Snapshots: take" key n ""
     check "Snapshots: listed" api_has "/nodes/$NODE/lxc/$TEST_CT/snapshot" name pvtsnap
     view snapshots; reset_step; answers edit "edited"
@@ -129,7 +129,7 @@ test_ct() {
     view backup; reset_step; answers remove
     check "Backup: remove" enter "$k"
     res_load; ctx "$id"
-    reset_step; answers 9913 pvetty-ct-clone yes
+    reset_step; answers 9913 proxhawk-tui-ct-clone yes
     check "Clone (full)" act_clone
     check "Clone 9913 exists" wait_for 120 pvesh get "/nodes/$NODE/lxc/9913/config"
     res_load; ctx lxc/9913

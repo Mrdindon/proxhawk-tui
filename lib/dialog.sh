@@ -30,9 +30,9 @@ _dlg_run() {
     local rc out="$RUN_DIR/dlg.out"
     term_leave
     if [[ $DLG == dialog ]]; then
-        dialog --colors --backtitle "pvetty - Proxmox VE" "$@" 2> "$out"
+        dialog --colors --backtitle "proxhawk-tui - Proxmox VE" "$@" 2> "$out"
     else
-        whiptail --backtitle "pvetty - Proxmox VE" "$@" 2> "$out"
+        whiptail --backtitle "proxhawk-tui - Proxmox VE" "$@" 2> "$out"
     fi
     rc=$?
     REPLY=$(< "$out")

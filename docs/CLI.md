@@ -1,12 +1,12 @@
-# pvetty — Command line (non-interactive)
+# proxhawk-tui — Command line (non-interactive)
 
-Besides the interface, `pvetty` answers simple commands for scripts. They
+Besides the interface, `proxhawk-tui` answers simple commands for scripts. They
 use the same API access as the interface (on the local node, as the user
 running the command) and print JSON (default) or a table.
 
 ```
-pvetty <command> [arguments] [options]
-pvetty help
+proxhawk-tui <command> [arguments] [options]
+proxhawk-tui help
 ```
 
 ## Commands
@@ -50,11 +50,11 @@ A guest is given by its VMID or its name.
 ## Examples
 
 ```bash
-pvetty guests list --status running -o table
-pvetty guests start 9901                      # waits for the task
-upid=$(pvetty guests shutdown web1 --no-wait | sed 's/.*"upid":"\([^"]*\)".*/\1/')
-pvetty tasks log "$upid"
-pvetty guests exec 9902 'uptime'
-pvetty api get /nodes/pve1/storage --content backup
-pvetty api set /nodes/pve1/qemu/9901/config --memory 2048
+proxhawk-tui guests list --status running -o table
+proxhawk-tui guests start 9901                      # waits for the task
+upid=$(proxhawk-tui guests shutdown web1 --no-wait | sed 's/.*"upid":"\([^"]*\)".*/\1/')
+proxhawk-tui tasks log "$upid"
+proxhawk-tui guests exec 9902 'uptime'
+proxhawk-tui api get /nodes/pve1/storage --content backup
+proxhawk-tui api set /nodes/pve1/qemu/9901/config --memory 2048
 ```

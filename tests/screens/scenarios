@@ -1,4 +1,4 @@
-# name          keys sent to pvetty (tmux send-keys names), see tools/screen-test.sh
+# name          keys sent to proxhawk-tui (tmux send-keys names), see tools/screen-test.sh
 dc_summary
 dc_help         F1
 dc_search       /
@@ -8,3 +8,8 @@ guest_summary   Down Down
 storage_view    v
 tasks_panel     Tab Tab Tab
 node_status     Down Tab Down
+# Translated screens (lang/<code>.sh + the Proxmox VE catalog of the node)
+dc_summary@fr   Tab Down
+node_summary@de Down Tab Down
+guest_summary@zh_CN Down Down
+dc_help@ru      F1

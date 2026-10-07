@@ -1,6 +1,6 @@
 # Notes for coding agents
 
-pvetty is a bash 5 terminal interface for Proxmox VE (plus a small Perl
+proxhawk-tui is a bash 5 terminal interface for Proxmox VE (plus a small Perl
 API helper). Read these before changing code:
 
 - `docs/DEVELOPMENT.md` — design decisions, Proxmox VE behaviours, lessons

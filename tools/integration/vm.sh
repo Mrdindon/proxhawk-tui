@@ -14,7 +14,7 @@ test_vm() {
     # Create VM wizard.
     ctx root
     reset_step
-    answers "$TEST_VM" "pvetty-test-vm" 512 1 "$st" 2 qcow2 "$br" none l26 yes
+    answers "$TEST_VM" "proxhawk-tui-test-vm" 512 1 "$st" 2 qcow2 "$br" none l26 yes
     check "Create VM wizard" act_create_vm
     check "VM created" wait_for 30 pvesh get "/nodes/$NODE/qemu/$TEST_VM/config"
     ctx "$id"
@@ -84,7 +84,7 @@ test_vm() {
 
     # Cloud-Init.
     view cloudinit
-    reset_step; preset ciuser=pvetty
+    reset_step; preset ciuser=proxhawk-tui
     check "Cloud-Init: edit user" enter ciuser
     reset_step; preset ipconfig0="ip=dhcp"
     check "Cloud-Init: edit IP config" enter ipconfig0
@@ -93,7 +93,7 @@ test_vm() {
 
     # Options.
     view options
-    reset_step; preset name=pvetty-test-vm2
+    reset_step; preset name=proxhawk-tui-test-vm2
     check "Options: rename" enter name
     reset_step; preset onboot=0 startup="order=5"
     check "Options: start at boot / order" enter startup
@@ -107,9 +107,9 @@ test_vm() {
     reset_step; check "Options: reset startup to default" key d startup
 
     # Notes, pool membership, permissions, HA.
-    editor_writes "pvetty vm note"
+    editor_writes "proxhawk-tui vm note"
     CTX_TYPE=qemu; check "Notes: edit" act_edit_notes
-    check "Notes: saved" vm_cfg description "pvetty vm note"
+    check "Notes: saved" vm_cfg description "proxhawk-tui vm note"
     view permissions
     reset_step; crud_answers acltype=users; preset users=root@pam roles=PVEVMUser
     check "Permissions: add" key a ""
@@ -123,23 +123,23 @@ test_vm() {
     check "Manage HA: change state" act_ha
     ctx root; view ha
     check "HA: resource listed" bash -c "[[ ' ${C_SELK[*]} ' == *' vm:$TEST_VM '* ]]"
-    reset_step; preset comment="pvetty ha"
+    reset_step; preset comment="proxhawk-tui ha"
     check "HA: edit resource" key e "vm:$TEST_VM"
     view harules
     reset_step; crud_answers type=node-affinity; preset rule=pvtrule resources="vm:$TEST_VM" nodes="$NODE"
     check "HA Rules: add node affinity" key a ""
-    view harules; reset_step; preset comment="pvetty rule"
+    view harules; reset_step; preset comment="proxhawk-tui rule"
     check "HA Rules: edit" key e pvtrule
     reset_step; check "HA Rules: remove" key d pvtrule
     ctx "$id"; CTX_TYPE=qemu
     reset_step; answers remove
     check "Manage HA: remove" act_ha
-    pvesh create /pools --poolid pvetty-test-pool >/dev/null 2>&1
-    ctx pool/pvetty-test-pool 2>/dev/null; ctx_set pool/pvetty-test-pool; menu_load
+    pvesh create /pools --poolid proxhawk-tui-test-pool >/dev/null 2>&1
+    ctx pool/proxhawk-tui-test-pool 2>/dev/null; ctx_set pool/proxhawk-tui-test-pool; menu_load
     check "Pool: members view" view members
     reset_step; crud_answers kind=vm; preset vms=$TEST_VM
     check "Pool: add VM" key a ""
-    check "Pool: VM member" bash -c "pvesh get /pools/pvetty-test-pool --output-format json | grep -q 'qemu/$TEST_VM'"
+    check "Pool: VM member" bash -c "pvesh get /pools/proxhawk-tui-test-pool --output-format json | grep -q 'qemu/$TEST_VM'"
     reset_step; crud_answers kind=storage; preset storage=local
     check "Pool: add storage" key a ""
     view members
@@ -147,7 +147,7 @@ test_vm() {
     reset_step; check "Pool: remove storage" key d "storage/$NODE/local"
     check "Pool: summary view" view summary
     check "Pool: permissions view" view permissions
-    pvesh delete /pools/pvetty-test-pool >/dev/null 2>&1
+    pvesh delete /pools/proxhawk-tui-test-pool >/dev/null 2>&1
 
     # Power actions (no OS installed: shutdown is replaced by stop).
     ctx "$id"
@@ -179,7 +179,7 @@ test_vm() {
     check "Console: qm terminal used (serial port)" bash -c "[[ '${TERM_CMDS[*]}' == *'qm terminal $TEST_VM'* ]]"
     # Snapshots with RAM.
     view snapshots
-    reset_step; answers pvtsnap1 "pvetty snapshot" yes
+    reset_step; answers pvtsnap1 "proxhawk-tui snapshot" yes
     check "Snapshots: take (with RAM)" key n ""
     check "Snapshots: listed" api_has "/nodes/$NODE/qemu/$TEST_VM/snapshot" name pvtsnap1
     view snapshots; reset_step; answers edit "edited snapshot"
@@ -221,7 +221,7 @@ test_vm() {
     check "Backup now" key n ""
     view backup; k=${C_SELK[0]-}
     check "Backup: listed" test -n "$k"
-    reset_step; answers notes "pvetty backup"
+    reset_step; answers notes "proxhawk-tui backup"
     check "Backup: edit notes" enter "$k"
     reset_step; answers protect
     check "Backup: protect" enter "$k"
@@ -246,7 +246,7 @@ test_vm() {
     else ok "Replication: refused on a single node ($STATUS_MSG)"; fi
 
     # More: clone, template, migrate (no target), remove.
-    reset_step; answers 9903 pvetty-clone yes
+    reset_step; answers 9903 proxhawk-tui-clone yes
     check "Clone (full)" act_clone
     check "Clone 9903 exists" wait_for 120 pvesh get "/nodes/$NODE/qemu/9903/config"
     res_load; ctx qemu/9903

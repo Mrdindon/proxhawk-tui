@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# screen-test.sh - golden screen tests: runs pvetty in a detached tmux
+# screen-test.sh - golden screen tests: runs proxhawk-tui in a detached tmux
 # session on recorded API answers (backend "replay"), sends the keys of each
 # scenario and compares the screen with tests/screens/golden/<name>.txt.
 #
@@ -11,6 +11,7 @@
 # Scenarios: tests/screens/scenarios, one per line:
 #   <name> <key> <key>...       keys as accepted by "tmux send-keys"
 #                               (Down, Enter, Tab, F1, Escape, q, ...)
+#   <name>@<code> ...           the same in a language (fr, de, zh_CN...)
 # Lines starting with # are comments. The fixture (tests/screens/fixture)
 # is a snapshot of a real node: re-record it when the API usage changes
 # (a missing answer shows as "not recorded: ..." on the screen).
@@ -25,10 +26,10 @@ case ${1-} in run|update|record) MODE=$1; shift ;; esac
 WANT=("$@")
 
 TMP=$(mktemp -d)
-SESSION=pvetty-screen-$$
+SESSION=proxhawk-tui-screen-$$
 trap 'tmux kill-session -t "$SESSION" 2>/dev/null; rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/config/pvetty" "$TMP/state"
-cat > "$TMP/config/pvetty/pvetty.conf" <<'EOF'
+mkdir -p "$TMP/config/proxhawk-tui" "$TMP/state"
+cat > "$TMP/config/proxhawk-tui/proxhawk-tui.conf" <<'EOF'
 glyphs = unicode
 theme = default
 dialog = builtin
@@ -39,7 +40,7 @@ ip_column = 0
 ask_user = 0
 EOF
 
-# Screen content once it stopped changing (pvetty loads asynchronously).
+# Screen content once it stopped changing (proxhawk-tui loads asynchronously).
 capture() {
     local prev="" cur i
     for (( i = 0; i < 50; i++ )); do
@@ -53,15 +54,19 @@ capture() {
 
 # run_scenario <name> <keys...>  -> screen on stdout
 run_scenario() {
-    local name=$1 k; shift
+    local name=$1 k lang=en; shift
+    # name@code: the scenario in another language (the translations of the
+    # Proxmox VE catalog installed on this node are used too).
+    [[ $name == *@* ]] && lang=${name#*@}
     local -a env=(env XDG_CONFIG_HOME="$TMP/config" XDG_STATE_HOME="$TMP/state"
-                  TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=)
+                  TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=
+                  PROXHAWK_TUI_LANGUAGE="$lang")
     if [[ $MODE == record ]]; then
-        env+=(PVETTY_RECORD="$FIX")
+        env+=(PROXHAWK_TUI_RECORD="$FIX")
     else
-        env+=(PVETTY_REPLAY="$FIX" PVETTY_NOW="$(< "$FIX/now")")
+        env+=(PROXHAWK_TUI_REPLAY="$FIX" PROXHAWK_TUI_NOW="$(< "$FIX/now")")
     fi
-    local -a cmd=("${env[@]}" "$ROOT/pvetty")
+    local -a cmd=("${env[@]}" "$ROOT/proxhawk-tui")
     [[ $MODE == record ]] || cmd+=(--backend replay)
     tmux new-session -d -s "$SESSION" -x "$W" -y "$H" "$(printf '%q ' "${cmd[@]}")"
     capture > /dev/null

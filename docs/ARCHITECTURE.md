@@ -1,4 +1,4 @@
-# pvetty — Architecture
+# proxhawk-tui — Architecture
 
 ## Goals
 
@@ -11,12 +11,13 @@
 ## Modules
 
 ```
-pvetty                main: options, initialisation, event loop, keys, mouse
+proxhawk-tui                main: options, initialisation, event loop, keys, mouse
 lib/core.sh           configuration (CFG), run directory, logging, cleanup hooks
 lib/term.sh           terminal setup (tput + ANSI fallbacks), key/mouse decoding
 lib/theme.sh          loads themes/<name>.sh and compiles colours into C[...]
 lib/glyphs.sh         icon / box drawing sets (G[...]), spinner frames
-lib/i18n.sh           T / Tf translation helpers, language loading
+lib/i18n.sh           T / Tf translation helpers, language choice and loading
+lib/i18n-pve.pl       translations from the Proxmox VE web interface catalog (pve-i18n)
 lib/widgets.sh        formatting, ANSI-aware fit/strip, bars, braille charts, spinner
 lib/api.sh            API access: broker co-process, pvesh fallback, background jobs
 lib/user.sh           Proxmox VE user to run as (prompt, permissions, pvesh wrapper)
@@ -44,17 +45,18 @@ plugins/*.sh          bundled plugins (community-scripts, ansible-inventory)
 views/*.sh            panels per object type: datacenter, cluster, access, acme, ceph,
                       firewall, sdn, node, guest, qemu, lxc, storage
 themes/*.sh           colour themes
-lang/*.sh             languages
+lang/*.sh             languages (strings of proxhawk-tui; lib/i18n-pve.pl adds the Proxmox VE GUI catalog)
 tools/selftest.sh     renders every panel without UI and reports errors / timings
 tools/integration-test.sh  read/write tests of every panel (see TESTING.md)
 tools/i18n-extract.sh builds a translation template from the sources
+tools/i18n-check.sh   translation coverage and placeholder check per language
 tools/screen-test.sh  golden screen tests in tmux on recorded API answers
 tools/lint.sh         bash -n, perl -c, shellcheck
 tools/make-release.sh, tools/make-deb.sh   release archive, Debian package
 ```
 
 Modules only define functions and global arrays; the order of loading is
-fixed in `pvetty`. View modules are sourced automatically (`views/*.sh`).
+fixed in `proxhawk-tui`. View modules are sourced automatically (`views/*.sh`).
 
 ## Data flow
 
@@ -70,11 +72,11 @@ fixed in `pvetty`. View modules are sourced automatically (`views/*.sh`).
 
 ### Record and replay
 
-With `PVETTY_RECORD=DIR`, every answer of `api_get` (rows or error) is
+With `PROXHAWK_TUI_RECORD=DIR`, every answer of `api_get` (rows or error) is
 saved in DIR under the MD5 of its request key (`mode|path|query|fields`),
 with an `index` file and the node name. `backend = replay` with
-`PVETTY_REPLAY=DIR` serves these files instead of the API and turns writes
-into no-ops; `PVETTY_NOW` freezes the clock. The screen tests use it.
+`PROXHAWK_TUI_REPLAY=DIR` serves these files instead of the API and turns writes
+into no-ops; `PROXHAWK_TUI_NOW` freezes the clock. The screen tests use it.
 
 ### The broker
 
@@ -208,7 +210,7 @@ draw → read_key (timeout) ─┬─ key / mouse → handle_key → (redraw)
 
 ## Security notes
 
-- pvetty runs as root and uses the local API as `root@pam`, like `pvesh`. It
+- proxhawk-tui runs as root and uses the local API as `root@pam`, like `pvesh`. It
   does not open any port, store credentials or use the HTTP API.
 - Writes are executed by `pvesh` with explicit arguments (no shell string
   evaluation of user input). Values typed in dialogs are passed as single

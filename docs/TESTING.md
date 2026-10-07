@@ -1,4 +1,4 @@
-# pvetty — Testing
+# proxhawk-tui — Testing
 
 Four tools are provided: lint, self test, screen tests and integration tests.
 
@@ -31,13 +31,13 @@ tools/screen-test.sh update           # accept the current screens
 tools/screen-test.sh record           # re-record the API answers (read only), then update
 ```
 
-Each scenario of `tests/screens/scenarios` (`name key key...`) starts pvetty
+Each scenario of `tests/screens/scenarios` (`name key key...`) starts proxhawk-tui
 in a detached tmux session (120×36, `unicode` icons, `default` theme, UTC,
 frozen clock), sends the keys and compares the screen text with
 `tests/screens/golden/<name>.txt`; a difference is shown as a diff.
 
 The API is not called: `backend = replay` serves the answers recorded in
-`tests/screens/fixture` (`PVETTY_RECORD`), so the tests give the same result
+`tests/screens/fixture` (`PROXHAWK_TUI_RECORD`), so the tests give the same result
 on any machine with bash and tmux, and catch layout regressions. Re-record
 when a panel reads new API data (it would show `not recorded: ...`). The
 fixture is an anonymised snapshot of a node (no real names or addresses).
@@ -55,7 +55,7 @@ LOG=/tmp/it.log tools/integration-test.sh sdn
 
 How it works:
 
-- the real pvetty functions are used: panels are rendered, keys are pressed
+- the real proxhawk-tui functions are used: panels are rendered, keys are pressed
   (`a`, `e`, `d`, `Enter`, toolbar and panel keys), wizards and menus are run;
 - dialogs are simulated: answers are queued, forms are submitted with preset
   values (`FORM_PRESET`), editors write a given text;
@@ -64,7 +64,7 @@ How it works:
 - every write is verified by reading the API (or the system: interfaces, LVM,
   ZFS, mounts, `/etc/hosts`, `resolv.conf`...) back;
 - every test object is removed and every changed setting is restored at the
-  end of its section (`pvetty-test*` / `pvt*` names, VMIDs 9901-9919).
+  end of its section (`proxhawk-tui-test*` / `pvt*` names, VMIDs 9901-9919).
 
 | Section | Content |
 |---------|---------|

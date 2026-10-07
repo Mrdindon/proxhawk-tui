@@ -110,12 +110,63 @@ strip() {
     REPLY=$out$s
 }
 
-# vlen <string> -> visible length in REPLY
-vlen() { strip "$1"; REPLY=${#REPLY}; }
+# Double width characters (CJK, Hangul, full width forms): two cells each.
+# Only handled when WIDE_TEXT=1 (set for the zh / ja / ko languages by
+# i18n_load): the test costs time on every cell. The ranges are compared by
+# code point (LC_COLLATE=C; other collations give wrong ranges).
+WIDE_TEXT=0
+_WR=$'\u1100-\u115f\u2e80-\u303e\u3041-\u33ff\u3400-\u4dbf\u4e00-\u9fff\ua000-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6'
+WIDE_ANY="*[$_WR]*" WIDE_ONE="[$_WR]" WIDE_NOT="[!$_WR]"
+unset _WR
+
+# vlen <string> -> visible width in REPLY
+# shellcheck disable=SC2053  # WIDE_* are glob patterns on purpose
+vlen() {
+    strip "$1"
+    if (( WIDE_TEXT )); then
+        local LC_COLLATE=C w
+        [[ $REPLY == $WIDE_ANY ]] && { w=${REPLY//$WIDE_NOT/}; REPLY=$(( ${#REPLY} + ${#w} )); return; }
+    fi
+    REPLY=${#REPLY}
+}
+
+# dwidth <string> -> display width in REPLY (no escape sequences inside).
+# shellcheck disable=SC2053
+dwidth() {
+    REPLY=${#1}
+    if (( WIDE_TEXT )); then
+        local LC_COLLATE=C w
+        [[ $1 == $WIDE_ANY ]] && { w=${1//$WIDE_NOT/}; REPLY=$(( ${#1} + ${#w} )); }
+    fi
+}
+
+# fit for strings with double width characters (slow path of fit).
+# shellcheck disable=SC2053  # WIDE_* are glob patterns on purpose
+_fit_wide() {
+    local s=$1 w=$2 LC_COLLATE=C out="" used=0 rem c seg
+    vlen "$s"
+    if (( REPLY <= w )); then printf -v REPLY '%s%*s' "$s" $(( w - REPLY )) ""; return; fi
+    rem=$(( w > 1 ? w - 1 : w ))
+    while [[ -n $s ]]; do
+        if [[ $s == $'\e['* ]]; then seg=${s%%m*}m; out+=$seg; s=${s:${#seg}}; continue; fi
+        c=${s:0:1}
+        if [[ $c == $WIDE_ONE ]]; then (( used + 2 > rem )) && break; (( used += 2 ))
+        else (( used + 1 > rem )) && break; (( used++ )); fi
+        out+=$c; s=${s:1}
+    done
+    printf -v out '%s%*s' "$out" $(( rem - used )) ""
+    (( w > 1 )) && out+=${G[ellipsis]}
+    REPLY=$out
+}
 
 # fit <string> <width> -> string padded or truncated to exactly <width> cells
+# shellcheck disable=SC2053  # WIDE_* are glob patterns on purpose
 fit() {
     local s=$1 w=$2 n seg out="" rem
+    if (( WIDE_TEXT )); then
+        local LC_COLLATE=C
+        [[ $s == $WIDE_ANY ]] && { _fit_wide "$s" "$w"; return; }
+    fi
     if [[ $s != *$'\e'* ]]; then
         n=${#s}
         if (( n <= w )); then printf -v REPLY '%s%*s' "$s" $(( w - n )) ""

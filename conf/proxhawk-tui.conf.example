@@ -1,5 +1,5 @@
-# pvetty configuration example
-# Copy to /etc/pvetty.conf (all users) or ~/.config/pvetty/pvetty.conf.
+# proxhawk-tui configuration example
+# Copy to /etc/proxhawk-tui.conf (all users) or ~/.config/proxhawk-tui/proxhawk-tui.conf.
 # Format: key = value   (# starts a comment). See docs/CONFIGURATION.md.
 
 # Interface language: auto | en | <code of a lang/<code>.sh file>

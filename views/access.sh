@@ -124,11 +124,11 @@ _users_add() {
     form_run "$REPLY" POST /access/users && content_load 1
 }
 
-# Linux account of a new PAM user, created only when the user pvetty runs as
+# Linux account of a new PAM user, created only when the user proxhawk-tui runs as
 # may create Linux accounts itself: a PAM user whose Linux account is root
 # or may run useradd through sudo. The account is created through that
 # account (runuser + sudo: its sudo rules apply, sudo may ask its password
-# and logs the action), never with pvetty's own root rights. rc 1: cancel.
+# and logs the action), never with proxhawk-tui's own root rights. rc 1: cancel.
 _users_pam_account() {
     local name=$1 me=${PVE_USER%@pam} how=""
     if [[ $PVE_USER == *@pam ]] && id "$me" >/dev/null 2>&1; then

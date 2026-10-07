@@ -1,10 +1,10 @@
 #!/usr/bin/perl
-# pvesh-as.pl - pvesh as another Proxmox VE user (PVETTY_USER).
+# pvesh-as.pl - pvesh as another Proxmox VE user (PROXHAWK_TUI_USER).
 #
 # Same command line as pvesh. The call runs as that user (tasks are logged
 # under its name) and is checked with its permissions first, exactly like
 # the API server does (check_api2_permissions on the called method only, not
-# on the internal calls it makes). pvetty puts a "pvesh" wrapper calling it
+# on the internal calls it makes). proxhawk-tui puts a "pvesh" wrapper calling it
 # first in PATH when it runs as a user other than root@pam.
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ use PVE::CLI::pvesh;
 use PVE::RPCEnvironment;
 use PVE::RESTHandler;
 
-my $user = $ENV{PVETTY_USER} or die "pvesh-as: PVETTY_USER is not set\n";
+my $user = $ENV{PROXHAWK_TUI_USER} or die "pvesh-as: PROXHAWK_TUI_USER is not set\n";
 
 no warnings 'redefine';
 *PVE::CLI::pvesh::setup_environment = sub {
