@@ -47,6 +47,7 @@ See [`conf/proxhawk-tui.conf.example`](../conf/proxhawk-tui.conf.example).
 | `cli_output` | `json` | `json`, `table` | default output of the subcommands (see [CLI.md](CLI.md)) |
 | `user` | | `name@realm` | Proxmox VE user to run as (see [Running as another user](#running-as-another-user)); empty = launching user |
 | `ask_user` | `1` | `0`, `1` | ask at start-up which user to run as (`0`: always the launching user) |
+| `console_font` | `auto` | `auto`, `256`, `512`, `off` | font loaded on the Linux console (see [Linux console](#linux-console)) |
 
 ### Key bindings
 
@@ -167,6 +168,31 @@ Writing a plugin: [EXTENDING.md](EXTENDING.md#plugins).
 | `ascii` | any terminal | letters and `+-|`; graphs use `.` and `:` |
 
 All sets use single-cell characters only, so the layout never breaks.
+
+### Linux console
+
+On the console of the node itself (screen and keyboard, IPMI, KVM:
+`TERM=linux`), the kernel draws the text with a bitmap font of at most 512
+characters. A Nerd Font (or any TrueType font) cannot be used there, and the
+default console fonts lack most symbols and every braille pattern. On that
+console proxhawk-tui therefore:
+
+1. loads its own console font while it runs (`fonts/proxhawk-256.psf.gz`:
+   box drawing, gauges, icons as small symbols, braille graphs, Western
+   European letters) and **puts the previous font back when it quits**. A
+   language that needs Cyrillic, Greek or Latin Extended letters (Russian,
+   Ukrainian, Polish, Czech, Greek...) gets the 512 character font, which
+   leaves 8 foreground colours instead of 16 on the console;
+2. reads which characters the console font really has and replaces the
+   others: icons by the letters of the `ascii` set, graphs by dots. This is
+   what happens with `console_font = off`, or when the font cannot be loaded.
+
+Chinese, Japanese, Korean, Arabic, Hebrew, Persian, Georgian and Lao cannot
+be drawn by the Linux console: English is used there, with a message.
+
+`console_font`: `auto` (default), `256`, `512`, or `off` (never change the
+font of the console). Over SSH nothing of this applies: the terminal of
+your computer draws the text (next section).
 
 ### Nerd Font: squares instead of icons
 

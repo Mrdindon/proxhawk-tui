@@ -36,6 +36,7 @@ overlay_show() {
         fit " $line" $(( bw - 3 ))
         _put $(( top + 2 + body )) "$left" "${C[border]}${G[v]}${C[norm]}${REPLY}${C[border]}${G[v]}${C[norm]}"
         _hline $(( top + 3 + body )) "$left" "$bw" "${G[bl]}" "${G[br]}"
+        (( ${#CONSOLE_SUBST[@]} )) && frame_fix
         printf '%s' "$FRAME"
         read_key 1 || continue
         case $KEY in

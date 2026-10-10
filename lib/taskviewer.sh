@@ -111,6 +111,7 @@ task_viewer() {
         hr+=($(( top + 4 + body ))); hc1+=("$x"); hc2+=($(( x + ${#b1} - 1 ))); ha+=(stop)
         _hline $(( top + 5 + body )) "$left" "$bw" "${G[bl]}" "${G[br]}"
         FRAME=${FRAME//"$SPIN_MARK"/${SPINNER[SPIN_FRAME % ${#SPINNER[@]}]}}
+        (( ${#CONSOLE_SUBST[@]} )) && frame_fix
         printf '%s' "$FRAME"
         TV_BODY=$body
     }

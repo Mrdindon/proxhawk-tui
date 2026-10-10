@@ -2,7 +2,7 @@
 
 [English](README.md) | [Français](README.fr.md) | [Español](README.es.md) | [Deutsch](README.de.md) | **简体中文** | [Русский](README.ru.md)
 
-版本 2.1.0 · 许可证 AGPL-3.0-or-later
+版本 2.2.0 · 许可证 AGPL-3.0-or-later
 
 `proxhawk-tui` 是 Proxmox VE Web 界面（运行在 8006 端口的 GUI）的文本版本。它使用
 Unicode 边框、盲文字符图表、Nerd Font 图标和 ANSI 颜色，重现了 Web 界面的布局、
@@ -196,6 +196,7 @@ views/           每种对象类型一个文件（datacenter、node、qemu、lxc
 themes/          配色主题
 plugins/         可选插件（在 F4 > 插件 中启用）
 lang/            语言（en、fr、es、de、zh_CN、ru + TEMPLATE.sh）
+fonts/           节点 Linux 控制台使用的字体
 conf/            示例配置
 tests/screens/   屏幕测试场景、录制的 API 响应、参考屏幕
 tools/           lint.sh、selftest.sh、screen-test.sh、integration-test.sh、
@@ -212,6 +213,10 @@ docs/            文档
   一样直接使用本地 API（不经过 HTTP，不使用票据）；应用的 Proxmox VE 权限是启动时
   所选用户的权限。
 - 上传（ISO、模板、代码片段）使用节点本身上的文件。
+- 在节点的 Linux 控制台（显示器/键盘、IPMI）上无法使用 Nerd Font：proxhawk-tui 会在
+  那里加载自带的控制台字体（图标和图表，退出时恢复原字体）；中文、日文、韩文以及
+  从右到左书写的语言在该控制台上会回退为英文。参见
+  [docs/CONFIGURATION.md](docs/CONFIGURATION.md#linux-console)。
 
 ## 开发方式
 

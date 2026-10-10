@@ -34,6 +34,7 @@ declare -gA CFG=(
     [cli_output]=json      # default output of the subcommands: json | table
     [user]=""              # Proxmox VE user to run as (empty = launching user, see ask_user)
     [ask_user]=1           # 1 = ask at start-up which user to run as
+    [console_font]=auto    # font loaded on the Linux console: auto | 256 | 512 | off
 )
 
 # Free form settings of the configuration file:
@@ -41,7 +42,7 @@ declare -gA CFG=(
 #   color.<token> = <value>   colour overrides (#rrggbb, SGR parameters or "default")
 declare -gA CFGX=()
 
-PROXHAWK_TUI_VERSION="2.1.0"
+PROXHAWK_TUI_VERSION="2.2.0"
 RUN_DIR=""
 LOCAL_NODE="${HOSTNAME%%.*}"
 

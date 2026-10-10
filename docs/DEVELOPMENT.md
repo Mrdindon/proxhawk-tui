@@ -15,6 +15,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 2.2.0 | 2026-10-10 | Linux console mode: own console font (GNU Unifont), replacement of missing glyphs |
 | 2.1.0 | 2026-10-06 | `proxhawk-tui upgrade` (package or git clone) |
 | 2.0.0 | 2026-10-06 | renamed pvetty → proxhawk-tui; French, Spanish, German, Chinese, Russian (with the Proxmox VE GUI catalog), double width characters |
 | 1.3.1 | 2026-10-06 | user question always asked, PAM account creation by users allowed to (sudo), fix of writes as another user, Ansible plugin fixes, new demo GIF |
@@ -111,6 +112,9 @@ kernel 7.0.14-20-pve, two spare test disks (`/dev/sdb`, `/dev/sdc`).
 - Wrapping pvesh: pvesh runs its own CLI command through
   `RESTHandler::handle` too; check only `PVE::API2::*` methods (1.3.0 refused
   every write of non-root users). "world" methods are not checked.
+- The Linux console could not be tested for real on the development node
+  (its VT driver is "dummy device", no display): font loading by the kernel
+  (`setfont`) is only covered by the simulation (`PROXHAWK_TUI_CONSOLE=1`).
 - `printf %-Ns` counts bytes with some locales: pad with `fit` (multibyte
   glyphs in the help window).
 

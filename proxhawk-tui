@@ -13,7 +13,7 @@ shopt -s extglob
 
 PROXHAWK_TUI_HOME=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 
-for _m in core term theme glyphs i18n widgets api user content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins onboarding cli upgrade actions layout; do
+for _m in core term theme glyphs i18n widgets console api user content resources views rrd tasks dialog form crud choices taskviewer keys overlay queue plugins onboarding cli upgrade actions layout; do
     # shellcheck source=/dev/null
     source "$PROXHAWK_TUI_HOME/lib/$_m.sh"
 done
@@ -111,7 +111,9 @@ trap 'exit 129' HUP
 trap 'exit 143' TERM
 trap 'NEED_RESIZE=1' WINCH
 
+console_setup
 i18n_load
+console_language
 term_init
 glyphs_load
 theme_load
@@ -145,6 +147,7 @@ fi
 select_id "$INITIAL_SEL"
 tree_visible
 now; LAST_REFRESH=$NOW
+[[ -n ${CONSOLE_NOTE-} ]] && { T "$CONSOLE_NOTE"; status_msg warn "$REPLY"; }
 
 # ---------------------------------------------------------------------------
 # Refresh: resources, tree, tasks and "live" content.

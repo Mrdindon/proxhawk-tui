@@ -20,6 +20,7 @@ lib/i18n.sh           T / Tf translation helpers, language choice and loading
 lib/i18n-pve.pl       translations from the Proxmox VE web interface catalog (pve-i18n)
 lib/widgets.sh        formatting, ANSI-aware fit/strip, bars, braille charts, spinner
 lib/api.sh            API access: broker co-process, pvesh fallback, background jobs
+lib/console.sh        Linux console (TERM=linux): console font, replacement of missing glyphs
 lib/user.sh           Proxmox VE user to run as (prompt, permissions, pvesh wrapper)
 lib/pvesh-as.pl       pvesh as another user, with the API server permission check
 lib/broker.pl         persistent read-only API helper (Perl)
@@ -50,6 +51,8 @@ tools/selftest.sh     renders every panel without UI and reports errors / timing
 tools/integration-test.sh  read/write tests of every panel (see TESTING.md)
 tools/i18n-extract.sh builds a translation template from the sources
 tools/i18n-check.sh   translation coverage and placeholder check per language
+tools/make-console-font.py  builds fonts/*.psf.gz (Linux console fonts) from GNU Unifont
+fonts/                console fonts loaded on the Linux console
 tools/screen-test.sh  golden screen tests in tmux on recorded API answers
 tools/lint.sh         bash -n, perl -c, shellcheck
 tools/make-release.sh, tools/make-deb.sh   release archive, Debian package
