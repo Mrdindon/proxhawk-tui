@@ -41,3 +41,10 @@ confirm = 1
 # Editor for notes and pager for logs (empty = $VISUAL/$EDITOR/nano, $PAGER/less)
 editor =
 pager =
+
+# Font loaded on the Linux console of the node (screen/keyboard, IPMI):
+# auto | 256 | 512 | off. The previous font is put back on exit.
+console_font = auto
+
+# Every setting (language, user, plugins, keys, colours...) is described in
+# docs/CONFIGURATION.md.

@@ -2,7 +2,7 @@
 
 **English** | [Français](README.fr.md) | [Español](README.es.md) | [Deutsch](README.de.md) | [简体中文](README.zh-CN.md) | [Русский](README.ru.md)
 
-Version 2.1.0 · licence AGPL-3.0-or-later
+Version 2.2.0 · licence AGPL-3.0-or-later
 
 `proxhawk-tui` is a text console version of the Proxmox VE web interface (the GUI
 served on port 8006). It reproduces the layout, the navigation and most panels
@@ -209,6 +209,7 @@ views/           one file per object type (datacenter, node, qemu, lxc...)
 themes/          colour themes
 plugins/         optional plugins (enabled in F4 > Plugins)
 lang/            languages (en, fr, es, de, zh_CN, ru + TEMPLATE.sh)
+fonts/           fonts for the Linux console of the node
 conf/            example configuration
 tests/screens/   screen test scenarios, recorded API answers, golden screens
 tools/           lint.sh, selftest.sh, screen-test.sh, integration-test.sh,
@@ -227,6 +228,11 @@ docs/            documentation
   the Proxmox VE permissions applied are those of the user chosen at
   start-up.
 - Uploads (ISO, templates, snippets) take a file of the node itself.
+- On the Linux console of the node (screen/keyboard, IPMI) a Nerd Font cannot
+  be used: proxhawk-tui loads its own console font there (icons and graphs,
+  restored on exit); Chinese, Japanese, Korean and right-to-left languages
+  fall back to English on that console. See
+  [docs/CONFIGURATION.md](docs/CONFIGURATION.md#linux-console).
 
 ## How it was made
 

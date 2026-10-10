@@ -76,6 +76,7 @@ draw() {
     if (( COLS < 80 || ROWS < 18 )); then
         Tf "Terminal too small (%sx%s) - minimum is 80x18" "$COLS" "$ROWS"
         FRAME+=$'\e[2J\e[1;1H'"$REPLY"
+        (( ${#CONSOLE_SUBST[@]} )) && frame_fix
         printf '%s' "$FRAME"
         return
     fi
@@ -91,6 +92,7 @@ draw() {
     else
         SPIN_ACTIVE=0
     fi
+    (( ${#CONSOLE_SUBST[@]} )) && frame_fix
     printf '%s' "$FRAME"
     NEED_REDRAW=0
 }

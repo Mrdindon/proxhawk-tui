@@ -17,6 +17,10 @@ API helper). Read these before changing code:
   PVE modules, pvesh, whiptail/dialog, less). No new dependency.
 - Match the surrounding style: `REPLY` for function results, `local` for
   every variable (a local named like a global, e.g. `L`, shadows it).
+- `README.md` has five translations (`README.fr.md`, `.es.md`, `.de.md`,
+  `.zh-CN.md`, `.ru.md`): update them in the same commit as `README.md`.
+- New symbols or languages: rebuild the console fonts
+  (`tools/make-console-font.py`, see `fonts/README.md`).
 - Write tests only against test guests (VMID 9901-9919) and test disks; never
   touch other guests of the node.
 

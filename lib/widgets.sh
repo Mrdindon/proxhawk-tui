@@ -357,7 +357,7 @@ chart() {
                     (( bits1 |= _R_MASK[f1], bits2 |= _R_MASK[f2] ))
                 fi
             done
-            if (( UTF8 )); then
+            if (( UTF8 && ${CHART_BRAILLE:-1} )); then
                 cell=${BRAILLE[bits1 | bits2]}
             else
                 local cnt=$(( (bits1 | bits2) ? ((bits1 | bits2) == 255 ? 2 : 1) : 0 ))

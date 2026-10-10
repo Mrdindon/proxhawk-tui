@@ -58,20 +58,8 @@ declare -gA _UNICODE=(
     [m_import]="⇩" [m_members]="∞" [m_backups]="⇩"
 )
 
-glyphs_load() {
-    local set=${CFG[glyphs]} k
-    [[ ${LC_ALL:-${LC_CTYPE:-${LANG:-}}} =~ [Uu][Tt][Ff]-?8 ]] && UTF8=1
-    if [[ $set == auto ]]; then
-        if (( ! UTF8 )); then set=ascii
-        elif [[ -n ${NERD_FONT:-} && ${NERD_FONT} != 0 ]]; then set=nerd
-        else set=unicode
-        fi
-    fi
-    (( UTF8 )) || set=ascii
-    GLYPH_SET=$set
-
-    if [[ $set == ascii ]]; then
-        G=(
+# 7-bit set (also the replacement of what a console font cannot draw).
+declare -gA _ASCII=(
             [h]="-" [v]="|" [tl]="+" [tr]="+" [bl]="+" [br]="+"
             [tee_l]="+" [tee_r]="+" [tee_t]="+" [tee_b]="+" [cross]="+" [vsep]="|"
             [exp_open]="v" [exp_closed]=">" [caret]="v" [bullet]="*" [ellipsis]="~"
@@ -85,6 +73,24 @@ glyphs_load() {
             [btn_create]="+" [btn_edit]="e" [btn_remove]="x"
             [search]="/" [docs]="?" [user]="@" [refresh]="@" [help]="?"
         )
+
+glyphs_load() {
+    local set=${CFG[glyphs]} k
+    [[ ${LC_ALL:-${LC_CTYPE:-${LANG:-}}} =~ [Uu][Tt][Ff]-?8 ]] && UTF8=1
+    if [[ $set == auto ]]; then
+        if (( ! UTF8 )); then set=ascii
+        elif [[ -n ${NERD_FONT:-} && ${NERD_FONT} != 0 ]]; then set=nerd
+        else set=unicode
+        fi
+    fi
+    (( UTF8 )) || set=ascii
+    # Linux console: no Nerd Font there (bitmap font, see lib/console.sh).
+    (( ${CONSOLE:-0} )) && [[ $set == nerd ]] && set=unicode
+    GLYPH_SET=$set
+
+    if [[ $set == ascii ]]; then
+        G=()
+        for k in "${!_ASCII[@]}"; do G[$k]=${_ASCII[$k]}; done
         BAR_PARTS=("" "" "" "" "" "" "" "")
         SPINNER=('|' '/' '-' '\')
         glyphs_icons_off
@@ -109,6 +115,7 @@ glyphs_load() {
     if [[ $set == nerd ]]; then
         for k in "${!_NERD[@]}"; do printf -v "G[$k]" "\\u${_NERD[$k]}"; done
     fi
+    declare -F console_glyphs >/dev/null && console_glyphs
     glyphs_icons_off
 }
 

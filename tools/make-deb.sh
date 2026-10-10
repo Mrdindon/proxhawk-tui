@@ -16,7 +16,7 @@ trap 'rm -rf "$tmp"' EXIT
 pkg=$tmp/pkg
 share=$pkg/usr/share/proxhawk-tui
 mkdir -p "$share" "$pkg/usr/bin" "$pkg/etc" "$pkg/usr/share/doc/proxhawk-tui" "$pkg/DEBIAN"
-cp -a "$src/proxhawk-tui" "$src/VERSION" "$src/lib" "$src/views" "$src/themes" "$src/lang" "$src/plugins" "$share/"
+cp -a "$src/proxhawk-tui" "$src/VERSION" "$src/lib" "$src/views" "$src/themes" "$src/lang" "$src/plugins" "$src/fonts" "$share/"
 # The help screen opens the user guide from $PROXHAWK_TUI_HOME/docs.
 mkdir -p "$share/docs"
 for f in "$src"/docs/*.md; do

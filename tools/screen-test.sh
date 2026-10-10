@@ -12,6 +12,7 @@
 #   <name> <key> <key>...       keys as accepted by "tmux send-keys"
 #                               (Down, Enter, Tab, F1, Escape, q, ...)
 #   <name>@<code> ...           the same in a language (fr, de, zh_CN...)
+#   <name>%sys|%256|%512 ...    Linux console mode (font of Debian / ours)
 # Lines starting with # are comments. The fixture (tests/screens/fixture)
 # is a snapshot of a real node: re-record it when the API usage changes
 # (a missing answer shows as "not recorded: ..." on the screen).
@@ -58,9 +59,20 @@ run_scenario() {
     # name@code: the scenario in another language (the translations of the
     # Proxmox VE catalog installed on this node are used too).
     [[ $name == *@* ]] && lang=${name#*@}
+    lang=${lang%%%*}
     local -a env=(env XDG_CONFIG_HOME="$TMP/config" XDG_STATE_HOME="$TMP/state"
                   TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=
                   PROXHAWK_TUI_LANGUAGE="$lang")
+    # name%sys / name%256 / name%512: the Linux console mode, with the
+    # characters of the default Debian console font or of our fonts.
+    if [[ $name == *%* ]]; then
+        local map="$DIR/console/debian-lat15-fixed16.map" f=${name##*%}
+        if [[ $f != sys ]]; then
+            map="$TMP/console-$f.map"
+            zcat "$ROOT/fonts/proxhawk-$f.psf.gz" > "$TMP/console-$f.psf" && psfgettable "$TMP/console-$f.psf" "$map" > /dev/null 2>&1
+        fi
+        env+=(PROXHAWK_TUI_CONSOLE=1 PROXHAWK_TUI_CONSOLE_MAP="$map")
+    fi
     if [[ $MODE == record ]]; then
         env+=(PROXHAWK_TUI_RECORD="$FIX")
     else

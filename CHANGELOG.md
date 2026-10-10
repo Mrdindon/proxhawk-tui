@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.2.0 — 2026-10-10
+
+- **Linux console** (screen and keyboard of the node, IPMI / KVM): the
+  interface showed squares for most icons and for the graphs, because the
+  console fonts lack these characters. proxhawk-tui now loads its own
+  console font while it runs (icons, braille graphs, letters of 24
+  languages; the previous font is put back on exit) and replaces whatever
+  the console font cannot draw (icons by letters, graphs by dots). Setting
+  `console_font` (`auto`, `256`, `512`, `off`). Languages the console cannot
+  draw (Chinese, Japanese, Arabic...) fall back to English there.
+- Fonts built from GNU Unifont by `tools/make-console-font.py`
+  (`fonts/README.md`); screen tests of the console mode (`name%sys`,
+  `name%256`, `name%512`).
+
 ## 2.1.0 — 2026-10-06
 
 - **`proxhawk-tui upgrade`**: update from GitHub according to the install

@@ -13,3 +13,8 @@ dc_summary@fr   Tab Down
 node_summary@de Down Tab Down
 guest_summary@zh_CN Down Down
 dc_help@ru      F1
+# Linux console mode: Debian console font (icons as letters, no braille),
+# then the proxhawk-tui fonts (icons and braille graphs; Russian needs 512)
+node_summary%sys  Down Tab Down
+guest_summary%256 Down Down
+guest_summary@ru%512 Down Down
