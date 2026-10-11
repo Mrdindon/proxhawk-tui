@@ -2,7 +2,7 @@
 
 [English](README.md) | [Français](README.fr.md) | [Español](README.es.md) | [Deutsch](README.de.md) | **简体中文** | [Русский](README.ru.md)
 
-版本 2.2.0 · 许可证 AGPL-3.0-or-later
+版本 2.2.1 · 许可证 AGPL-3.0-or-later
 
 `proxhawk-tui` 是 Proxmox VE Web 界面（运行在 8006 端口的 GUI）的文本版本。它使用
 Unicode 边框、盲文字符图表、Nerd Font 图标和 ANSI 颜色，重现了 Web 界面的布局、

@@ -2,7 +2,7 @@
 
 [English](README.md) | **Français** | [Español](README.es.md) | [Deutsch](README.de.md) | [简体中文](README.zh-CN.md) | [Русский](README.ru.md)
 
-Version 2.2.0 · licence AGPL-3.0-or-later
+Version 2.2.1 · licence AGPL-3.0-or-later
 
 `proxhawk-tui` est une version en mode texte de l'interface web de Proxmox VE
 (le GUI servi sur le port 8006). Elle en reproduit la disposition, la

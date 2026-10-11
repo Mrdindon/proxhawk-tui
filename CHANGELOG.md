@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.1 — 2026-10-10
 
 - Fix: on the Linux console the keys `F1` to `F5` did nothing (the console
   sends `ESC [ [ A`..`E` for them, read as an unknown key followed by a
