@@ -15,6 +15,7 @@ ARCHITECTURE.md and EXTENDING.md.
 
 | Version | Date | Content |
 |---------|------|---------|
+| 2.2.1 | 2026-10-10 | fix of F1–F5 on the Linux console |
 | 2.2.0 | 2026-10-10 | Linux console mode: own console font (GNU Unifont), replacement of missing glyphs |
 | 2.1.0 | 2026-10-06 | `proxhawk-tui upgrade` (package or git clone) |
 | 2.0.0 | 2026-10-06 | renamed pvetty → proxhawk-tui; French, Spanish, German, Chinese, Russian (with the Proxmox VE GUI catalog), double width characters |

@@ -93,7 +93,10 @@ read_key() {
             fi
             return 0
         fi
-        if [[ $rest == \[[0-9] ]]; then
+        if [[ $rest == '[[' ]]; then
+            # Linux console: F1-F5 are ESC [ [ A..E.
+            IFS= read -rsn1 -t 0.05 c && rest+=$c
+        elif [[ $rest == \[[0-9] ]]; then
             # Read the rest of a CSI sequence ending in ~ or a letter.
             while IFS= read -rsn1 -t 0.01 c; do
                 rest+=$c

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1 — 2026-10-10
+
+- Fix: on the Linux console the keys `F1` to `F5` did nothing (the console
+  sends `ESC [ [ A`..`E` for them, read as an unknown key followed by a
+  letter).
+
 ## 2.2.0 — 2026-10-10
 
 - **Linux console** (screen and keyboard of the node, IPMI / KVM): the

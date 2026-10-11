@@ -42,7 +42,7 @@ declare -gA CFG=(
 #   color.<token> = <value>   colour overrides (#rrggbb, SGR parameters or "default")
 declare -gA CFGX=()
 
-PROXHAWK_TUI_VERSION="2.2.0"
+PROXHAWK_TUI_VERSION="2.2.1"
 RUN_DIR=""
 LOCAL_NODE="${HOSTNAME%%.*}"
 
