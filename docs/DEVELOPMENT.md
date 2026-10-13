@@ -147,7 +147,10 @@ releases (tags `vX.Y.Z`), work is done on `develop`, one commit per feature.
 3. Run the integration tests on a test node; update TEST-RESULTS.md.
 4. `tools/i18n-extract.sh > lang/TEMPLATE.sh`.
 5. Commit on `develop`, merge into `main` (`--no-ff`), tag `vX.Y.Z`.
-6. Build the archive and the package: `tools/make-release.sh`,
+6. Fast-forward `develop` to the merge commit (`git checkout develop &&
+   git merge --ff-only main`) so that it is not shown as behind `main`,
+   then push `main`, `develop` and the tag.
+7. Build the archive and the package: `tools/make-release.sh`,
    `tools/make-deb.sh` (in `../releases/`).
 
 ## Ideas for later
